@@ -335,7 +335,7 @@
         }
     }
   </style>
-  </head>
+</head>
 <body>
   <h1>My Shopping List 🛒</h1>
 
@@ -409,10 +409,9 @@
     </form>
   </div>
 
-  <script type="module">
-    // Importation de createClient depuis Supabase via Skypack
-    import { createClient } from "https://cdn.skypack.dev/@supabase/supabase-js";
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.0/dist/umd/supabase.min.js"></script>
 
+  <script>
     // Enregistrement du Service Worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -468,8 +467,8 @@
     const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // Replace with your Supabase URL
     const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // Replace with your Supabase Anon Key
 
-    // CRUCIAL : Appel direct de createClient car nous sommes dans un module ES
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // CRUCIAL : Appel de Supabase.createClient car Supabase est global
+    const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // --- Realtime Listener for Supabase ---
     function setupRealtimeListener() {
