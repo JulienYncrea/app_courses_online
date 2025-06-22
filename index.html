@@ -8,7 +8,6 @@
   <link rel="apple-touch-icon" href="icon.png" />
   <meta name="theme-color" content="#FFC0CB" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -337,16 +336,7 @@
     }
   </style>
   <script>
-    const SHARED_LIST_ID = 'ma_liste_de_courses_commune';
     if ('serviceWorker' in navigator) {
-                // --- Initialisation Supabase ---
-        const SUPABASE_URL = 'https://cepqcretnxfhjbvdukkk.supabase.co'; // Remplace par ta Project URL
-        const SUPABASE_ANON_KEY = 'uzPVTW0F8aS3Syn8TiYlgr484pL5XPkSpdtSw/lZ5zODX5xO91hx/8WJcLZpNf8PRTSGtluKEfQMHc5OSVYZmA=='; // Remplace par ta clé anon (public)
-
-        const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        // --- Fin Initialisation Supabase ---
-
-        // ... le reste de ton code JavaScript
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js')
           .then(reg => console.log('Service Worker registered:', reg.scope))
@@ -428,7 +418,18 @@
     </form>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+    // --- Initialisation Supabase ---
+    const SUPABASE_URL = 'https://cepqcretnxfhjbvdukkk.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlcHFjcmV0bnhmaGpidmR1a2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2MTc1NDcsImV4cCI6MjA2NjE5MzU0N30.H56IGRN14FpfHXQVODKsmTbqMEe27_gcCcgGLphEEOU';
+
+    const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // --- Fin Initialisation Supabase ---
+
+    // Define the shared list ID
+    const SHARED_LIST_ID = 'ma_liste_de_courses_commune';
+
     const shoppingForm = document.getElementById('shoppingForm');
     const newItemInput = document.getElementById('newItem');
     const shoppingListDiv = document.getElementById('shoppingList');
@@ -547,26 +548,141 @@
         categories.forEach(category => {
             const li = document.createElement('li');
             li.textContent = category;
-            li.innerHTML = `
-                <span>${category}</span>
-                <button class="delete-category-btn" data-category="${category}">✖</button>
-            `;
-            manageCategoryList.appendChild(li);
+            li.setAttribute('draggable', true); // Keep for desktop
+            li.dataset.category = category;
+            li.innerHTML = `<span class="drag-handle">⠿</span> ${category}`;
+
+            // Touch events for mobile (long press to drag)
+            li.addEventListener('touchstart', (e) => {
+                e.stopPropagation(); // Prevent immediate text selection/scroll interference
+                if (touchStartTimer) clearTimeout(touchStartTimer);
+                
+                touchStartTimer = setTimeout(() => {
+                    draggedItem = li;
+                    li.classList.add('dragging');
+                    // Optional: Add haptic feedback for long press
+                    if (navigator.vibrate) navigator.vibrate(50);
+                }, LONG_PRESS_THRESHOLD);
+            }, { passive: false }); 
+
+            li.addEventListener('touchmove', (e) => {
+                if (touchStartTimer) clearTimeout(touchStartTimer); // Cancel long press if moved
+                if (!draggedItem) return; // Only proceed if drag is active
+
+                e.preventDefault(); // Prevent scrolling while dragging
+                const touch = e.touches[0];
+                const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                
+                if (target && target.closest('#categoryOrderList li') && target.closest('#categoryOrderList li') !== draggedItem) {
+                    const draggingOver = target.closest('#categoryOrderList li');
+                    const container = categoryOrderList;
+                    const children = Array.from(container.children);
+
+                    const draggingOverIndex = children.indexOf(draggingOver);
+                    const draggedItemIndex = children.indexOf(draggedItem);
+
+                    const rect = draggingOver.getBoundingClientRect();
+                    const offset = touch.clientY - rect.top;
+
+                    if (draggedItemIndex < draggingOverIndex) {
+                        if (offset > rect.height / 2) {
+                            container.insertBefore(draggedItem, draggingOver.nextSibling);
+                        }
+                    } else {
+                        if (offset < rect.height / 2) {
+                            container.insertBefore(draggedItem, draggingOver);
+                        }
+                    }
+                }
+            }, { passive: false });
+
+            li.addEventListener('touchend', () => {
+                if (touchStartTimer) clearTimeout(touchStartTimer);
+                if (draggedItem) {
+                    draggedItem.classList.remove('dragging');
+                    draggedItem = null;
+                    saveCategoryOrder();
+                    loadShoppingList();
+                }
+            });
+
+            // Standard desktop drag events
+            li.addEventListener('dragstart', (e) => {
+                draggedItem = li;
+                setTimeout(() => li.classList.add('dragging'), 0);
+            });
+
+            li.addEventListener('dragend', () => {
+                draggedItem.classList.remove('dragging');
+                draggedItem = null;
+                saveCategoryOrder();
+                loadShoppingList();
+            });
+
+            li.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                const draggingOver = li;
+                const container = categoryOrderList;
+                const children = Array.from(container.children);
+
+                if (draggedItem === draggingOver) return;
+
+                const draggingOverIndex = children.indexOf(draggingOver);
+                const draggedItemIndex = children.indexOf(draggedItem);
+
+                const rect = draggingOver.getBoundingClientRect();
+                const offset = e.clientY - rect.top;
+
+                if (draggedItemIndex < draggingOverIndex) {
+                    if (offset > rect.height / 2) {
+                        container.insertBefore(draggedItem, draggingOver.nextSibling);
+                    }
+                } else {
+                    if (offset < rect.height / 2) {
+                        container.insertBefore(draggedItem, draggingOver);
+                    }
+                }
+            });
+
+            categoryOrderList.appendChild(li);
         });
+        }
+        saveCategoryOrder();
+        loadManageCategories();
     }
 
-    // --- Shopping list management functions ---
+    function saveCategoryOrder() {
+        const order = Array.from(categoryOrderList.children).map(li => li.dataset.category);
+        localStorage.setItem('category_order', JSON.stringify(order));
+    }
 
-    function loadShoppingList() {
-        let items = JSON.parse(localStorage.getItem('shopping_list_items')) || [];
+
+    // --- Shopping list management functions (modifiées pour Supabase) ---
+
+    async function loadShoppingList() {
+        shoppingListDiv.innerHTML = ''; // Vide la liste actuelle
+
+        // Récupère les catégories pour le tri
         const currentCategoryOrder = JSON.parse(localStorage.getItem('category_order')) || getCategories();
-        shoppingListDiv.innerHTML = '';
 
-        if (items.length === 0) {
-            shoppingListDiv.innerHTML = '<p style="text-align: center; color: #C71585; margin-top: 0.5rem;">Your list is empty for now!</p>';
+        // Récupère les articles depuis Supabase pour notre liste partagée
+        const { data: items, error } = await supabase
+            .from('items')
+            .select('*')
+            .eq('list_id', SHARED_LIST_ID); // Filtre par l'ID de la liste partagée
+
+        if (error) {
+            console.error('Erreur de chargement des articles:', error);
+            shoppingListDiv.innerHTML = '<p style="text-align: center; color: red;">Erreur de chargement de la liste. Réessayez plus tard.</p>';
             return;
         }
 
+        if (items.length === 0) {
+            shoppingListDiv.innerHTML = '<p style="text-align: center; color: #C71585; margin-top: 0.5rem;">Votre liste est vide pour l\'instant !</p>';
+            return;
+        }
+
+        // Le reste de la logique de tri et d'affichage reste la même
         // Sort items alphabetically before categorization
         items.sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
 
@@ -592,20 +708,16 @@
                 categoryHeader.textContent = category;
                 shoppingListDiv.appendChild(categoryHeader);
 
-                // Sort items within each category alphabetically
                 categorizedItems[category].sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
 
                 categorizedItems[category].forEach((item) => {
                     const itemDiv = document.createElement('div');
                     itemDiv.className = 'shopping-list-item';
-                    
-                    // Use item name as identifier for actions, safer than array index after sorting/filtering
-                    // For actual deletion/decrement, we'll find the item by name in the stored array
                     itemDiv.innerHTML = `
-                        <button class="decrement-btn" data-item-name="${item.name}">-</button>
+                        <button class="decrement-btn" data-item-id="${item.id}">-</button>
                         <span class="quantity">${item.quantity}x</span>
                         <span>${item.name}</span>
-                        <button class="delete-btn" data-item-name="${item.name}">✖</button>
+                        <button class="delete-btn" data-item-id="${item.id}">✖</button>
                     `;
                     shoppingListDiv.appendChild(itemDiv);
                 });
@@ -619,60 +731,110 @@
             otherCategoryHeader.textContent = 'Autre / Non classé';
             shoppingListDiv.appendChild(otherCategoryHeader);
 
-            // Sort 'Other' items alphabetically
             itemsInOtherOrUncategorized.sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
 
             itemsInOtherOrUncategorized.forEach((item) => {
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'shopping-list-item';
                 itemDiv.innerHTML = `
-                    <button class="decrement-btn" data-item-name="${item.name}">-</button>
+                    <button class="decrement-btn" data-item-id="${item.id}">-</button>
                     <span class="quantity">${item.quantity}x</span>
                     <span>${item.name}</span>
-                    <button class="delete-btn" data-item-name="${item.name}">✖</button>
+                    <button class="delete-btn" data-item-id="${item.id}">✖</button>
                 `;
                 shoppingListDiv.appendChild(itemDiv);
             });
         }
     }
 
-    function addShoppingItem(itemName) {
-      if (!itemName.trim()) return;
+    async function addShoppingItem(itemName) {
+        if (!itemName.trim()) return;
 
-      let items = JSON.parse(localStorage.getItem('shopping_list_items')) || [];
-      const lowerCaseItemName = itemName.trim().toLowerCase();
+        // Récupère d'abord les articles existants pour voir si l'article est déjà là
+        const { data: existingItems, error: fetchError } = await supabase
+            .from('items')
+            .select('*')
+            .eq('list_id', SHARED_LIST_ID)
+            .eq('name', itemName.trim());
 
-      const existingItemIndex = items.findIndex(item => item.name.toLowerCase() === lowerCaseItemName);
-
-      if (existingItemIndex !== -1) {
-        items[existingItemIndex].quantity++;
-      } else {
-        items.push({ name: itemName.trim(), quantity: 1 });
-      }
-
-      localStorage.setItem('shopping_list_items', JSON.stringify(items));
-      loadShoppingList();
-    }
-
-    function decrementShoppingItemByName(itemName) {
-        let items = JSON.parse(localStorage.getItem('shopping_list_items')) || [];
-        const index = items.findIndex(item => item.name === itemName);
-
-        if (index !== -1) {
-            items[index].quantity--;
-            if (items[index].quantity <= 0) {
-                items.splice(index, 1);
-            }
-            localStorage.setItem('shopping_list_items', JSON.stringify(items));
-            loadShoppingList();
+        if (fetchError) {
+            console.error('Erreur de vérification des articles existants:', fetchError);
+            return;
         }
+
+        if (existingItems && existingItems.length > 0) {
+            // L'article existe déjà, incrémente la quantité
+            const itemToUpdate = existingItems[0];
+            const { error: updateError } = await supabase
+                .from('items')
+                .update({ quantity: itemToUpdate.quantity + 1 })
+                .eq('id', itemToUpdate.id); // Met à jour par l'ID unique
+
+            if (updateError) {
+                console.error('Erreur d\'incrémentation de la quantité:', updateError);
+            }
+        } else {
+            // L'article n'existe pas, insère un nouvel article
+            const category = getCategoryForItem(itemName.trim()); // Trouve la catégorie
+            const { error: insertError } = await supabase
+                .from('items')
+                .insert({
+                    name: itemName.trim(),
+                    quantity: 1,
+                    category: category,
+                    list_id: SHARED_LIST_ID // Lie à la liste partagée
+                });
+
+            if (insertError) {
+                console.error('Erreur d\'ajout d\'article:', insertError);
+            }
+        }
+        // La liste sera rechargée par le système de temps réel de Supabase
+        newItemInput.value = ''; // Vide l'input
     }
 
-    function deleteShoppingItemByName(itemName) {
-      let items = JSON.parse(localStorage.getItem('shopping_list_items')) || [];
-      items = items.filter(item => item.name !== itemName);
-      localStorage.setItem('shopping_list_items', JSON.stringify(items));
-      loadShoppingList();
+    async function decrementShoppingItemById(itemId) {
+        // Récupère l'article par son ID pour connaître la quantité actuelle
+        const { data: item, error: fetchError } = await supabase
+            .from('items')
+            .select('quantity')
+            .eq('id', itemId)
+            .single(); // Utilise .single() car on s'attend à un seul résultat
+
+        if (fetchError) {
+            console.error('Erreur de récupération de l\'article pour décrémentation:', fetchError);
+            return;
+        }
+
+        if (item) {
+            if (item.quantity > 1) {
+                // Décrémente la quantité
+                const { error: updateError } = await supabase
+                    .from('items')
+                    .update({ quantity: item.quantity - 1 })
+                    .eq('id', itemId);
+
+                if (updateError) {
+                    console.error('Erreur de décrémentation de la quantité:', updateError);
+                }
+            } else {
+                // Si la quantité est 1, supprime l'article
+                await deleteShoppingItemById(itemId);
+            }
+        }
+        // La liste sera rechargée par le système de temps réel de Supabase
+    }
+
+    async function deleteShoppingItemById(itemId) {
+        const { error } = await supabase
+            .from('items')
+            .delete()
+            .eq('id', itemId);
+
+        if (error) {
+            console.error('Erreur de suppression d\'article:', error);
+        }
+        // La liste sera rechargée par le système de temps réel de Supabase
     }
 
     function getCategoryForItem(itemName) {
@@ -950,7 +1112,7 @@
         if (sectionToShow === 'shoppingList') {
             shoppingListSection.classList.add('active');
             showShoppingListBtn.classList.add('active');
-            loadShoppingList();
+            // loadShoppingList() will be triggered by Realtime or initial load
         } else if (sectionToShow === 'suggestions') {
             suggestionsSection.classList.add('active');
             showSuggestionsBtn.classList.add('active');
@@ -972,16 +1134,17 @@
     shoppingForm.addEventListener('submit', e => {
       e.preventDefault();
       addShoppingItem(newItemInput.value);
-      newItemInput.value = '';
     });
 
     shoppingListDiv.addEventListener('click', e => {
       if (e.target.classList.contains('delete-btn')) {
-        const itemName = e.target.dataset.itemName;
-        deleteShoppingItemByName(itemName);
+        const itemId = e.target.dataset.itemId; // Utilise data-item-id
+        if (confirm("Voulez-vous vraiment supprimer cet article ?")) {
+            deleteShoppingItemById(itemId);
+        }
       } else if (e.target.classList.contains('decrement-btn')) {
-        const itemName = e.target.dataset.itemName;
-        decrementShoppingItemByName(itemName);
+        const itemId = e.target.dataset.itemId; // Utilise data-item-id
+        decrementShoppingItemById(itemId);
       }
     });
 
@@ -1051,6 +1214,26 @@
         }
     });
 
+    // --- Configuration du temps réel Supabase ---
+    function setupRealtimeListener() {
+        supabase
+            .channel('schema-db-changes') // Tu peux donner un nom au canal
+            .on(
+                'postgres_changes',
+                {
+                    event: '*', // Écoute tous les événements (INSERT, UPDATE, DELETE)
+                    schema: 'public',
+                    table: 'items' // Écoute les changements sur ta table 'items'
+                },
+                (payload) => {
+                    console.log('Changement en temps réel reçu:', payload);
+                    // Quand un changement arrive, recharge la liste pour tout le monde
+                    loadShoppingList();
+                }
+            )
+            .subscribe(); // Abonne-toi au canal
+    }
+
 
     // --- Initialization on page load ---
     window.addEventListener('load', () => {
@@ -1062,10 +1245,13 @@
       }
 
       updateAllCategorySelects();
-      loadShoppingList();
       loadSuggestions();
       loadBuyLaterList();
       loadCategoryOrder(); 
+
+      // IMPORTANT : Initialise le listener Realtime de Supabase
+      setupRealtimeListener();
+      loadShoppingList(); // Charge la liste initiale une fois que le listener est configuré
 
       showSection('shoppingList');
       // Ensure options are visible on initial load
