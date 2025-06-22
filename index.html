@@ -410,10 +410,9 @@
 
   <script type="module">
     // Supabase Initialization
-    // Import the createClient function from the Supabase JS library as an ES module
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-    // Remplacez avec votre Supabase URL et Anon Key
+    // Vos clés Supabase
     const SUPABASE_URL = 'https://cepqcretnxfhjbvdukkk.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlcHFjcmV0bnhmaGpidmR1a2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2MTc1NDcsImV4cCI6MjA2NjE5MzU0N30.H56IGRN14FpfHXQVODKsmTbqMEe27_gcCcgGLphEEOU';
 
@@ -429,20 +428,20 @@
     const navigationButtonsContainer = document.querySelector('.navigation-options');
     const allSectionContainers = document.querySelectorAll('.section-container');
     const shoppingListSection = document.getElementById('shoppingList');
-    const itemForm = document.getElementById('itemForm'); // Get the item form
+    const itemForm = document.getElementById('itemForm');
     const itemNameInput = document.getElementById('itemName');
     const itemQuantityInput = document.getElementById('itemQuantity');
     const itemCategorySelect = document.getElementById('itemCategory');
     const shoppingListItemsUl = document.getElementById('shoppingListItems');
 
-    // Function to show a specific section and hide others
+    // Fonction pour afficher une section spécifique et masquer les autres
     function showSection(sectionId) {
         allSectionContainers.forEach(container => {
             container.classList.remove('active');
         });
         document.getElementById(sectionId).classList.add('active');
 
-        // Update active button state
+        // Met à jour l'état du bouton actif
         const allNavButtons = document.querySelectorAll('.navigation-buttons button');
         allNavButtons.forEach(button => {
             button.classList.remove('active');
@@ -460,14 +459,14 @@
         }
     }
 
-    // Event Listeners for navigation buttons
+    // Écouteurs d'événements pour les boutons de navigation
     shoppingListBtn.addEventListener('click', () => showSection('shoppingList'));
     suggestionsBtn.addEventListener('click', () => showSection('suggestions'));
     buyLaterBtn.addEventListener('click', () => showSection('buyLater'));
     categoriesBtn.addEventListener('click', () => showSection('categories'));
     settingsBtn.addEventListener('click', () => showSection('settings'));
 
-    // Toggle options for navigation
+    // Basculer les options de navigation
     document.getElementById('toggleOptions').addEventListener('click', () => {
         const isShowing = navigationButtonsContainer.classList.contains('show-options');
         if (!isShowing) {
@@ -478,34 +477,31 @@
             navigationButtonsContainer.classList.remove('show-options');
             toggleOptionsIcon.classList.remove('fa-chevron-up');
             toggleOptionsIcon.classList.add('fa-chevron-down');
-            // If the current section is one of the hidden ones, switch to "My List"
+            // Si la section actuelle est l'une des sections masquées, basculez vers "Ma Liste"
             if (!shoppingListSection.classList.contains('active')) {
                 showSection('shoppingList');
             }
         }
     });
 
-    // Fonctions pour interagir avec Supabase - Décommentez et adaptez selon votre schéma de base de données
+    // Fonctions d'interaction avec Supabase
     function setupRealtimeListener() {
-        console.log("Setting up Supabase Realtime listener...");
-        // Exemple : Écoutez les changements dans une table 'shopping_items'
-        /*
+        console.log("Configuration de l'écouteur Supabase Realtime...");
+        // Écoutez les changements dans votre table 'shopping_items'
         supabase.channel('public:shopping_items')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'shopping_items' }, payload => {
                 console.log('Changement reçu !', payload);
                 loadShoppingList(); // Recharge la liste en cas de changement
             })
             .subscribe();
-        */
     }
 
     async function loadShoppingList() {
-        console.log("Loading shopping list...");
-        // Exemple : Récupérez les articles de la table 'shopping_items'
-        /*
+        console.log("Chargement de la liste de courses...");
+        // Récupérez les articles de votre table 'shopping_items'
         const { data, error } = await supabase
             .from('shopping_items')
-            .select('*')
+            .select('id, name, quantity, category') // Sélectionnez les colonnes que vous avez
             .order('created_at', { ascending: false });
 
         if (error) {
@@ -516,27 +512,39 @@
         shoppingListItemsUl.innerHTML = ''; // Efface la liste actuelle
         data.forEach(item => {
             const li = document.createElement('li');
+            // La colonne 'purchased' n'est pas dans votre schéma, je l'ai commentée.
+            // Si vous l'ajoutez, décommentez et ajustez.
+            // const isPurchased = item.purchased || false;
+            // li.classList.toggle('purchased', isPurchased);
+
             li.innerHTML = `
                 <div class="item-info">
                     <strong>${item.name}</strong>
                     <span>Quantité: ${item.quantity} ${item.category ? `(${item.category})` : ''}</span>
                 </div>
                 <div class="item-actions">
-                    <button class="purchase-btn" data-id="${item.id}">${item.purchased ? 'Déjà acheté' : 'Acheter'}</button>
                     <button class="edit-btn" data-id="${item.id}">Modifier</button>
                     <button class="delete-btn" data-id="${item.id}">Supprimer</button>
                 </div>
             `;
-            // Ajoutez des écouteurs d'événements pour les boutons d'achat/suppression/modification
-            li.querySelector('.purchase-btn').addEventListener('click', async (e) => {
-                const itemId = e.target.dataset.id;
-                const { data: updatedItem, error: updateError } = await supabase
-                    .from('shopping_items')
-                    .update({ purchased: !item.purchased })
-                    .eq('id', itemId);
-                if (updateError) console.error('Erreur lors de la mise à jour de l\'article :', updateError.message);
-                else loadShoppingList(); // Recharge la liste
-            });
+
+            // Ajoutez des écouteurs d'événements pour les boutons de suppression/modification
+            // Logique de 'purchase-btn' commentée car 'purchased' n'est pas dans votre schéma
+            /*
+            const purchaseBtn = li.querySelector('.purchase-btn');
+            if (purchaseBtn) {
+                purchaseBtn.addEventListener('click', async (e) => {
+                    const itemId = e.target.dataset.id;
+                    const { error: updateError } = await supabase
+                        .from('shopping_items')
+                        .update({ purchased: !isPurchased }) // Bascule l'état 'purchased'
+                        .eq('id', itemId);
+                    if (updateError) console.error('Erreur lors de la mise à jour de l\'article :', updateError.message);
+                    else loadShoppingList(); // Recharge la liste
+                });
+            }
+            */
+
             li.querySelector('.delete-btn').addEventListener('click', async (e) => {
                 const itemId = e.target.dataset.id;
                 const { error: deleteError } = await supabase
@@ -546,39 +554,39 @@
                 if (deleteError) console.error('Erreur lors de la suppression de l\'article :', deleteError.message);
                 else loadShoppingList(); // Recharge la liste
             });
-            // Ajoutez la fonctionnalité d'édition ici
+            // Ajoutez la fonctionnalité d'édition ici si nécessaire
+            // li.querySelector('.edit-btn').addEventListener('click', ...)
+
             shoppingListItemsUl.appendChild(li);
         });
-        */
     }
 
     function updateAllCategorySelects() {
-        console.log("Updating category selects...");
-        // Logique pour populer le sélecteur itemCategory avec les catégories
-        // Exemple :
-        // const categories = JSON.parse(localStorage.getItem('user_categories') || '[]');
-        // itemCategorySelect.innerHTML = '<option value="">Sélectionner une catégorie</option>';
-        // categories.forEach(cat => {
-        //     const option = document.createElement('option');
-        //     option.value = cat;
-        //     option.textContent = cat;
-        //     itemCategorySelect.appendChild(option);
-        // });
+        console.log("Mise à jour des sélecteurs de catégories...");
+        // Cette fonction remplirait le sélecteur de catégories
+        const categories = JSON.parse(localStorage.getItem('user_categories') || '[]');
+        itemCategorySelect.innerHTML = '<option value="">Sélectionner une catégorie</option>';
+        categories.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat;
+            option.textContent = cat;
+            itemCategorySelect.appendChild(option);
+        });
     }
 
     function loadSuggestions() {
-        console.log("Loading suggestions...");
-        // Logique pour charger les suggestions
+        console.log("Chargement des suggestions...");
+        // Logique pour charger les suggestions (non liée directement à Supabase dans ce code)
     }
 
     function loadBuyLaterList() {
-        console.log("Loading buy later list...");
-        // Logique pour charger les articles à acheter plus tard
+        console.log("Chargement de la liste 'Acheter Plus Tard'...");
+        // Logique pour charger les articles à acheter plus tard (non liée directement à Supabase dans ce code)
     }
 
     function loadCategoryOrder() {
-        console.log("Loading category order...");
-        // Logique pour charger et appliquer l'ordre des catégories
+        console.log("Chargement de l'ordre des catégories...");
+        // Logique pour charger et appliquer l'ordre des catégories (non liée directement à Supabase dans ce code)
     }
 
     const initialDefaultCategories = ['Fruits & Légumes', 'Produits Laitiers', 'Viandes & Poissons', 'Boulangerie', 'Épicerie', 'Surgelés', 'Boissons', 'Maison & Entretien', 'Hygiène & Beauté', 'Autres'];
@@ -586,7 +594,7 @@
         return JSON.parse(localStorage.getItem('user_categories') || '[]');
     }
 
-    // Gérer l'ajout de nouveaux articles à la liste
+    // Gérer l'ajout de nouveaux articles à la liste via le formulaire
     itemForm.addEventListener('submit', async (event) => {
         event.preventDefault(); // Empêche la soumission par défaut du formulaire
 
@@ -600,14 +608,16 @@
         }
 
         try {
-            // Exemple : Insérez des données dans une table 'shopping_items' dans Supabase
-            // Assurez-vous que votre table 'shopping_items' existe dans Supabase
-            // et a des colonnes 'name', 'quantity', 'category', 'purchased'.
-            /*
+            // Insertion des données dans votre table 'shopping_items'
             const { data, error } = await supabase
-                .from('shopping_items') // Remplacez 'shopping_items' par le nom de votre table
+                .from('shopping_items') // Le nom de votre table
                 .insert([
-                    { name: itemName, quantity: itemQuantity, category: itemCategory, purchased: false }
+                    // Insérez les colonnes qui existent dans votre table
+                    { name: itemName, quantity: itemQuantity, category: itemCategory }
+                    // Si vous ajoutez une colonne 'purchased' (boolean) à votre table, vous pouvez faire :
+                    // { name: itemName, quantity: itemQuantity, category: itemCategory, purchased: false }
+                    // La colonne 'list_id' est dans votre schéma mais n'est pas utilisée ici, ajoutez-la si besoin
+                    // { name: itemName, quantity: itemQuantity, category: itemCategory, list_id: 'votre_id_de_liste' }
                 ]);
 
             if (error) {
@@ -618,13 +628,8 @@
                 itemNameInput.value = ''; // Efface le champ de saisie
                 itemQuantityInput.value = '1'; // Réinitialise la quantité
                 itemCategorySelect.value = ''; // Réinitialise la catégorie
-                loadShoppingList(); // Recharge la liste de courses pour afficher le nouvel article
+                loadShoppingList(); // Recharge la liste pour afficher le nouvel article
             }
-            */
-            alert(`Article ajouté (non sauvegardé car Supabase non configuré) : ${itemName}, Quantité : ${itemQuantity}, Catégorie : ${itemCategory}`);
-            itemNameInput.value = '';
-            itemQuantityInput.value = '1';
-            itemCategorySelect.value = '';
         } catch (e) {
             console.error("Une erreur inattendue est survenue :", e);
             alert("Une erreur inattendue est survenue.");
@@ -633,6 +638,7 @@
 
     // --- Initialisation au chargement de la page ---
     window.addEventListener('load', () => {
+      // Ces lignes gèrent les catégories via localStorage, indépendamment de Supabase pour l'instant
       if (!localStorage.getItem('user_categories')) {
           localStorage.setItem('user_categories', JSON.stringify(initialDefaultCategories));
       }
