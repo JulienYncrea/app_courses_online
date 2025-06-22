@@ -1,11 +1,11 @@
 const CACHE_NAME = 'shopping-list-cache-v1';
 const urlsToCache = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon.png', // Assure-toi d'avoir une image icon.png
-  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css'
+  '/app_courses_online/',        // Référence à la racine de ton projet
+  '/app_courses_online/index.html',
+  '/app_courses_online/manifest.json',
+  '/app_courses_online/icon.png',
+  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2', // URL externe, pas besoin de la changer
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css' // URL externe
 ];
 
 self.addEventListener('install', event => {
