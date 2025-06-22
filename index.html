@@ -338,7 +338,7 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
+        navigator.serviceWorker.register('/app_courses_online/sw.js')
           .then(reg => console.log('Service Worker registered:', reg.scope))
           .catch(err => console.error('SW error:', err));
       });
@@ -418,7 +418,8 @@
     </form>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.0/dist/umd/supabase.min.js"></script>
+
   <script>
     const shoppingForm = document.getElementById('shoppingForm');
     const newItemInput = document.getElementById('newItem');
