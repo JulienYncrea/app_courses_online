@@ -335,16 +335,6 @@
         }
     }
   </style>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-          .then(reg => console.log('Service Worker registered:', reg.scope))
-          .catch(err => console.error('SW error:', err));
-      });
-    }
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.0/dist/umd/supabase.min.js"></script>
 </head>
 <body>
   <h1>My Shopping List 🛒</h1>
@@ -419,7 +409,19 @@
     </form>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.0/dist/umd/supabase.min.js"></script>
+
   <script>
+    // Enregistrement du Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        // CORRECTION ICI : Chemin absolu pour le Service Worker avec le nom de fichier correct
+        navigator.serviceWorker.register('/app_courses_online/service-worker.js') 
+          .then(reg => console.log('Service Worker registered:', reg.scope))
+          .catch(err => console.error('SW error:', err));
+      });
+    }
+
     const shoppingForm = document.getElementById('shoppingForm');
     const newItemInput = document.getElementById('newItem');
     const shoppingListDiv = document.getElementById('shoppingList');
@@ -460,6 +462,33 @@
         "Petit déjeuner", "Boisson", "Viande", "Fruit", "Légume",
         "Produit ménager", "Produit de beauté", "Autre"
     ];
+
+    // --- Supabase setup ---
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // Replace with your Supabase URL
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // Replace with your Supabase Anon Key
+
+    // CRUCIAL : Appel de Supabase.createClient car Supabase est global
+    const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // --- Realtime Listener for Supabase ---
+    function setupRealtimeListener() {
+        supabase
+            .channel('schema-db-changes') // You can choose any channel name
+            .on(
+                'postgres_changes',
+                {
+                    event: '*', // Listen for all events (INSERT, UPDATE, DELETE)
+                    schema: 'public',
+                    table: 'items' // Listen for changes on your 'items' table
+                },
+                (payload) => {
+                    console.log('Realtime change received:', payload);
+                    // When a change arrives, reload the list for everyone
+                    loadShoppingList();
+                }
+            )
+            .subscribe(); // Subscribe to the channel
+    }
 
     // --- Category Management (core functions) ---
 
@@ -548,8 +577,19 @@
 
     // --- Shopping list management functions ---
 
-    function loadShoppingList() {
-        let items = JSON.parse(localStorage.getItem('shopping_list_items')) || [];
+    async function loadShoppingList() { // Made async
+        const { data, error } = await supabase
+            .from('items') // Your Supabase table name
+            .select('*'); // Select all columns
+
+        if (error) {
+            console.error('Error fetching shopping list from Supabase:', error.message);
+            // Fallback to localStorage if Supabase fails or is not configured
+            loadShoppingListFromLocalStorage(); 
+            return;
+        }
+
+        let items = data || []; // Use data from Supabase
         const currentCategoryOrder = JSON.parse(localStorage.getItem('category_order')) || getCategories();
         shoppingListDiv.innerHTML = '';
 
@@ -627,25 +667,189 @@
         }
     }
 
-    function addShoppingItem(itemName) {
-      if (!itemName.trim()) return;
+    // Fallback function to load from localStorage if Supabase is not used/fails
+    function loadShoppingListFromLocalStorage() {
+        let items = JSON.parse(localStorage.getItem('shopping_list_items')) || [];
+        const currentCategoryOrder = JSON.parse(localStorage.getItem('category_order')) || getCategories();
+        shoppingListDiv.innerHTML = '';
 
-      let items = JSON.parse(localStorage.getItem('shopping_list_items')) || [];
-      const lowerCaseItemName = itemName.trim().toLowerCase();
+        if (items.length === 0) {
+            shoppingListDiv.innerHTML = '<p style="text-align: center; color: #C71585; margin-top: 0.5rem;">Your list is empty for now!</p>';
+            return;
+        }
 
-      const existingItemIndex = items.findIndex(item => item.name.toLowerCase() === lowerCaseItemName);
+        // The rest of the logic to display items from localStorage is the same as in loadShoppingList
+        // ... (copy paste the categorization and rendering logic from loadShoppingList here)
+        // Sort items alphabetically before categorization
+        items.sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
 
-      if (existingItemIndex !== -1) {
-        items[existingItemIndex].quantity++;
-      } else {
-        items.push({ name: itemName.trim(), quantity: 1 });
-      }
+        const categorizedItems = {};
+        currentCategoryOrder.forEach(cat => categorizedItems[cat] = []);
 
-      localStorage.setItem('shopping_list_items', JSON.stringify(items));
-      loadShoppingList();
+        const itemsInOtherOrUncategorized = [];
+
+        items.forEach(item => {
+            const category = getCategoryForItem(item.name);
+            if (currentCategoryOrder.includes(category)) {
+                categorizedItems[category].push(item);
+            } else {
+                itemsInOtherOrUncategorized.push(item);
+            }
+        });
+
+        currentCategoryOrder.forEach(category => {
+            if (categorizedItems[category] && categorizedItems[category].length > 0) {
+                const categoryHeader = document.createElement('h3');
+                categoryHeader.style.color = '#E75480';
+                categoryHeader.style.marginTop = '1rem';
+                categoryHeader.textContent = category;
+                shoppingListDiv.appendChild(categoryHeader);
+
+                // Sort items within each category alphabetically
+                categorizedItems[category].sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
+
+                categorizedItems[category].forEach((item) => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'shopping-list-item';
+                    itemDiv.innerHTML = `
+                        <button class="decrement-btn" data-item-name="${item.name}">-</button>
+                        <span class="quantity">${item.quantity}x</span>
+                        <span>${item.name}</span>
+                        <button class="delete-btn" data-item-name="${item.name}">✖</button>
+                    `;
+                    shoppingListDiv.appendChild(itemDiv);
+                });
+            }
+        });
+
+        if (itemsInOtherOrUncategorized.length > 0) {
+            const otherCategoryHeader = document.createElement('h3');
+            otherCategoryHeader.style.color = '#E75480';
+            otherCategoryHeader.style.marginTop = '1rem';
+            otherCategoryHeader.textContent = 'Autre / Non classé';
+            shoppingListDiv.appendChild(otherCategoryHeader);
+
+            // Sort 'Other' items alphabetically
+            itemsInOtherOrUncategorized.sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
+
+            itemsInOtherOrUncategorized.forEach((item) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'shopping-list-item';
+                itemDiv.innerHTML = `
+                    <button class="decrement-btn" data-item-name="${item.name}">-</button>
+                    <span class="quantity">${item.quantity}x</span>
+                    <span>${item.name}</span>
+                    <button class="delete-btn" data-item-name="${item.name}">✖</button>
+                `;
+                shoppingListDiv.appendChild(itemDiv);
+            });
+        }
     }
 
-    function decrementShoppingItemByName(itemName) {
+
+    async function addShoppingItem(itemName) {
+      if (!itemName.trim()) return;
+
+      const lowerCaseItemName = itemName.trim().toLowerCase();
+
+      // Check if item exists in Supabase
+      const { data: existingItems, error: fetchError } = await supabase
+          .from('items') // Your Supabase table name
+          .select('*')
+          .ilike('name', lowerCaseItemName); // Case-insensitive check
+
+      if (fetchError) {
+          console.error('Error checking existing item:', fetchError.message);
+          // Fallback to localStorage if Supabase fails
+          addShoppingItemToLocalStorage(itemName);
+          return;
+      }
+
+      if (existingItems && existingItems.length > 0) {
+        // Item exists, increment quantity
+        const itemToUpdate = existingItems[0];
+        const newQuantity = itemToUpdate.quantity + 1;
+        const { error: updateError } = await supabase
+            .from('items') // Your Supabase table name
+            .update({ quantity: newQuantity })
+            .eq('id', itemToUpdate.id); // Update by ID
+
+        if (updateError) {
+            console.error('Error incrementing item quantity:', updateError.message);
+        }
+      } else {
+        // Item does not exist, insert new item
+        const { error: insertError } = await supabase
+            .from('items') // Your Supabase table name
+            .insert([{ name: itemName.trim(), quantity: 1 }]); // Insert new item
+
+        if (insertError) {
+            console.error('Error adding new item:', insertError.message);
+        }
+      }
+      loadShoppingList(); // Reload the list after operation
+    }
+
+    // Fallback function to add item to localStorage
+    function addShoppingItemToLocalStorage(itemName) {
+        let items = JSON.parse(localStorage.getItem('shopping_list_items')) || [];
+        const lowerCaseItemName = itemName.trim().toLowerCase();
+
+        const existingItemIndex = items.findIndex(item => item.name.toLowerCase() === lowerCaseItemName);
+
+        if (existingItemIndex !== -1) {
+            items[existingItemIndex].quantity++;
+        } else {
+            items.push({ name: itemName.trim(), quantity: 1 });
+        }
+        localStorage.setItem('shopping_list_items', JSON.stringify(items));
+        loadShoppingList();
+    }
+
+
+    async function decrementShoppingItemByName(itemName) {
+        const lowerCaseItemName = itemName.toLowerCase();
+        const { data: existingItems, error: fetchError } = await supabase
+            .from('items') // Your Supabase table name
+            .select('*')
+            .ilike('name', lowerCaseItemName); // Case-insensitive check
+
+        if (fetchError) {
+            console.error('Error checking item for decrement:', fetchError.message);
+            // Fallback to localStorage
+            decrementShoppingItemByNameFromLocalStorage(itemName);
+            return;
+        }
+
+        if (existingItems && existingItems.length > 0) {
+            const itemToUpdate = existingItems[0];
+            const newQuantity = itemToUpdate.quantity - 1;
+
+            if (newQuantity <= 0) {
+                // Delete item if quantity goes to 0 or below
+                const { error: deleteError } = await supabase
+                    .from('items') // Your Supabase table name
+                    .delete()
+                    .eq('id', itemToUpdate.id); // Delete by ID
+                if (deleteError) {
+                    console.error('Error deleting item:', deleteError.message);
+                }
+            } else {
+                // Decrement quantity
+                const { error: updateError } = await supabase
+                    .from('items') // Your Supabase table name
+                    .update({ quantity: newQuantity })
+                    .eq('id', itemToUpdate.id); // Update by ID
+                if (updateError) {
+                    console.error('Error decrementing item quantity:', updateError.message);
+                }
+            }
+        }
+        loadShoppingList(); // Reload the list after operation
+    }
+
+    // Fallback for decrementing from localStorage
+    function decrementShoppingItemByNameFromLocalStorage(itemName) {
         let items = JSON.parse(localStorage.getItem('shopping_list_items')) || [];
         const index = items.findIndex(item => item.name === itemName);
 
@@ -659,12 +863,42 @@
         }
     }
 
-    function deleteShoppingItemByName(itemName) {
-      let items = JSON.parse(localStorage.getItem('shopping_list_items')) || [];
-      items = items.filter(item => item.name !== itemName);
-      localStorage.setItem('shopping_list_items', JSON.stringify(items));
-      loadShoppingList();
+
+    async function deleteShoppingItemByName(itemName) {
+        const lowerCaseItemName = itemName.toLowerCase();
+        const { data: existingItems, error: fetchError } = await supabase
+            .from('items') // Your Supabase table name
+            .select('id')
+            .ilike('name', lowerCaseItemName); // Find by name
+
+        if (fetchError) {
+            console.error('Error finding item for deletion:', fetchError.message);
+            // Fallback to localStorage
+            deleteShoppingItemByNameFromLocalStorage(itemName);
+            return;
+        }
+
+        if (existingItems && existingItems.length > 0) {
+            const itemToDeleteId = existingItems[0].id;
+            const { error: deleteError } = await supabase
+                .from('items') // Your Supabase table name
+                .delete()
+                .eq('id', itemToDeleteId); // Delete by ID
+            if (deleteError) {
+                console.error('Error deleting item:', deleteError.message);
+            }
+        }
+        loadShoppingList(); // Reload list after deletion
     }
+
+    // Fallback for deleting from localStorage
+    function deleteShoppingItemByNameFromLocalStorage(itemName) {
+        let items = JSON.parse(localStorage.getItem('shopping_list_items')) || [];
+        items = items.filter(item => item.name !== itemName);
+        localStorage.setItem('shopping_list_items', JSON.stringify(items));
+        loadShoppingList();
+    }
+
 
     function getCategoryForItem(itemName) {
         const suggestions = JSON.parse(localStorage.getItem('shopping_suggestions')) || [];
@@ -1024,7 +1258,7 @@
     showBuyLaterBtn.addEventListener('click', () => showSection('buyLater'));
 
     // Toggle options functionality
-    let optionsVisible = true; // Start with options visible
+    let optionsVisible = false; // Start with options hidden
     toggleOptionsBtn.addEventListener('click', () => {
         optionsVisible = !optionsVisible;
         if (optionsVisible) {
@@ -1053,16 +1287,19 @@
       }
 
       updateAllCategorySelects();
-      loadShoppingList();
       loadSuggestions();
       loadBuyLaterList();
       loadCategoryOrder(); 
 
+      // IMPORTANT : Initialise le listener Realtime de Supabase
+      setupRealtimeListener();
+      loadShoppingList(); // Charge la liste initiale une fois que le listener est configuré
+
       showSection('shoppingList');
-      // Ensure options are visible on initial load
-      navigationButtonsContainer.classList.add('show-options');
-      toggleOptionsIcon.classList.remove('fa-chevron-down');
-      toggleOptionsIcon.classList.add('fa-chevron-up');
+      // Ensure options are hidden on initial load and arrow points down
+      navigationButtonsContainer.classList.remove('show-options');
+      toggleOptionsIcon.classList.remove('fa-chevron-up');
+      toggleOptionsIcon.classList.add('fa-chevron-down');
     });
   </script>
 </body>
