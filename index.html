@@ -8,6 +8,7 @@
   <link rel="apple-touch-icon" href="/app_courses_online/icon.png" />
   <meta name="theme-color" content="#FFC0CB" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -419,11 +420,10 @@
     </form>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     // --- Initialisation Supabase ---
     const SUPABASE_URL = 'https://cepqcretnxfhjbvdukkk.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlcHFjcmV0bnhmaGpidmR1a2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2MTc1NDcsImV4cCI6MjA2NjE5MzU0N30.H56IGRN14FpfHXQVODKsmTbqMEe27_gcCcgGLphEEOU';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlcHFjcmV0bnhmaG JanicebhjbvdukkkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2MTc1NDcsImV4cCI6MjA2NjE5MzU0N30.H56IGRN14FpfHXQVODKsmTbqMEe27_gcCcgGLphEEOU';
 
     const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     // --- Fin Initialisation Supabase ---
@@ -727,7 +727,7 @@
         if (itemsInOtherOrUncategorized.length > 0) {
             const otherCategoryHeader = document.createElement('h3');
             otherCategoryHeader.style.color = '#E75480';
-            otherCategoryHeader.style.marginTop = '1rem';
+            otherCategoryHeader.style.marginTop = '1.rem';
             otherCategoryHeader.textContent = 'Autre / Non classé';
             shoppingListDiv.appendChild(otherCategoryHeader);
 
