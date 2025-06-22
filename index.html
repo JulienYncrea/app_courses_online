@@ -338,7 +338,7 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/app_courses_online/sw.js')
+        navigator.serviceWorker.register('/app_courses_online/service-worker.js')
           .then(reg => console.log('Service Worker registered:', reg.scope))
           .catch(err => console.error('SW error:', err));
       });
