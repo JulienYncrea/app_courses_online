@@ -335,16 +335,7 @@
         }
     }
   </style>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/app_courses_online/service-worker.js')
-          .then(reg => console.log('Service Worker registered:', reg.scope))
-          .catch(err => console.error('SW error:', err));
-      });
-    }
-  </script>
-</head>
+  </head>
 <body>
   <h1>My Shopping List 🛒</h1>
 
@@ -418,9 +409,20 @@
     </form>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.0/dist/umd/supabase.min.js"></script>
+  <script type="module">
+    // Importation de createClient depuis Supabase via Skypack
+    import { createClient } from "https://cdn.skypack.dev/@supabase/supabase-js";
 
-  <script>
+    // Enregistrement du Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        // CORRECTION ICI : Chemin absolu pour le Service Worker avec le nom de fichier correct
+        navigator.serviceWorker.register('/app_courses_online/service-worker.js') 
+          .then(reg => console.log('Service Worker registered:', reg.scope))
+          .catch(err => console.error('SW error:', err));
+      });
+    }
+
     const shoppingForm = document.getElementById('shoppingForm');
     const newItemInput = document.getElementById('newItem');
     const shoppingListDiv = document.getElementById('shoppingList');
@@ -466,8 +468,8 @@
     const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // Replace with your Supabase URL
     const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // Replace with your Supabase Anon Key
 
-    // Create a single Supabase client for your application
-    const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // CRUCIAL : Appel direct de createClient car nous sommes dans un module ES
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // --- Realtime Listener for Supabase ---
     function setupRealtimeListener() {
