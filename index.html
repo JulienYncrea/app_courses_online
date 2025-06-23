@@ -251,11 +251,20 @@
     const SUPABASE_URL = 'https://cepqcretnxfhjbvdukkk.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlcHFjcmV0bnhmaGpidmR1a2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2MTc1NDcsImV4cCI6MjA2NjE5MzU0N30.H56IGRN14FpfHXQVODKsmTbqMEe27_gcCcgGLphEEOU';
 
-    // AJOUTEZ CETTE LIGNE POUR LE DÉBOGAGE:
-    console.log("Type of createClient:", typeof createClient);
+    // Ligne de débogage pour vérifier la disponibilité de createClient
+    console.log("Type of createClient (avant init):", typeof createClient);
+    console.log("Type of window.supabase (avant init):", typeof window.supabase);
     
-    // Initialise le client Supabase (createClient est directement disponible)
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let supabase = null;
+    if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
+        // Initialise le client Supabase via window.supabase.createClient
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log("Supabase client initialized successfully.");
+    } else {
+        console.error("Erreur: La fonction 'createClient' de Supabase n'est pas définie ou la bibliothèque Supabase n'est pas chargée correctement.");
+        alert("Erreur de chargement: La bibliothèque Supabase n'a pas pu être initialisée. Vérifiez votre connexion internet ou la configuration.");
+    }
+
 
     // --- Variables Globales ---
     let currentListId = null; // ID UUID de la liste active (récupéré via le share_code)
@@ -318,16 +327,25 @@
 
     // Met à jour l'en-tête X-Share-Code pour toutes les requêtes Supabase
     function updateSupabaseHeaders(shareCode) {
-      if (shareCode) {
-        supabase.postgrest.headers['X-Share-Code'] = shareCode;
+      if (supabase && supabase.postgrest) { // Ajout d'une vérification pour s'assurer que supabase est initialisé
+        if (shareCode) {
+          supabase.postgrest.headers['X-Share-Code'] = shareCode;
+        } else {
+          // Supprime l'en-tête si le code n'est pas défini
+          delete supabase.postgrest.headers['X-Share-Code'];
+        }
       } else {
-        // Supprime l'en-tête si le code n'est pas défini
-        delete supabase.postgrest.headers['X-Share-Code'];
+        console.warn("Supabase client non initialisé, impossible de mettre à jour les headers.");
       }
     }
 
     // Tente de récupérer ou de créer une liste basée sur le code de partage
     async function getOrCreateListByShareCode(shareCode) {
+        if (!supabase) {
+            console.error("Supabase client non initialisé. Impossible de récupérer ou créer la liste.");
+            displayMessage("Erreur: Supabase non initialisé.", "error");
+            return null;
+        }
         // Mettre à jour l'en-tête pour cette requête
         updateSupabaseHeaders(shareCode);
 
@@ -372,6 +390,9 @@
 
     // Demande à l'utilisateur d'entrer un code de partage
     async function promptForShareCode(isInitialLoad = true) {
+        // Ne rien faire si Supabase n'est pas initialisé
+        if (!supabase) return;
+
         let shareCode = prompt("Veuillez entrer le code de votre liste:");
         shareCode = shareCode ? shareCode.trim() : null;
 
@@ -397,6 +418,10 @@
 
     // Change le code de partage depuis les paramètres
     async function changeShareCode() {
+      if (!supabase) {
+        displayMessage("Erreur: Supabase non initialisé. Impossible de changer de liste.", "error", settingsMessage);
+        return;
+      }
       let newShareCode = shareCodeInput.value.trim();
       if (!newShareCode) {
           displayMessage('Veuillez entrer un nouveau code de liste.', 'error', settingsMessage);
@@ -421,8 +446,8 @@
     // --- Fonctions de Gestion de Liste (modifiées pour utiliser currentListId) ---
 
     async function loadShoppingList() {
-      if (!currentListId) {
-        shoppingList.innerHTML = '<li style="text-align: center;">Veuillez d\'abord entrer un code de liste.</li>';
+      if (!currentListId || !supabase) {
+        shoppingList.innerHTML = '<li style="text-align: center;">Veuillez d\'abord entrer un code de liste et assurez-vous que Supabase est initialisé.</li>';
         return;
       }
 
@@ -525,8 +550,8 @@
     }
 
     async function addItem() {
-      if (!currentListId) {
-        displayMessage('Veuillez sélectionner une liste avant d\'ajouter des articles.', 'error');
+      if (!currentListId || !supabase) {
+        displayMessage('Veuillez sélectionner une liste avant d\'ajouter des articles et assurez-vous que Supabase est initialisé.', 'error');
         return;
       }
 
@@ -561,7 +586,7 @@
     }
 
     async function togglePurchased(id, currentStatus) {
-      if (!currentListId) return;
+      if (!currentListId || !supabase) return;
 
       // S'assurer que l'en-tête est défini avant la requête
       updateSupabaseHeaders(currentShareCode);
@@ -581,7 +606,7 @@
     }
 
     async function deleteItem(id) {
-      if (!currentListId) return;
+      if (!currentListId || !supabase) return;
 
       if (!confirm('Êtes-vous sûr de vouloir supprimer cet article ?')) {
         return;
@@ -607,6 +632,11 @@
 
     // --- Fonctions Realtime ---
     async function setupRealtimeListener(listId) {
+        if (!supabase) {
+            console.warn('Supabase client non initialisé. Impossible de configurer le listener Realtime.');
+            return;
+        }
+
         // Désabonnement de l'ancien canal si il existe
         if (shoppingListChannel) {
             await supabase.removeChannel(shoppingListChannel);
@@ -641,7 +671,7 @@
 
     // --- Fonctions pour "Acheter Plus Tard" (nécessitent de gérer la "status" ou "archive" colonne) ---
     async function moveToBuyLater(id) {
-        if (!currentListId) return;
+        if (!currentListId || !supabase) return;
 
         // S'assurer que l'en-tête est défini avant la requête
         updateSupabaseHeaders(currentShareCode);
@@ -850,19 +880,25 @@
         loadCategoryOrder(); 
         
         // --- NOUVELLE LOGIQUE D'INITIALISATION SANS AUTH ---
-        const storedShareCode = localStorage.getItem('active_share_code');
-        if (storedShareCode) {
-            shareCodeInput.value = storedShareCode; // Pré-remplit l'input des paramètres
-            await getOrCreateListByShareCode(storedShareCode);
-            if (currentListId) {
-                loadShoppingList();
-                setupRealtimeListener(currentListId);
+        // Seulement si supabase est initialisé, continuer la logique de chargement de liste
+        if (supabase) { 
+            const storedShareCode = localStorage.getItem('active_share_code');
+            if (storedShareCode) {
+                shareCodeInput.value = storedShareCode; // Pré-remplit l'input des paramètres
+                await getOrCreateListByShareCode(storedShareCode);
+                if (currentListId) {
+                    loadShoppingList();
+                    setupRealtimeListener(currentListId);
+                } else {
+                    // Si le chargement initial échoue, demander à nouveau
+                    promptForShareCode(true);
+                }
             } else {
-                // Si le chargement initial échoue, demander à nouveau
-                promptForShareCode(true);
+                promptForShareCode(true); // Demander le code au premier chargement
             }
         } else {
-            promptForShareCode(true); // Demander le code au premier chargement
+            console.error("Supabase n'est pas initialisé au chargement de la page. Les fonctionnalités de la liste ne seront pas disponibles.");
+            displayMessage("Erreur: L'application ne peut pas se connecter à la base de données. Vérifiez l'alerte pour plus de détails.", "error");
         }
 
         showSection('shoppingList'); // Afficher la section de la liste principale par défaut
