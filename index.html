@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>My Shopping List 🛒</title>
+  <title>Ma Liste de Courses 🛒</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icon.png" />
   <meta name="theme-color" content="#FFC0CB" />
@@ -26,873 +26,855 @@
       background: #FFFFFF;
       padding: 1.5rem;
       border-radius: 1rem;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      display: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      display: none; /* Hidden by default */
+      min-height: 200px;
     }
     .section-container.active {
-        display: block;
-    }
-    label {
       display: block;
-      margin-top: 0.75rem;
-      font-weight: bold;
-      color: #6A057F;
     }
-    input, button, select {
-      width: 100%;
-      padding: 0.7rem;
-      margin-top: 0.4rem;
-      border: 1px solid #DDA0DD;
-      border-radius: 0.5rem;
+    input[type="text"], input[type="number"], select, button {
+      width: calc(100% - 20px);
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
       box-sizing: border-box;
-      color: #333;
-      font-size: 1rem;
     }
     button {
-      background: #FF69B4;
-      color: #FFFFFF;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s ease;
+      background-color: #E75480;
+      color: white;
       border: none;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.2s ease;
     }
     button:hover {
-      background: #C71585;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      background-color: #D14771;
     }
-    select {
-        background: #F8F8FF;
-        appearance: none;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        background-image: url("data:image/svg+xml;utf8,<svg fill='%23C71585' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
-        background-repeat: no-repeat;
-        background-position: right 0.7em top 50%;
-        background-size: 0.65em auto;
-        padding-right: 2.5em;
-    }
-
-    /* Styles for navigation buttons */
-    .navigation-buttons {
-        text-align: center;
-        margin-bottom: 2rem;
-        display: flex;
-        justify-content: center;
-        gap: 1.5rem;
-        flex-wrap: wrap;
-    }
-    .navigation-buttons button {
-        width: auto;
-        padding: 0.8rem 1.8rem;
-        font-size: 1.1rem;
-        background-color: #EE82EE;
-        color: #FFFFFF;
-        border: 2px solid #DA70D6;
-        border-radius: 25px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .navigation-buttons button.active {
-        background: #FFD700;
-        color: #6A057F;
-        border-color: #FFA500;
-        font-weight: bold;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
-    .navigation-buttons button:hover:not(.active) {
-        background-color: #DDA0DD;
-        border-color: #BA55D3;
-    }
-    .navigation-buttons button i {
-        margin-right: 0.5rem;
-    }
-    .navigation-buttons button#toggleOptions {
-        background: #FF6347;
-        border-color: #FF4500;
-    }
-    .navigation-buttons button#toggleOptions:hover {
-        background: #CD5C5C;
-        border-color: #DC143C;
-    }
-    .navigation-options {
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.5s ease-out;
-        padding: 0 1rem;
-        text-align: center;
-    }
-    .navigation-options.show-options {
-        max-height: 200px;
-        padding: 1rem;
-    }
-
-    /* Common List Item Style */
     ul {
-        list-style: none;
-        padding: 0;
+      list-style: none;
+      padding: 0;
     }
     li {
-        background: #F0F8FF;
-        border: 1px solid #E0BBE4;
-        padding: 0.8rem 1rem;
-        margin-bottom: 0.6rem;
-        border-radius: 0.7rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        transition: all 0.3s ease;
-    }
-    li:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      background: #f9f9f9;
+      margin-bottom: 8px;
+      padding: 10px;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
     li.purchased {
-        text-decoration: line-through;
-        color: #888;
-        background-color: #E8E8E8;
-    }
-    .item-info {
-        display: flex;
-        flex-direction: column;
-        flex-grow: 1;
-    }
-    .item-info strong {
-        color: #6A057F;
-    }
-    .item-info span {
-        font-size: 0.9em;
-        color: #555;
+      background-color: #e0ffe0;
+      text-decoration: line-through;
+      color: #888;
     }
     .item-actions button {
-        width: auto;
-        padding: 0.4rem 0.7rem;
-        border-radius: 0.4rem;
-        font-size: 0.8rem;
+      width: auto;
+      padding: 5px 10px;
+      margin-left: 5px;
+      font-size: 0.8rem;
+      border-radius: 3px;
     }
-    .item-actions .purchase-btn {
-        background: #8A2BE2;
+    .item-info {
+      flex-grow: 1;
     }
-    .item-actions .purchase-btn:hover {
-        background: #6A057F;
+    .add-item-form, .settings-form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: flex-end;
     }
-    .item-actions .delete-btn {
-        background: #FF4500;
+    .add-item-form input, .add-item-form select, .settings-form input {
+      flex-grow: 1;
+      width: auto;
+      margin-bottom: 0;
     }
-    .item-actions .delete-btn:hover {
-        background: #DC143C;
+    .add-item-form button {
+      flex-shrink: 0;
+      width: auto;
+      margin-bottom: 0;
     }
-    .item-actions .edit-btn {
-        background: #FFD700;
-        color: #6A057F;
+    .message {
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 5px;
+      text-align: center;
+      font-weight: bold;
     }
-    .item-actions .edit-btn:hover {
-        background: #FFA500;
+    .message.success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .message.error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    .message.info {
+      background-color: #d1ecf1;
+      color: #0c5460;
     }
 
-    /* Specific Section Styles */
-    #authentication, #myLists, #joinList {
-        padding: 1rem;
+    /* Navigation */
+    nav {
+      text-align: center;
+      margin-bottom: 1rem;
+      position: relative;
     }
-    #authentication form, #myLists form, #joinList form {
-        margin-top: 1rem;
+    .nav-buttons {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap; /* Allows wrapping on smaller screens */
+      gap: 10px; /* Space between buttons */
     }
-    #myLists ul li {
+    .nav-button {
+      background-color: #FF69B4; /* Hot Pink */
+      color: white;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      font-weight: bold;
+      text-decoration: none; /* For potential future links */
+      white-space: nowrap; /* Prevents text from breaking */
+    }
+    .nav-button:hover, .nav-button.active {
+      background-color: #E75480; /* Deeper Pink */
+    }
+
+    /* Hidden Navigation Options */
+    .hidden-nav-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+      padding: 0;
+      width: 100%; /* Ensure it spans full width */
+      align-items: center; /* Center items if they don't fill width */
+    }
+    .hidden-nav-options.show-options {
+      max-height: 200px; /* Adjust based on content */
+    }
+    .hidden-nav-options .nav-button {
+      width: calc(100% - 20px); /* Fill width, adjust for padding */
+      text-align: center;
+    }
+
+    /* Toggle icon for navigation */
+    .toggle-options-button {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #E75480;
+        font-size: 1.5rem;
         cursor: pointer;
     }
-    #myLists ul li.active-list {
-        background-color: #e6e6fa;
-        font-weight: bold;
-        border-color: #8a2be2;
-    }
-    #myLists .share-code-display {
-        font-family: monospace;
-        background-color: #eee;
-        padding: 0.5rem;
-        border-radius: 0.3rem;
-        margin-top: 0.5rem;
-        word-break: break-all;
+    .toggle-options-button:hover {
+        color: #D14771;
     }
 
+    .current-share-code-display {
+      text-align: center;
+      margin-bottom: 1rem;
+      font-weight: bold;
+      color: #E75480;
+    }
   </style>
 </head>
 <body>
-  <h1>My Shopping List 🛒</h1>
+  <h1>Ma Liste de Courses 🛒</h1>
 
-  <nav class="navigation-buttons">
-    <button id="authBtn"><i class="fas fa-user"></i> Authentification</button>
-    <button id="myListsBtn"><i class="fas fa-list"></i> Mes Listes</button>
-    <button id="joinListBtn"><i class="fas fa-handshake"></i> Rejoindre Liste</button>
-    <button id="shoppingListBtn" class="active"><i class="fas fa-shopping-basket"></i> Liste Active</button>
-    <button id="toggleOptions"><i class="fas fa-chevron-down toggle-icon"></i> Options</button>
+  <div class="current-share-code-display">
+    Code de Liste Actuel: <span id="displayShareCode">Non défini</span>
+  </div>
+
+  <nav>
+    <div class="nav-buttons">
+      <button class="nav-button active" data-section="shoppingList">Ma Liste</button>
+      <button class="nav-button" data-section="buyLaterList">A Acheter Plus Tard</button>
+      <button class="nav-button" data-section="categoriesManagement">Catégories</button>
+      <button class="nav-button" data-section="settings">Paramètres</button>
+    </div>
   </nav>
 
-  <div class="navigation-options">
-    <nav class="navigation-buttons">
-        <button id="suggestionsBtn"><i class="fas fa-lightbulb"></i> Suggestions</button>
-        <button id="buyLaterBtn"><i class="fas fa-clock"></i> Acheter Plus Tard</button>
-        <button id="categoriesBtn"><i class="fas fa-tags"></i> Catégories</button>
-        <button id="settingsBtn"><i class="fas fa-cog"></i> Paramètres</button>
-        <button id="signOutBtn" style="background-color: #dc3545;"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
-    </nav>
-  </div>
-
-  <div id="authentication" class="section-container">
-    <h2>Authentification</h2>
-    <div id="authStatus"></div>
-    <h3>Inscription</h3>
-    <form id="signUpForm">
-      <label for="signUpEmail">Email:</label>
-      <input type="email" id="signUpEmail" placeholder="Votre email" required />
-      <label for="signUpPassword">Mot de passe:</label>
-      <input type="password" id="signUpPassword" placeholder="Votre mot de passe" required />
-      <label for="signUpUsername">Nom d'utilisateur:</label>
-      <input type="text" id="signUpUsername" placeholder="Votre nom d'utilisateur" required />
-      <button type="submit">S'inscrire</button>
-    </form>
-    <h3>Connexion</h3>
-    <form id="signInForm">
-      <label for="signInEmail">Email:</label>
-      <input type="email" id="signInEmail" placeholder="Votre email" required />
-      <label for="signInPassword">Mot de passe:</label>
-      <input type="password" id="signInPassword" placeholder="Votre mot de passe" required />
-      <button type="submit">Se connecter</button>
-    </form>
-  </div>
-
-  <div id="myLists" class="section-container">
-    <h2>Mes Listes</h2>
-    <form id="createListForm">
-      <label for="newListName">Nom de la nouvelle liste:</label>
-      <input type="text" id="newListName" placeholder="Ex: Courses du mois" required />
-      <button type="submit"><i class="fas fa-plus"></i> Créer Nouvelle Liste</button>
-    </form>
-    <h3>Vos Listes Actuelles</h3>
-    <ul id="userListsDisplay">
+  <div id="shoppingListSection" class="section-container active">
+    <h2>Articles de la Liste</h2>
+    <div class="add-item-form">
+      <input type="text" id="itemInput" placeholder="Nom de l'article" autocomplete="off" list="suggestions">
+      <datalist id="suggestions"></datalist>
+      <input type="number" id="quantityInput" placeholder="Quantité" value="1">
+      <select id="categorySelect"></select>
+      <button onclick="addItem()">Ajouter</button>
+    </div>
+    <ul id="shoppingList">
       </ul>
   </div>
 
-  <div id="joinList" class="section-container">
-    <h2>Rejoindre une Liste par Code</h2>
-    <form id="joinListForm">
-      <label for="shareCodeInput">Code de Partage:</label>
-      <input type="text" id="shareCodeInput" placeholder="Entrez le code unique" required />
-      <button type="submit"><i class="fas fa-paper-plane"></i> Rejoindre la Liste</button>
-    </form>
-  </div>
-
-
-  <div id="shoppingList" class="section-container active">
-    <h2>Liste Active: <span id="currentListName">Aucune sélectionnée</span></h2>
-    <form id="itemForm">
-      <input type="text" id="itemName" placeholder="Nom de l'article" required />
-      <input type="number" id="itemQuantity" placeholder="Quantité" value="1" min="1" />
-      <select id="itemCategory">
-        <option value="">Sélectionner une catégorie</option>
-      </select>
-      <button type="submit"><i class="fas fa-plus"></i> Ajouter à la liste</button>
-    </form>
-    <ul id="shoppingListItems">
-      </ul>
-  </div>
-
-  <div id="suggestions" class="section-container">
-    <h2>Suggestions d'Articles</h2>
-    <input type="text" id="suggestionSearch" placeholder="Rechercher des suggestions..." />
-    <ul id="suggestionList">
-      </ul>
-  </div>
-
-  <div id="buyLater" class="section-container">
+  <div id="buyLaterListSection" class="section-container">
     <h2>Articles à Acheter Plus Tard</h2>
     <ul id="buyLaterList">
       </ul>
   </div>
 
-  <div id="categories" class="section-container">
-    <h2>Gérer les Catégories</h2>
-    <form id="addCategoryForm">
-      <input type="text" id="newCategoryName" placeholder="Nouvelle catégorie" required />
-      <button type="submit"><i class="fas fa-plus"></i> Ajouter Catégorie</button>
-    </form>
+  <div id="categoriesManagementSection" class="section-container">
+    <h2>Gestion des Catégories</h2>
+    <div class="add-item-form">
+      <input type="text" id="newCategoryInput" placeholder="Nom de la nouvelle catégorie">
+      <button onclick="addCategory()">Ajouter Catégorie</button>
+    </div>
     <ul id="categoryList">
       </ul>
+    <button onclick="saveCategoryOrder()">Sauvegarder Ordre des Catégories</button>
   </div>
 
-  <div id="settings" class="section-container">
+  <div id="settingsSection" class="section-container">
     <h2>Paramètres</h2>
-    <p>Gérez les options de votre application ici.</p>
+    <div class="settings-form">
+        <label for="shareCodeInput">Code de Liste:</label>
+        <input type="text" id="shareCodeInput" placeholder="Entrez un code de liste">
+        <button onclick="changeShareCode()">Changer de Liste</button>
     </div>
+    <p class="message" id="settingsMessage"></p>
+  </div>
 
-  <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const { createClient } = supabase;
 
-    const SUPABASE_URL = 'https://cepqcretnxfhjbvdukkk.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlcHFjcmV0bnhmaGpidmR1a2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2MTc1NDcsImV4cCI6MjA2NjE5MzU0N30.H56IGRN14FpfHXQVODKsmTbqMEe27_gcCcgGLphEEOU';
-
+    // --- Configuration Supabase ---
+    // REMPLACEZ CES VALEURS PAR LES VÔTRES !
+    const SUPABASE_URL = 'VOTRE_URL_SUPABASE'; // Exemple: https://xxxx.supabase.co
+    const SUPABASE_ANON_KEY = 'VOTRE_ANON_KEY_SUPABASE'; // Exemple: eyJ...
+    
+    // Initialise le client Supabase (sans options d'auth)
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // --- DOM Elements ---
-    const authBtn = document.getElementById('authBtn');
-    const myListsBtn = document.getElementById('myListsBtn');
-    const joinListBtn = document.getElementById('joinListBtn');
-    const shoppingListBtn = document.getElementById('shoppingListBtn');
-    const suggestionsBtn = document.getElementById('suggestionsBtn');
-    const buyLaterBtn = document.getElementById('buyLaterBtn');
-    const categoriesBtn = document.getElementById('categoriesBtn');
-    const settingsBtn = document.getElementById('settingsBtn');
-    const toggleOptionsIcon = document.querySelector('#toggleOptions .toggle-icon');
-    const navigationButtonsContainer = document.querySelector('.navigation-options');
-    const allSectionContainers = document.querySelectorAll('.section-container');
-    const shoppingListSection = document.getElementById('shoppingList');
+    // --- Variables Globales ---
+    let currentListId = null; // ID UUID de la liste active (récupéré via le share_code)
+    let currentShareCode = null; // Le code de partage actuellement utilisé par l'utilisateur
+    let shoppingListChannel = null; // Pour le Realtime de Supabase
 
-    const authStatusDiv = document.getElementById('authStatus');
-    const signUpForm = document.getElementById('signUpForm');
-    const signInForm = document.getElementById('signInForm');
-    const signOutBtn = document.getElementById('signOutBtn');
+    // --- Éléments du DOM ---
+    const shoppingListSection = document.getElementById('shoppingListSection');
+    const buyLaterListSection = document.getElementById('buyLaterListSection');
+    const categoriesManagementSection = document.getElementById('categoriesManagementSection');
+    const settingsSection = document.getElementById('settingsSection'); // Nouvelle section paramètres
 
-    const createListForm = document.getElementById('createListForm');
-    const newListNameInput = document.getElementById('newListName');
-    const userListsDisplayUl = document.getElementById('userListsDisplay');
-    const currentListNameSpan = document.getElementById('currentListName');
+    const itemInput = document.getElementById('itemInput');
+    const quantityInput = document.getElementById('quantityInput');
+    const categorySelect = document.getElementById('categorySelect');
+    const shoppingList = document.getElementById('shoppingList');
+    const buyLaterList = document.getElementById('buyLaterList');
+    const suggestionsDatalist = document.getElementById('suggestions');
+    const newCategoryInput = document.getElementById('newCategoryInput');
+    const categoryListUl = document.getElementById('categoryList');
 
-    const joinListForm = document.getElementById('joinListForm');
+    const displayShareCodeSpan = document.getElementById('displayShareCode');
     const shareCodeInput = document.getElementById('shareCodeInput');
+    const settingsMessage = document.getElementById('settingsMessage');
 
-    const itemForm = document.getElementById('itemForm');
-    const itemNameInput = document.getElementById('itemName');
-    const itemQuantityInput = document.getElementById('itemQuantity');
-    const itemCategorySelect = document.getElementById('itemCategory');
-    const shoppingListItemsUl = document.getElementById('shoppingListItems');
+    const navigationButtons = document.querySelectorAll('.nav-button');
 
-    // --- Global State Variables ---
-    let currentUserId = null;
-    let currentListId = null; // L'ID de la liste actuellement sélectionnée
-    let userLists = []; // Pour stocker les listes auxquelles l'utilisateur a accès
+    // Catégories par défaut si aucune n'est définie
+    const initialDefaultCategories = ["Fruits & Légumes", "Boulangerie", "Viandes & Poissons", "Produits laitiers", "Épicerie", "Surgelés", "Boissons", "Entretien", "Hygiène"];
 
-    // --- Helper Functions ---
+    // --- Fonctions utilitaires ---
+    function displayMessage(message, type, targetElement = null) {
+      const element = targetElement || document.getElementById('authMessage') || document.getElementById('settingsMessage');
+      if (element) {
+        element.textContent = message;
+        element.className = `message ${type}`;
+        element.style.display = 'block';
+        setTimeout(() => { element.style.display = 'none'; }, 5000);
+      } else {
+        console.log(`Message (${type}): ${message}`);
+      }
+    }
+
     function showSection(sectionId) {
-        allSectionContainers.forEach(container => {
-            container.classList.remove('active');
-        });
-        document.getElementById(sectionId).classList.add('active');
+      document.querySelectorAll('.section-container').forEach(section => {
+        section.classList.remove('active');
+      });
+      document.getElementById(`${sectionId}Section`).classList.add('active');
 
-        const allNavButtons = document.querySelectorAll('.navigation-buttons button');
-        allNavButtons.forEach(button => {
-            button.classList.remove('active');
-        });
-        if (sectionId === 'authentication') authBtn.classList.add('active');
-        else if (sectionId === 'myLists') myListsBtn.classList.add('active');
-        else if (sectionId === 'joinList') joinListBtn.classList.add('active');
-        else if (sectionId === 'shoppingList') shoppingListBtn.classList.add('active');
-        else if (sectionId === 'suggestions') suggestionsBtn.classList.add('active');
-        else if (sectionId === 'buyLater') buyLaterBtn.classList.add('active');
-        else if (sectionId === 'categories') categoriesBtn.classList.add('active');
-        else if (sectionId === 'settings') settingsBtn.classList.add('active');
-    }
-
-    // --- AUTHENTICATION LOGIC ---
-    async function updateAuthUI() {
-        const { data: { user } } = await supabase.auth.getUser();
-        currentUserId = user ? user.id : null;
-
-        if (currentUserId) {
-            authStatusDiv.textContent = `Connecté en tant que ${user.email} (ID: ${user.id})`;
-            signUpForm.style.display = 'none';
-            signInForm.style.display = 'none';
-            signOutBtn.style.display = 'inline-block'; // Show sign out button
-            // Load user-specific data after successful login
-            await loadUserLists();
-            await loadCategoriesFromSupabase(); // Load categories for this user/app
+      navigationButtons.forEach(button => {
+        if (button.dataset.section === sectionId) {
+          button.classList.add('active');
         } else {
-            authStatusDiv.textContent = 'Non connecté.';
-            signUpForm.style.display = 'block';
-            signInForm.style.display = 'block';
-            signOutBtn.style.display = 'none'; // Hide sign out button
-            userListsDisplayUl.innerHTML = ''; // Clear lists
-            shoppingListItemsUl.innerHTML = '<li>Veuillez vous connecter pour voir vos listes de courses.</li>';
-            currentListNameSpan.textContent = 'Aucune sélectionnée';
-            currentListId = null;
+          button.classList.remove('active');
         }
+      });
     }
 
-    signUpForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = signUpEmail.value;
-        const password = signUpPassword.value;
-        const username = signUpUsername.value;
+    // --- Gestion du Code de Partage ---
 
-        const { data, error } = await supabase.auth.signUp({ email, password });
-
-        if (error) {
-            alert(`Erreur d'inscription: ${error.message}`);
-        } else if (data.user) {
-            // Insérer le profil après l'inscription
-            const { error: profileError } = await supabase
-                .from('profiles')
-                .insert([{ id: data.user.id, username: username }]);
-            if (profileError) {
-                console.error("Erreur lors de la création du profil:", profileError.message);
-                alert("Inscription réussie, mais échec de la création du profil. Veuillez contacter l'administrateur.");
-                await supabase.auth.signOut(); // Déconnecter l'utilisateur si le profil ne peut pas être créé
-            } else {
-                alert('Inscription réussie! Veuillez vérifier votre email pour confirmer.');
-                signUpForm.reset();
-            }
-        }
-    });
-
-    signInForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = signInEmail.value;
-        const password = signInPassword.value;
-
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) {
-            alert(`Erreur de connexion: ${error.message}`);
-        } else {
-            alert('Connecté avec succès!');
-            signInForm.reset();
-        }
-    });
-
-    signOutBtn.addEventListener('click', async () => {
-        const { error } = await supabase.auth.signOut();
-        if (error) {
-            console.error('Erreur de déconnexion:', error.message);
-        } else {
-            alert('Déconnecté avec succès!');
-        }
-    });
-
-    supabase.auth.onAuthStateChange((event, session) => {
-        updateAuthUI();
-        if (event === 'SIGNED_IN' && session) {
-            console.log('User signed in:', session.user);
-            // Redirigez vers "Mes Listes" après connexion
-            showSection('myLists');
-        } else if (event === 'SIGNED_OUT') {
-            console.log('User signed out.');
-            showSection('authentication'); // Redirigez vers l'authentification après déconnexion
-        }
-    });
-
-    // --- LIST MANAGEMENT LOGIC ---
-
-    async function loadUserLists() {
-        if (!currentUserId) {
-            userListsDisplayUl.innerHTML = '<li>Connectez-vous pour voir vos listes.</li>';
-            return;
-        }
-
-        const { data, error } = await supabase
-            .from('list_members')
-            .select(`
-                list_id,
-                role,
-                lists (
-                    id,
-                    name,
-                    owner_id,
-                    share_code
-                )
-            `)
-            .eq('user_id', currentUserId);
-
-        if (error) {
-            console.error('Erreur lors du chargement des listes de l\'utilisateur :', error.message);
-            userListsDisplayUl.innerHTML = '<li>Erreur lors du chargement des listes.</li>';
-            return;
-        }
-
-        userLists = data.map(member => ({
-            ...member.lists,
-            role: member.role // Ajouter le rôle pour chaque liste
-        }));
-        displayUserLists();
-        // Si l'utilisateur a des listes et qu'aucune n'est sélectionnée, sélectionnez la première
-        if (userLists.length > 0 && !currentListId) {
-            selectList(userLists[0].id, userLists[0].name);
-        } else if (userLists.length === 0) {
-            shoppingListItemsUl.innerHTML = '<li>Vous n\'avez pas encore de listes. Créez-en une ou rejoignez-en une.</li>';
-            currentListNameSpan.textContent = 'Aucune sélectionnée';
-            currentListId = null;
-        }
+    // Met à jour l'en-tête X-Share-Code pour toutes les requêtes Supabase
+    function updateSupabaseHeaders(shareCode) {
+      if (shareCode) {
+        supabase.postgrest.headers['X-Share-Code'] = shareCode;
+      } else {
+        // Supprime l'en-tête si le code n'est pas défini
+        delete supabase.postgrest.headers['X-Share-Code'];
+      }
     }
 
-    function displayUserLists() {
-        userListsDisplayUl.innerHTML = '';
-        userLists.forEach(list => {
-            const li = document.createElement('li');
-            li.dataset.listId = list.id;
-            li.classList.toggle('active-list', list.id === currentListId);
-            li.innerHTML = `
-                <div>
-                    <strong>${list.name}</strong> (${list.role})
-                    ${list.owner_id === currentUserId ? ` <button class="generate-share-code-btn" data-list-id="${list.id}">Générer Code</button>` : ''}
-                </div>
-                ${list.share_code ? `<div class="share-code-display">Code: ${list.share_code}</div>` : ''}
-            `;
-            li.addEventListener('click', () => selectList(list.id, list.name));
-            userListsDisplayUl.appendChild(li);
-        });
+    // Tente de récupérer ou de créer une liste basée sur le code de partage
+    async function getOrCreateListByShareCode(shareCode) {
+        // Mettre à jour l'en-tête pour cette requête
+        updateSupabaseHeaders(shareCode);
 
-        // Add event listeners for generate share code buttons
-        document.querySelectorAll('.generate-share-code-btn').forEach(button => {
-            button.addEventListener('click', async (e) => {
-                e.stopPropagation(); // Prevent li click
-                const listId = e.target.dataset.listId;
-                await generateShareCode(listId);
-            });
-        });
-    }
-
-    async function selectList(listId, listName) {
-        currentListId = listId;
-        currentListNameSpan.textContent = listName;
-        // Mettre à jour l'état actif dans la liste des listes affichées
-        document.querySelectorAll('#userListsDisplay li').forEach(li => {
-            li.classList.toggle('active-list', li.dataset.listId === listId);
-        });
-        await loadShoppingList();
-        // Optionnel: Passer directement à la section de la liste de courses
-        showSection('shoppingList');
-    }
-
-    createListForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (!currentUserId) {
-            alert("Veuillez vous connecter pour créer une liste.");
-            return;
-        }
-        const newListName = newListNameInput.value.trim();
-        if (!newListName) return;
-
-        // 1. Créer la liste
-        const { data: listData, error: listError } = await supabase
-            .from('lists')
-            .insert([{ name: newListName, owner_id: currentUserId }])
-            .select();
-
-        if (listError) {
-            console.error('Erreur lors de la création de la liste:', listError.message);
-            alert("Erreur lors de la création de la liste.");
-            return;
-        }
-        const newListId = listData[0].id;
-
-        // 2. Ajouter l'utilisateur courant comme membre (propriétaire) de la liste
-        const { error: memberError } = await supabase
-            .from('list_members')
-            .insert([{ user_id: currentUserId, list_id: newListId, role: 'owner' }]);
-
-        if (memberError) {
-            console.error('Erreur lors de l\'ajout du membre à la liste:', memberError.message);
-            alert("Erreur lors de l'ajout de vous-même comme propriétaire de la liste.");
-            // Considérez de supprimer la liste si l'ajout de membre échoue
-            await supabase.from('lists').delete().eq('id', newListId);
-            return;
-        }
-
-        alert(`Liste "${newListName}" créée avec succès!`);
-        newListNameInput.value = '';
-        await loadUserLists(); // Recharger les listes de l'utilisateur
-        selectList(newListId, newListName); // Sélectionner la nouvelle liste
-    });
-
-    async function generateShareCode(listId) {
-        const listToUpdate = userLists.find(l => l.id === listId);
-        if (!listToUpdate || listToUpdate.owner_id !== currentUserId) {
-            alert("Vous n'êtes pas le propriétaire de cette liste.");
-            return;
-        }
-
-        if (listToUpdate.share_code) {
-            alert(`Code de partage déjà existant pour cette liste : ${listToUpdate.share_code}`);
-            return;
-        }
-
-        const newShareCode = crypto.randomUUID(); // Génère un UUID unique comme code
-
-        const { data, error } = await supabase
-            .from('lists')
-            .update({ share_code: newShareCode })
-            .eq('id', listId)
-            .select();
-
-        if (error) {
-            console.error('Erreur lors de la génération du code de partage:', error.message);
-            alert("Erreur lors de la génération du code de partage.");
-        } else {
-            alert(`Nouveau code de partage généré pour "${listToUpdate.name}": ${newShareCode}`);
-            await loadUserLists(); // Recharger les listes pour afficher le code
-        }
-    }
-
-    joinListForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (!currentUserId) {
-            alert("Veuillez vous connecter pour rejoindre une liste.");
-            return;
-        }
-        const code = shareCodeInput.value.trim();
-        if (!code) return;
-
-        // 1. Trouver la liste par le code de partage
-        const { data: listData, error: listError } = await supabase
+        // 1. Essayer de récupérer la liste existante
+        let { data: list, error: fetchError } = await supabase
             .from('lists')
             .select('id, name')
-            .eq('share_code', code)
+            .eq('share_code', shareCode)
             .single();
 
-        if (listError || !listData) {
-            alert("Code de partage invalide ou liste introuvable.");
-            console.error("Erreur ou liste introuvable pour le code:", error ? error.message : "Pas de données");
-            return;
+        if (fetchError && fetchError.code === 'PGRST116') { // PGRST116 = pas de ligne trouvée
+            // 2. Si la liste n'existe pas, la créer
+            console.log(`Aucune liste trouvée pour le code ${shareCode}. Création d'une nouvelle liste.`);
+            displayMessage(`Création de la liste pour le code ${shareCode}...`, 'info');
+
+            const { data: newlist, error: createError } = await supabase
+                .from('lists')
+                .insert({ name: `Liste #${shareCode}`, share_code: shareCode })
+                .select('id, name')
+                .single();
+
+            if (createError) {
+                console.error('Erreur lors de la création de la liste:', createError.message);
+                displayMessage('Erreur lors de la création de la liste: ' + createError.message, 'error');
+                return null;
+            }
+            list = newlist;
+        } else if (fetchError) {
+            console.error('Erreur lors de la récupération de la liste:', fetchError.message);
+            displayMessage('Erreur lors de la récupération de la liste: ' + fetchError.message, 'error');
+            return null;
         }
+        
+        currentListId = list.id;
+        currentShareCode = shareCode; // Met à jour le code de partage global
+        displayShareCodeSpan.textContent = currentShareCode; // Met à jour l'affichage
+        localStorage.setItem('active_share_code', shareCode); // Sauvegarde dans le localStorage
 
-        const targetListId = listData.id;
-        const targetListName = listData.name;
-
-        // Vérifier si l'utilisateur est déjà membre de cette liste
-        const isMember = userLists.some(list => list.id === targetListId);
-        if (isMember) {
-            alert(`Vous êtes déjà membre de la liste "${targetListName}".`);
-            selectList(targetListId, targetListName);
-            return;
-        }
-
-        // 2. Ajouter l'utilisateur comme membre (éditeur par défaut, ou rôle à choisir)
-        const { error: memberError } = await supabase
-            .from('list_members')
-            .insert([{ user_id: currentUserId, list_id: targetListId, role: 'editor' }]); // Rôle par défaut
-
-        if (memberError) {
-            console.error('Erreur lors de l\'ajout du membre à la liste:', memberError.message);
-            alert("Erreur lors de la tentative de rejoindre la liste.");
-            return;
-        }
-
-        alert(`Vous avez rejoint la liste "${targetListName}" avec succès!`);
-        shareCodeInput.value = '';
-        await loadUserLists(); // Recharger les listes de l'utilisateur
-        selectList(targetListId, targetListName); // Sélectionner la liste rejointe
-    });
-
-    // --- SHOPPING LIST ITEMS LOGIC ---
-
-    function setupRealtimeListener() {
-        console.log("Configuration de l'écouteur Supabase Realtime...");
-        supabase.channel('public:shopping_items')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'shopping_items' }, payload => {
-                console.log('Changement Realtime reçu !', payload);
-                if (currentListId && payload.new && payload.new.list_id === currentListId) {
-                    loadShoppingList(); // Recharge la liste si le changement concerne la liste active
-                } else if (currentListId && payload.old && payload.old.list_id === currentListId && payload.eventType === 'DELETE') {
-                    loadShoppingList(); // Aussi pour les suppressions
-                }
-            })
-            .subscribe();
+        displayMessage(`Liste "${list.name}" chargée avec succès !`, 'success');
+        return list.id;
     }
 
+    // Demande à l'utilisateur d'entrer un code de partage
+    async function promptForShareCode(isInitialLoad = true) {
+        let shareCode = prompt("Veuillez entrer le code de votre liste:");
+        shareCode = shareCode ? shareCode.trim() : null;
+
+        if (shareCode) {
+            const listId = await getOrCreateListByShareCode(shareCode);
+            if (listId) {
+                console.log(`Liste initialisée avec ID: ${listId} pour le code: ${shareCode}`);
+                loadShoppingList();
+                setupRealtimeListener(listId);
+            } else {
+                displayMessage('Impossible de charger ou créer la liste pour le code fourni.', 'error');
+                if (isInitialLoad) {
+                    promptForShareCode(true); // Redemander le code si échec initial
+                }
+            }
+        } else {
+            displayMessage('Un code de liste est nécessaire pour continuer.', 'error');
+            if (isInitialLoad) {
+                promptForShareCode(true); // Redemander le code si initial et annulé
+            }
+        }
+    }
+
+    // Change le code de partage depuis les paramètres
+    async function changeShareCode() {
+      let newShareCode = shareCodeInput.value.trim();
+      if (!newShareCode) {
+          displayMessage('Veuillez entrer un nouveau code de liste.', 'error', settingsMessage);
+          return;
+      }
+      if (newShareCode === currentShareCode) {
+          displayMessage('Ceci est déjà votre code de liste actuel.', 'info', settingsMessage);
+          return;
+      }
+
+      const listId = await getOrCreateListByShareCode(newShareCode);
+      if (listId) {
+          displayMessage(`Basculé vers la liste avec le code: ${newShareCode}`, 'success', settingsMessage);
+          loadShoppingList();
+          setupRealtimeListener(listId);
+          showSection('shoppingList'); // Revenir à la liste principale
+      } else {
+          displayMessage('Impossible de basculer vers la liste avec ce code.', 'error', settingsMessage);
+      }
+    }
+
+    // --- Fonctions de Gestion de Liste (modifiées pour utiliser currentListId) ---
+
     async function loadShoppingList() {
-        if (!currentListId) {
-            shoppingListItemsUl.innerHTML = '<li>Veuillez sélectionner ou créer une liste.</li>';
-            currentListNameSpan.textContent = 'Aucune sélectionnée';
+      if (!currentListId) {
+        shoppingList.innerHTML = '<li style="text-align: center;">Veuillez d\'abord entrer un code de liste.</li>';
+        return;
+      }
+
+      // S'assurer que l'en-tête est défini avant la requête
+      updateSupabaseHeaders(currentShareCode);
+
+      const { data, error } = await supabase
+        .from('shopping_items')
+        .select('*')
+        .eq('list_id', currentListId) // Filtre par l'ID UUID de la liste
+        .order('category', { ascending: true })
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Erreur de chargement des articles:', error.message);
+        displayMessage('Erreur de chargement des articles.', 'error');
+        return;
+      }
+
+      displayShoppingList(data);
+      loadSuggestions();
+    }
+
+    function displayShoppingList(items) {
+      shoppingList.innerHTML = '';
+      if (items.length === 0) {
+        shoppingList.innerHTML = '<li style="text-align: center;">Votre liste est vide. Ajoutez des articles !</li>';
+        return;
+      }
+
+      const categorizedItems = {};
+      const categoryOrder = JSON.parse(localStorage.getItem('category_order')) || getCategories();
+
+      categoryOrder.forEach(category => {
+        categorizedItems[category] = [];
+      });
+
+      items.forEach(item => {
+        if (categorizedItems[item.category]) {
+          categorizedItems[item.category].push(item);
+        } else {
+          // Pour les catégories non triées explicitement, ajoutez-les à la fin
+          if (!categorizedItems['Autres']) {
+            categorizedItems['Autres'] = [];
+          }
+          categorizedItems['Autres'].push(item);
+        }
+      });
+
+      for (const category of categoryOrder) {
+        if (categorizedItems[category] && categorizedItems[category].length > 0) {
+          const categoryHeader = document.createElement('h3');
+          categoryHeader.textContent = category;
+          shoppingList.appendChild(categoryHeader);
+
+          categorizedItems[category].forEach(item => {
+            const li = document.createElement('li');
+            li.dataset.id = item.id;
+            li.className = item.purchased ? 'purchased' : '';
+            li.innerHTML = `
+              <span class="item-info">
+                ${item.name} (${item.quantity})
+              </span>
+              <div class="item-actions">
+                <button onclick="togglePurchased('${item.id}', ${item.purchased})">
+                  <i class="fas ${item.purchased ? 'fa-undo' : 'fa-check'}"></i>
+                </button>
+                <button onclick="moveToBuyLater('${item.id}')" style="background-color: #f0ad4e;"><i class="fas fa-archive"></i></button>
+                <button onclick="deleteItem('${item.id}')" style="background-color: #dc3545;"><i class="fas fa-trash"></i></button>
+              </div>
+            `;
+            shoppingList.appendChild(li);
+          });
+        }
+      }
+      // Add 'Autres' if it exists and wasn't explicitly ordered
+      if (categorizedItems['Autres'] && categorizedItems['Autres'].length > 0) {
+        const categoryHeader = document.createElement('h3');
+        categoryHeader.textContent = 'Autres';
+        shoppingList.appendChild(categoryHeader);
+        categorizedItems['Autres'].forEach(item => {
+          const li = document.createElement('li');
+          li.dataset.id = item.id;
+          li.className = item.purchased ? 'purchased' : '';
+          li.innerHTML = `
+            <span class="item-info">
+              ${item.name} (${item.quantity})
+            </span>
+            <div class="item-actions">
+              <button onclick="togglePurchased('${item.id}', ${item.purchased})">
+                <i class="fas ${item.purchased ? 'fa-undo' : 'fa-check'}"></i>
+              </button>
+              <button onclick="moveToBuyLater('${item.id}')" style="background-color: #f0ad4e;"><i class="fas fa-archive"></i></button>
+              <button onclick="deleteItem('${item.id}')" style="background-color: #dc3545;"><i class="fas fa-trash"></i></button>
+            </div>
+          `;
+          shoppingList.appendChild(li);
+        });
+      }
+    }
+
+    async function addItem() {
+      if (!currentListId) {
+        displayMessage('Veuillez sélectionner une liste avant d\'ajouter des articles.', 'error');
+        return;
+      }
+
+      const itemName = itemInput.value.trim();
+      const quantity = parseInt(quantityInput.value);
+      const category = categorySelect.value;
+
+      if (!itemName || isNaN(quantity) || quantity <= 0) {
+        displayMessage('Veuillez remplir le nom et la quantité de l\'article.', 'error');
+        return;
+      }
+
+      // S'assurer que l'en-tête est défini avant la requête
+      updateSupabaseHeaders(currentShareCode);
+
+      const { data, error } = await supabase
+        .from('shopping_items')
+        .insert({ name: itemName, quantity: quantity, category: category, list_id: currentListId });
+
+      if (error) {
+        console.error('Erreur d\'ajout d\'article:', error.message);
+        displayMessage('Erreur d\'ajout d\'article.', 'error');
+        return;
+      }
+
+      itemInput.value = '';
+      quantityInput.value = '1';
+      categorySelect.value = getCategories()[0]; // Reset to first category
+      loadShoppingList(); // Recharger la liste pour afficher le nouvel article
+      addSuggestion(itemName); // Ajouter à la liste de suggestions
+      displayMessage('Article ajouté avec succès !', 'success');
+    }
+
+    async function togglePurchased(id, currentStatus) {
+      if (!currentListId) return;
+
+      // S'assurer que l'en-tête est défini avant la requête
+      updateSupabaseHeaders(currentShareCode);
+
+      const { data, error } = await supabase
+        .from('shopping_items')
+        .update({ purchased: !currentStatus })
+        .eq('id', id);
+
+      if (error) {
+        console.error('Erreur de mise à jour de l\'article:', error.message);
+        displayMessage('Erreur de mise à jour de l\'article.', 'error');
+        return;
+      }
+
+      loadShoppingList(); // Recharger la liste pour refléter le changement
+    }
+
+    async function deleteItem(id) {
+      if (!currentListId) return;
+
+      if (!confirm('Êtes-vous sûr de vouloir supprimer cet article ?')) {
+        return;
+      }
+
+      // S'assurer que l'en-tête est défini avant la requête
+      updateSupabaseHeaders(currentShareCode);
+
+      const { data, error } = await supabase
+        .from('shopping_items')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Erreur de suppression d\'article:', error.message);
+        displayMessage('Erreur de suppression d\'article.', 'error');
+        return;
+      }
+
+      displayMessage('Article supprimé avec succès !', 'success');
+      loadShoppingList(); // Recharger la liste
+    }
+
+    // --- Fonctions Realtime ---
+    async function setupRealtimeListener(listId) {
+        // Désabonnement de l'ancien canal si il existe
+        if (shoppingListChannel) {
+            await supabase.removeChannel(shoppingListChannel);
+            shoppingListChannel = null;
+        }
+
+        if (!listId) {
+            console.warn('Impossible de configurer le listener Realtime sans un ID de liste.');
             return;
         }
-        console.log(`Chargement des articles pour la liste: ${currentListId}...`);
+
+        shoppingListChannel = supabase.channel(`shopping_items_list_${listId}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: '*', // 'INSERT', 'UPDATE', 'DELETE'
+                    schema: 'public',
+                    table: 'shopping_items',
+                    filter: `list_id=eq.${listId}` // Filtrer par l'ID UUID de la liste
+                },
+                (payload) => {
+                    console.log('Changement reçu!', payload);
+                    // Recharger la liste principale pour refléter le changement
+                    // Ou mettre à jour le DOM de manière plus granulaire si nécessaire
+                    loadShoppingList();
+                    loadBuyLaterList();
+                }
+            )
+            .subscribe();
+
+        console.log(`Listener Realtime configuré pour la liste ID: ${listId}`);
+    }
+
+    // --- Fonctions pour "Acheter Plus Tard" (nécessitent de gérer la "status" ou "archive" colonne) ---
+    async function moveToBuyLater(id) {
+        if (!currentListId) return;
+
+        // S'assurer que l'en-tête est défini avant la requête
+        updateSupabaseHeaders(currentShareCode);
+
+        // Cette fonction nécessiterait une colonne 'status' ou 'archived' dans shopping_items
+        // Pour l'exemple, nous allons simplement le supprimer de la liste principale et l'ajouter à une "liste acheter plus tard" locale
+        // Dans une vraie application, vous changeriez le statut dans la DB, ou le déplaceriez vers une autre table/liste.
+        // Pour l'instant, je vais juste le supprimer de la liste principale
+        if (!confirm('Voulez-vous déplacer cet article dans "Acheter Plus Tard" (ce qui le supprimera de la liste principale) ?')) {
+            return;
+        }
 
         const { data, error } = await supabase
             .from('shopping_items')
-            .select('id, name, quantity, category, purchased')
-            .eq('list_id', currentListId) // Filtre par l'ID de la liste active
-            .order('created_at', { ascending: false });
+            .delete()
+            .eq('id', id);
 
         if (error) {
-            console.error('Erreur lors du chargement de la liste de courses :', error.message);
-            shoppingListItemsUl.innerHTML = '<li>Erreur lors du chargement des articles.</li>';
+            console.error('Erreur de déplacement de l\'article:', error.message);
+            displayMessage('Erreur de déplacement de l\'article.', 'error');
             return;
         }
-
-        shoppingListItemsUl.innerHTML = '';
-        if (data.length === 0) {
-            shoppingListItemsUl.innerHTML = '<li>Cette liste est vide. Ajoutez un article !</li>';
-        }
-
-        data.forEach(item => {
-            const li = document.createElement('li');
-            li.dataset.itemId = item.id;
-            li.classList.toggle('purchased', item.purchased);
-
-            li.innerHTML = `
-                <div class="item-info">
-                    <strong>${item.name}</strong>
-                    <span>Quantité: ${item.quantity} ${item.category ? `(${item.category})` : ''}</span>
-                </div>
-                <div class="item-actions">
-                    <button class="purchase-btn" data-id="${item.id}">${item.purchased ? 'Annuler Achat' : 'Acheter'}</button>
-                    <button class="edit-btn" data-id="${item.id}">Modifier</button>
-                    <button class="delete-btn" data-id="${item.id}">Supprimer</button>
-                </div>
-            `;
-
-            li.querySelector('.purchase-btn').addEventListener('click', async (e) => {
-                const itemId = e.target.dataset.id;
-                const { error: updateError } = await supabase
-                    .from('shopping_items')
-                    .update({ purchased: !item.purchased })
-                    .eq('id', itemId);
-                if (updateError) console.error('Erreur lors de la mise à jour de l\'article :', updateError.message);
-                // loadShoppingList() sera appelée par le Realtime listener
-            });
-
-            li.querySelector('.delete-btn').addEventListener('click', async (e) => {
-                const itemId = e.target.dataset.id;
-                const { error: deleteError } = await supabase
-                    .from('shopping_items')
-                    .delete()
-                    .eq('id', itemId);
-                if (deleteError) console.error('Erreur lors de la suppression de l\'article :', deleteError.message);
-                // loadShoppingList() sera appelée par le Realtime listener
-            });
-
-            // Ajoutez la fonctionnalité d'édition ici
-            // li.querySelector('.edit-btn').addEventListener('click', ...)
-
-            shoppingListItemsUl.appendChild(li);
-        });
+        displayMessage('Article déplacé dans "Acheter Plus Tard" (supprimé de la liste principale).', 'success');
+        loadShoppingList(); // Recharger la liste principale
+        loadBuyLaterList(); // Recharger la liste "acheter plus tard" (qui est factice ici)
     }
 
-    itemForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        if (!currentListId) {
-            alert("Veuillez sélectionner ou créer une liste avant d'ajouter des articles.");
-            return;
-        }
+    function loadBuyLaterList() {
+        // Cette fonction serait liée à une vraie base de données pour une liste "acheter plus tard"
+        // Pour l'instant, elle reste une démo
+        buyLaterList.innerHTML = '<li style="text-align: center; color: #888;">Cette liste est pour l\'exemple. Les articles y seraient déplacés depuis la liste principale.</li>';
+    }
 
-        const itemName = itemNameInput.value.trim();
-        const itemQuantity = parseInt(itemQuantityInput.value, 10);
-        const itemCategory = itemCategorySelect.value;
 
-        if (!itemName) {
-            alert("Veuillez entrer le nom de l'article.");
-            return;
-        }
+    // --- Fonctions de Gestion des Catégories ---
+    function getCategories() {
+      return JSON.parse(localStorage.getItem('user_categories')) || initialDefaultCategories;
+    }
 
-        try {
-            const { error } = await supabase
-                .from('shopping_items')
-                .insert([
-                    {
-                        name: itemName,
-                        quantity: itemQuantity,
-                        category: itemCategory,
-                        list_id: currentListId, // Assurez-vous que l'article est lié à la liste active
-                        purchased: false
-                    }
-                ]);
+    function saveCategories(categories) {
+      localStorage.setItem('user_categories', JSON.stringify(categories));
+      localStorage.setItem('category_order', JSON.stringify(categories)); // Mettre à jour l'ordre aussi
+      updateAllCategorySelects();
+      loadCategoryOrder();
+    }
 
-            if (error) {
-                console.error('Erreur lors de l\'ajout de l\'article :', error.message);
-                alert("Erreur lors de l'ajout de l'article : " + error.message);
+    function addCategory() {
+      const newCategoryName = newCategoryInput.value.trim();
+      if (newCategoryName && !getCategories().includes(newCategoryName)) {
+        const updatedCategories = [...getCategories(), newCategoryName];
+        saveCategories(updatedCategories);
+        newCategoryInput.value = '';
+        displayMessage('Catégorie ajoutée !', 'success', categoriesManagementSection.querySelector('.message'));
+      } else {
+        displayMessage('Nom de catégorie invalide ou déjà existante.', 'error', categoriesManagementSection.querySelector('.message'));
+      }
+    }
+
+    function deleteCategory(categoryToDelete) {
+      if (confirm(`Êtes-vous sûr de vouloir supprimer la catégorie "${categoryToDelete}" ?`)) {
+        const updatedCategories = getCategories().filter(cat => cat !== categoryToDelete);
+        saveCategories(updatedCategories);
+        displayMessage('Catégorie supprimée !', 'success', categoriesManagementSection.querySelector('.message'));
+      }
+    }
+
+    function updateCategoryListDisplay() {
+      categoryListUl.innerHTML = '';
+      getCategories().forEach(category => {
+        const li = document.createElement('li');
+        li.textContent = category;
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Supprimer';
+        deleteButton.style.backgroundColor = '#dc3545';
+        deleteButton.style.width = 'auto';
+        deleteButton.style.marginLeft = '10px';
+        deleteButton.onclick = () => deleteCategory(category);
+        li.appendChild(deleteButton);
+        categoryListUl.appendChild(li);
+      });
+    }
+
+    function updateAllCategorySelects() {
+      const selects = document.querySelectorAll('select#categorySelect');
+      const categories = getCategories();
+      selects.forEach(select => {
+        select.innerHTML = '';
+        categories.forEach(category => {
+          const option = document.createElement('option');
+          option.value = category;
+          option.textContent = category;
+          select.appendChild(option);
+        });
+      });
+    }
+
+    // Drag and drop categories
+    function loadCategoryOrder() {
+      const categories = JSON.parse(localStorage.getItem('category_order')) || getCategories();
+      categoryListUl.innerHTML = '';
+      categories.forEach(category => {
+        const li = document.createElement('li');
+        li.textContent = category;
+        li.draggable = true;
+        li.dataset.category = category;
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Supprimer';
+        deleteButton.style.backgroundColor = '#dc3545';
+        deleteButton.style.width = 'auto';
+        deleteButton.style.marginLeft = '10px';
+        deleteButton.onclick = (event) => {
+            event.stopPropagation(); // Empêche le dragstart si on clique sur le bouton
+            deleteCategory(category);
+        };
+        li.appendChild(deleteButton);
+        categoryListUl.appendChild(li);
+      });
+      addDragDropListeners();
+    }
+
+    function addDragDropListeners() {
+      let draggedItem = null;
+      categoryListUl.querySelectorAll('li').forEach(item => {
+        item.addEventListener('dragstart', (e) => {
+          draggedItem = item;
+          setTimeout(() => item.style.display = 'none', 0);
+        });
+
+        item.addEventListener('dragend', () => {
+          setTimeout(() => draggedItem.style.display = 'flex', 0);
+          draggedItem = null;
+        });
+
+        item.addEventListener('dragover', (e) => {
+          e.preventDefault(); // Permet le drop
+        });
+
+        item.addEventListener('dragenter', (e) => {
+          e.preventDefault();
+          if (item !== draggedItem) {
+            item.style.borderTop = '2px solid #E75480';
+          }
+        });
+
+        item.addEventListener('dragleave', () => {
+          item.style.borderTop = '';
+        });
+
+        item.addEventListener('drop', (e) => {
+          e.preventDefault();
+          item.style.borderTop = '';
+          if (item !== draggedItem) {
+            const allItems = Array.from(categoryListUl.querySelectorAll('li'));
+            const draggedIndex = allItems.indexOf(draggedItem);
+            const targetIndex = allItems.indexOf(item);
+
+            if (draggedIndex < targetIndex) {
+              item.parentNode.insertBefore(draggedItem, item.nextSibling);
             } else {
-                console.log('Article ajouté avec succès.');
-                itemNameInput.value = '';
-                itemQuantityInput.value = '1';
-                itemCategorySelect.value = '';
-                // loadShoppingList() sera appelée par le Realtime listener
+              item.parentNode.insertBefore(draggedItem, item);
             }
-        } catch (e) {
-            console.error("Une erreur inattendue est survenue :", e);
-            alert("Une erreur inattendue est survenue.");
-        }
-    });
-
-    // --- CATEGORIES LOGIC ---
-    // Pour l'instant, les catégories sont gérées en localstorage ou peuvent être une table Supabase
-    const initialDefaultCategories = ['Fruits & Légumes', 'Produits Laitiers', 'Viandes & Poissons', 'Boulangerie', 'Épicerie', 'Surgelés', 'Boissons', 'Maison & Entretien', 'Hygiène & Beauté', 'Autres'];
-
-    async function loadCategoriesFromSupabase() {
-        // Idéalement, les catégories devraient être stockées dans une table Supabase,
-        // potentiellement par utilisateur ou globales. Pour simplifier, nous utiliserons
-        // les catégories par défaut ou celles du localStorage.
-        // Si vous voulez des catégories par utilisateur, liez-les à `profiles.id`
-        // Si globales, liez-les à l'application.
-
-        let categories = JSON.parse(localStorage.getItem('user_categories') || '[]');
-        if (categories.length === 0) { // Si pas de catégories dans localStorage, utilisez les défauts
-            categories = initialDefaultCategories;
-            localStorage.setItem('user_categories', JSON.stringify(categories));
-        }
-        updateAllCategorySelects(categories);
-    }
-
-    function updateAllCategorySelects(categories) {
-        itemCategorySelect.innerHTML = '<option value="">Sélectionner une catégorie</option>';
-        categories.forEach(cat => {
-            const option = document.createElement('option');
-            option.value = cat;
-            option.textContent = cat;
-            itemCategorySelect.appendChild(option);
+          }
         });
+      });
     }
 
-    // --- OTHER SECTIONS PLACEHOLDERS ---
-    function loadSuggestions() { console.log("Chargement des suggestions..."); }
-    function loadBuyLaterList() { console.log("Chargement de la liste 'Acheter Plus Tard'..."); }
-    function loadCategoryOrder() { console.log("Chargement de l'ordre des catégories..."); }
+    function saveCategoryOrder() {
+      const orderedCategories = Array.from(categoryListUl.querySelectorAll('li')).map(li => li.dataset.category);
+      localStorage.setItem('category_order', JSON.stringify(orderedCategories));
+      displayMessage('Ordre des catégories sauvegardé !', 'success', categoriesManagementSection.querySelector('.message'));
+      updateAllCategorySelects(); // Mettre à jour les selects après avoir sauvegardé l'ordre
+    }
 
+    // --- Suggestions pour les Noms d'Articles ---
+    function addSuggestion(name) {
+      let suggestions = JSON.parse(localStorage.getItem('item_suggestions')) || [];
+      if (!suggestions.includes(name)) {
+        suggestions.push(name);
+        localStorage.setItem('item_suggestions', JSON.stringify(suggestions));
+      }
+    }
+
+    function loadSuggestions() {
+      const suggestions = JSON.parse(localStorage.getItem('item_suggestions')) || [];
+      suggestionsDatalist.innerHTML = '';
+      suggestions.forEach(suggestion => {
+        const option = document.createElement('option');
+        option.value = suggestion;
+        suggestionsDatalist.appendChild(option);
+      });
+    }
 
     // --- Initialisation au chargement de la page ---
     window.addEventListener('load', async () => {
-      // Configuration initiale des catégories (peut être remplacé par un chargement Supabase)
-      await loadCategoriesFromSupabase();
+        // Initialisation des catégories
+        if (!localStorage.getItem('user_categories')) {
+            localStorage.setItem('user_categories', JSON.stringify(initialDefaultCategories));
+        }
+        if (!localStorage.getItem('category_order')) {
+            localStorage.setItem('category_order', JSON.stringify(getCategories()));
+        }
 
-      // IMPORTANT : Initialise le listener Realtime de Supabase
-      setupRealtimeListener();
+        updateAllCategorySelects();
+        loadSuggestions();
+        loadBuyLaterList(); // Cette liste reste locale / factice pour l'instant
+        loadCategoryOrder(); 
+        
+        // --- NOUVELLE LOGIQUE D'INITIALISATION SANS AUTH ---
+        const storedShareCode = localStorage.getItem('active_share_code');
+        if (storedShareCode) {
+            shareCodeInput.value = storedShareCode; // Pré-remplit l'input des paramètres
+            await getOrCreateListByShareCode(storedShareCode);
+            if (currentListId) {
+                loadShoppingList();
+                setupRealtimeListener(currentListId);
+            } else {
+                // Si le chargement initial échoue, demander à nouveau
+                promptForShareCode(true);
+            }
+        } else {
+            promptForShareCode(true); // Demander le code au premier chargement
+        }
 
-      // Vérifie l'état d'authentification et met à jour l'UI
-      await updateAuthUI();
-
-      // Gérer l'affichage initial
-      showSection(currentUserId ? 'myLists' : 'authentication');
-
-      // S'assurer que les options sont cachées au chargement initial et que la flèche pointe vers le bas
-      navigationButtonsContainer.classList.remove('show-options');
-      toggleOptionsIcon.classList.remove('fa-chevron-up');
-      toggleOptionsIcon.classList.add('fa-chevron-down');
+        showSection('shoppingList'); // Afficher la section de la liste principale par défaut
     });
 
-    // --- Event Listeners for Navigation Buttons ---
-    authBtn.addEventListener('click', () => showSection('authentication'));
-    myListsBtn.addEventListener('click', () => showSection('myLists'));
-    joinListBtn.addEventListener('click', () => showSection('joinList'));
-    shoppingListBtn.addEventListener('click', () => showSection('shoppingList'));
-    suggestionsBtn.addEventListener('click', () => loadSuggestions()); // Should also show section
-    buyLaterBtn.addEventListener('click', () => loadBuyLaterList()); // Should also show section
-    categoriesBtn.addEventListener('click', () => showSection('categories'));
-    settingsBtn.addEventListener('click', () => showSection('settings'));
 
-    document.getElementById('toggleOptions').addEventListener('click', () => {
-        const isShowing = navigationButtonsContainer.classList.contains('show-options');
-        if (!isShowing) {
-            navigationButtonsContainer.classList.add('show-options');
-            toggleOptionsIcon.classList.remove('fa-chevron-down');
-            toggleOptionsIcon.classList.add('fa-chevron-up');
-        } else {
-            navigationButtonsContainer.classList.remove('show-options');
-            toggleOptionsIcon.classList.remove('fa-chevron-up');
-            toggleOptionsIcon.classList.add('fa-chevron-down');
-            if (!shoppingListSection.classList.contains('active')) {
-                showSection('shoppingList'); // Retour à la liste par défaut si les options se ferment
-            }
-        }
+    // --- Listeners pour la navigation ---
+    navigationButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        showSection(button.dataset.section);
+      });
     });
 
   </script>
