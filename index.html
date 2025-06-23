@@ -1119,143 +1119,146 @@
 
     // --- Event Listeners ---
     document.addEventListener('DOMContentLoaded', async () => {
-      // Initialize Supabase client
-      supabase = Supabase.createClient(supabaseUrl, supabaseKey); // CORRECTED: Changed supabaseJs.createClient to Supabase.createClient
+      // Added a small delay to ensure Supabase global object is fully available.
+      setTimeout(async () => {
+        // Initialize Supabase client
+        supabase = Supabase.createClient(supabaseUrl, supabaseKey); 
 
-      if (!supabase) {
-          console.error("Supabase client failed to initialize.");
-          alert("Erreur critique: La connexion à la base de données Supabase a échoué. Veuillez recharger la page.");
-          return;
-      }
-
-      // --- CODE MODIFIÉ : Attendre que supabase.rest soit prêt ---
-      let attempts = 0;
-      const maxAttempts = 20; // Essayer jusqu'à 20 fois
-      const delayMs = 50;     // Attendre 50ms entre chaque tentative
-
-      while (!supabase.rest && attempts < maxAttempts) {
-          console.log(`Attente de supabase.rest (tentative ${attempts + 1}/${maxAttempts})...`);
-          await new Promise(resolve => setTimeout(resolve, delayMs));
-          attempts++;
-      }
-
-      if (supabase.rest) {
-          console.log("supabase.rest est maintenant prêt !");
-          // Initialisation des données locales (categories, etc.)
-          if (!localStorage.getItem('user_categories')) {
-              localStorage.setItem('user_categories', JSON.stringify(initialDefaultCategories));
-          }
-          if (!localStorage.getItem('category_order')) {
-              localStorage.setItem('category_order', JSON.stringify(getCategories()));
-          }
-
-          updateAllCategorySelects();
-          loadCategoryOrder(); // Load category order and render lists
-          renderManageCategoryList(); // Render manage categories list
-
-          // Prompt for share code as soon as the page loads, which will then load lists from Supabase
-          // Check if a share code is in localStorage, otherwise generate one
-          let initialShareCode = localStorage.getItem('last_share_code');
-          if (!initialShareCode) {
-              initialShareCode = generateShareCode();
-              localStorage.setItem('last_share_code', initialShareCode);
-          }
-          shareCodeInput.value = initialShareCode;
-          await getOrCreateListByShareCode(initialShareCode);
-
-          showSection('shoppingListSection'); // Ensure initial section is shown
-          // Ensure options are visible on initial load
-          navigationButtonsContainer.classList.add('show-options');
-          toggleOptionsIcon.classList.remove('fa-chevron-down');
-          toggleOptionsIcon.classList.add('fa-chevron-up');
-      } else {
-          console.error("Erreur: supabase.rest n'est pas devenu prêt après plusieurs tentatives. Impossible de démarrer l'application.");
-          alert("Erreur critique: La connexion à la base de données Supabase a échoué après plusieurs tentatives. Veuillez recharger la page ou vérifier votre connexion.");
-          return;
-      }
-
-      // Existing event listeners
-      shoppingForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const itemName = newItemInput.value.trim();
-        const itemQuantity = 1; // Default quantity
-        const itemCategory = suggestionCategorySelect.value; // Use the value from the suggestion category select
-        if (itemName) {
-          addItem(itemName, itemQuantity, itemCategory);
+        if (!supabase) {
+            console.error("Supabase client failed to initialize.");
+            alert("Erreur critique: La connexion à la base de données Supabase a échoué. Veuillez recharger la page.");
+            return;
         }
-      });
 
-      addSuggestionForm.addEventListener('submit', (e) => {
-          e.preventDefault();
-          const suggestionName = newSuggestionInput.value.trim();
-          const suggestionCat = suggestionCategorySelect.value;
-          if (suggestionName) {
-              addSuggestion(suggestionName, suggestionCat);
-          }
-      });
+        // --- CODE MODIFIÉ : Attendre que supabase.rest soit prêt ---
+        let attempts = 0;
+        const maxAttempts = 20; // Essayer jusqu'à 20 fois
+        const delayMs = 50;     // Attendre 50ms entre chaque tentative
 
-      categoryFilterSelect.addEventListener('change', loadSuggestions);
+        while (!supabase.rest && attempts < maxAttempts) {
+            console.log(`Attente de supabase.rest (tentative ${attempts + 1}/${maxAttempts})...`);
+            await new Promise(resolve => setTimeout(resolve, delayMs));
+            attempts++;
+        }
 
-      buyLaterForm.addEventListener('submit', (e) => { // Corrected: Changed addBuyLaterForm to buyLaterForm
-          e.preventDefault();
-          const buyLaterItemName = newBuyLaterItemInput.value.trim();
-          if (buyLaterItemName) {
-              addBuyLaterItem(buyLaterItemName);
-          }
-      });
+        if (supabase.rest) {
+            console.log("supabase.rest est maintenant prêt !");
+            // Initialisation des données locales (categories, etc.)
+            if (!localStorage.getItem('user_categories')) {
+                localStorage.setItem('user_categories', JSON.stringify(initialDefaultCategories));
+            }
+            if (!localStorage.getItem('category_order')) {
+                localStorage.setItem('category_order', JSON.stringify(getCategories()));
+            }
 
-      addCategoryForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const newCatName = newCategoryNameInput.value.trim();
-        if (newCatName && !getCategories().includes(newCatName)) {
-            const currentCategories = getCategories();
-            currentCategories.push(newCatName);
-            saveCategories(currentCategories);
             updateAllCategorySelects();
-            renderCategoryOrderList();
-            renderManageCategoryList();
-            newCategoryNameInput.value = '';
-        } else if (getCategories().includes(newCatName)) {
-            alert("Category already exists!");
+            loadCategoryOrder(); // Load category order and render lists
+            renderManageCategoryList(); // Render manage categories list
+
+            // Prompt for share code as soon as the page loads, which will then load lists from Supabase
+            // Check if a share code is in localStorage, otherwise generate one
+            let initialShareCode = localStorage.getItem('last_share_code');
+            if (!initialShareCode) {
+                initialShareCode = generateShareCode();
+                localStorage.setItem('last_share_code', initialShareCode);
+            }
+            shareCodeInput.value = initialShareCode;
+            await getOrCreateListByShareCode(initialShareCode);
+
+            showSection('shoppingListSection'); // Ensure initial section is shown
+            // Ensure options are visible on initial load
+            navigationButtonsContainer.classList.add('show-options');
+            toggleOptionsIcon.classList.remove('fa-chevron-down');
+            toggleOptionsIcon.classList.add('fa-chevron-up');
+        } else {
+            console.error("Erreur: supabase.rest n'est pas devenu prêt après plusieurs tentatives. Impossible de démarrer l'application.");
+            alert("Erreur critique: La connexion à la base de données Supabase a échoué après plusieurs tentatives. Veuillez recharger la page ou vérifier votre connexion.");
+            return;
         }
-      });
 
-      manageCategoryList.addEventListener('click', (e) => {
-          if (e.target.classList.contains('delete-category-btn') || e.target.closest('.delete-category-btn')) {
-              const btn = e.target.closest('.delete-category-btn');
-              const categoryToDelete = btn.dataset.category;
-              if (confirm(`Are you sure you want to delete the category "${categoryToDelete}"? This will not delete items already assigned to it.`)) {
-                  let currentCategories = getCategories();
-                  currentCategories = currentCategories.filter(cat => cat !== categoryToDelete);
-                  saveCategories(currentCategories);
-                  updateAllCategorySelects();
-                  renderCategoryOrderList();
-                  renderManageCategoryList();
-              }
+        // Existing event listeners
+        shoppingForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const itemName = newItemInput.value.trim();
+          const itemQuantity = 1; // Default quantity
+          const itemCategory = suggestionCategorySelect.value; // Use the value from the suggestion category select
+          if (itemName) {
+            addItem(itemName, itemQuantity, itemCategory);
           }
-      });
+        });
 
-      // Navigation button event listeners
-      showShoppingListBtn.addEventListener('click', () => showSection('shoppingListSection'));
-      showSuggestionsBtn.addEventListener('click', () => showSection('suggestionsSection'));
-      showCategoryOrderBtn.addEventListener('click', () => showSection('categoryOrderSection'));
-      showBuyLaterBtn.addEventListener('click', () => showSection('buyLaterSection'));
+        addSuggestionForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const suggestionName = newSuggestionInput.value.trim();
+            const suggestionCat = suggestionCategorySelect.value;
+            if (suggestionName) {
+                addSuggestion(suggestionName, suggestionCat);
+            }
+        });
 
-      toggleOptionsBtn.addEventListener('click', () => {
-          navigationButtonsContainer.classList.toggle('show-options');
-          toggleOptionsIcon.classList.toggle('fa-chevron-up');
-          toggleOptionsIcon.classList.toggle('fa-chevron-down');
-      });
+        categoryFilterSelect.addEventListener('change', loadSuggestions);
 
-      connectListBtn.addEventListener('click', async () => {
-          const code = shareCodeInput.value.trim();
-          if (code) {
-              localStorage.setItem('last_share_code', code); // Save last used share code
-              await getOrCreateListByShareCode(code);
-          } else {
-              alert("Please enter a share code or leave blank to create a new one.");
+        buyLaterForm.addEventListener('submit', (e) => { // Corrected: Changed addBuyLaterForm to buyLaterForm
+            e.preventDefault();
+            const buyLaterItemName = newBuyLaterItemInput.value.trim();
+            if (buyLaterItemName) {
+                addBuyLaterItem(buyLaterItemName);
+            }
+        });
+
+        addCategoryForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const newCatName = newCategoryNameInput.value.trim();
+          if (newCatName && !getCategories().includes(newCatName)) {
+              const currentCategories = getCategories();
+              currentCategories.push(newCatName);
+              saveCategories(currentCategories);
+              updateAllCategorySelects();
+              renderCategoryOrderList();
+              renderManageCategoryList();
+              newCategoryNameInput.value = '';
+          } else if (getCategories().includes(newCatName)) {
+              alert("Category already exists!");
           }
-      });
+        });
+
+        manageCategoryList.addEventListener('click', (e) => {
+            if (e.target.classList.contains('delete-category-btn') || e.target.closest('.delete-category-btn')) {
+                const btn = e.target.closest('.delete-category-btn');
+                const categoryToDelete = btn.dataset.category;
+                if (confirm(`Are you sure you want to delete the category "${categoryToDelete}"? This will not delete items already assigned to it.`)) {
+                    let currentCategories = getCategories();
+                    currentCategories = currentCategories.filter(cat => cat !== categoryToDelete);
+                    saveCategories(currentCategories);
+                    updateAllCategorySelects();
+                    renderCategoryOrderList();
+                    renderManageCategoryList();
+                }
+            }
+        });
+
+        // Navigation button event listeners
+        showShoppingListBtn.addEventListener('click', () => showSection('shoppingListSection'));
+        showSuggestionsBtn.addEventListener('click', () => showSection('suggestionsSection'));
+        showCategoryOrderBtn.addEventListener('click', () => showSection('categoryOrderSection'));
+        showBuyLaterBtn.addEventListener('click', () => showSection('buyLaterSection'));
+
+        toggleOptionsBtn.addEventListener('click', () => {
+            navigationButtonsContainer.classList.toggle('show-options');
+            toggleOptionsIcon.classList.toggle('fa-chevron-up');
+            toggleOptionsIcon.classList.toggle('fa-chevron-down');
+        });
+
+        connectListBtn.addEventListener('click', async () => {
+            const code = shareCodeInput.value.trim();
+            if (code) {
+                localStorage.setItem('last_share_code', code); // Save last used share code
+                await getOrCreateListByShareCode(code);
+            } else {
+                alert("Please enter a share code or leave blank to create a new one.");
+            }
+        });
+      }, 100); // Small delay of 100ms
     });
   </script>
 </body>
