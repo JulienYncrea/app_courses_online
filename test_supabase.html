@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Test</title>
+</head>
+<body>
+    <h1>Supabase Global Object Test</h1>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        console.log("Test: Démarrage de la vérification Supabase.");
+        // Vérifie si l'objet Supabase est défini
+        if (typeof Supabase !== 'undefined') {
+            console.log("Test: Supabase est défini ! Type:", typeof Supabase);
+            console.log("Test: Contenu de Supabase:", Supabase); // Affiche l'objet Supabase s'il est défini
+        } else {
+            console.error("Test: Supabase est UNDEFINED.");
+        }
+        console.log("Test: Fin de la vérification Supabase.");
+    </script>
+</body>
+</html>
