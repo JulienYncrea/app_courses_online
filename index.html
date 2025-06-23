@@ -92,9 +92,6 @@
     .item-actions .undo-btn:hover {
       background-color: #e68a00;
     }
-    .hidden {
-      display: none;
-    }
     .tab-buttons {
       display: flex;
       justify-content: center;
@@ -401,13 +398,15 @@
     function updateSupabaseHeaders(shareCode) {
         console.log("Dans updateSupabaseHeaders:");
         console.log("supabase est :", supabase);
-        console.log("supabase.postgrest est :", supabase ? supabase.postgrest : 'non défini');
+        // MODIFICATION ICI : supabase.rest au lieu de supabase.postgrest
+        console.log("supabase.rest est :", supabase ? supabase.rest : 'non défini');
 
-        if (supabase && supabase.postgrest) {
-            supabase.postgrest.headers['X-Share-Code'] = shareCode;
+        // MODIFICATION ICI : supabase.rest au lieu de supabase.postgrest
+        if (supabase && supabase.rest) {
+            supabase.rest.headers['X-Share-Code'] = shareCode;
             console.log(`Supabase headers updated with X-Share-Code: ${shareCode}`);
         } else {
-            console.warn("Supabase client non initialisé ou postgrest non prêt, impossible de mettre à jour les headers.");
+            console.warn("Supabase client non initialisé ou rest client non prêt, impossible de mettre à jour les headers.");
         }
     }
 
@@ -1132,27 +1131,27 @@
           return; // Arrêter l'exécution si Supabase n'est pas initialisé
       }
 
-      // --- NOUVEAU CODE : Attendre que supabase.postgrest soit prêt ---
+      // --- CODE MODIFIÉ : Attendre que supabase.rest soit prêt ---
       let attempts = 0;
       const maxAttempts = 20; // Essayer jusqu'à 20 fois
       const delayMs = 50;     // Attendre 50ms entre chaque tentative
 
-      while (!supabase.postgrest && attempts < maxAttempts) {
-          console.log(`Attente de supabase.postgrest (tentative ${attempts + 1}/${maxAttempts})...`);
+      while (!supabase.rest && attempts < maxAttempts) { // MODIFICATION ICI : !supabase.rest
+          console.log(`Attente de supabase.rest (tentative ${attempts + 1}/${maxAttempts})...`); // MODIFICATION ICI : message
           await new Promise(resolve => setTimeout(resolve, delayMs));
           attempts++;
       }
 
-      if (supabase.postgrest) {
-          console.log("supabase.postgrest est maintenant prêt !");
+      if (supabase.rest) { // MODIFICATION ICI : supabase.rest
+          console.log("supabase.rest est maintenant prêt !"); // MODIFICATION ICI : message
           // Appeler les fonctions qui dépendent de Supabase ici
-          await promptForShareCode(); // Appelez ceci APRÈS que postgrest soit prêt
+          await promptForShareCode(); // Appelez ceci APRÈS que rest soit prêt
       } else {
-          console.error("Erreur: supabase.postgrest n'est pas devenu prêt après plusieurs tentatives. Impossible de démarrer l'application.");
+          console.error("Erreur: supabase.rest n'est pas devenu prêt après plusieurs tentatives. Impossible de démarrer l'application."); // MODIFICATION ICI : message
           // Gérer l'erreur, par exemple afficher un message à l'utilisateur
           return;
       }
-      // --- FIN NOUVEAU CODE ---
+      // --- FIN CODE MODIFIÉ ---
 
       // IMPORTANT : Initialise le listener Realtime de Supabase
       // setupRealtimeListener() doit être appelé APRÈS qu'une liste soit chargée/créée (dans getOrCreateListByShareCode)
