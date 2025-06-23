@@ -1308,6 +1308,8 @@
         }
 
         // Supabase client initialization
+        console.log("Type of Supabase at initialization:", typeof Supabase); // AJOUTEZ CETTE LIGNE
+
         supabase = Supabase.createClient(supabaseUrl, supabaseKey);
         if (!supabase) {
             console.error("Erreur: Supabase n'a pas pu être initialisé. Vérifiez votre connexion Internet ou la configuration.");
