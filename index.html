@@ -247,14 +247,11 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const { createClient } = supabase;
-
     // --- Configuration Supabase ---
-    // REMPLACEZ CES VALEURS PAR LES VÔTRES !
-    const SUPABASE_URL = 'VOTRE_URL_SUPABASE'; // Exemple: https://xxxx.supabase.co
-    const SUPABASE_ANON_KEY = 'VOTRE_ANON_KEY_SUPABASE'; // Exemple: eyJ...
+    const SUPABASE_URL = 'https://cepqcretnxfhjbvdukkk.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlcHFjcmV0bnhmaGpidmR1a2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2MTc1NDcsImV4cCI6MjA2NjE5MzU0N30.H56IGRN14FpfHXQVODKsmTbqMEe27_gcCcgGLphEEOU';
     
-    // Initialise le client Supabase (sans options d'auth)
+    // Initialise le client Supabase (createClient est directement disponible)
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // --- Variables Globales ---
@@ -288,7 +285,7 @@
 
     // --- Fonctions utilitaires ---
     function displayMessage(message, type, targetElement = null) {
-      const element = targetElement || document.getElementById('authMessage') || document.getElementById('settingsMessage');
+      const element = targetElement || document.getElementById('settingsMessage'); // Fallback sur settingsMessage
       if (element) {
         element.textContent = message;
         element.className = `message ${type}`;
@@ -630,7 +627,6 @@
                 (payload) => {
                     console.log('Changement reçu!', payload);
                     // Recharger la liste principale pour refléter le changement
-                    // Ou mettre à jour le DOM de manière plus granulaire si nécessaire
                     loadShoppingList();
                     loadBuyLaterList();
                 }
@@ -847,7 +843,7 @@
 
         updateAllCategorySelects();
         loadSuggestions();
-        loadBuyLaterList(); // Cette liste reste locale / factice pour l'instant
+        loadBuyLaterList(); 
         loadCategoryOrder(); 
         
         // --- NOUVELLE LOGIQUE D'INITIALISATION SANS AUTH ---
