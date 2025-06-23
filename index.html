@@ -382,6 +382,13 @@
         return Math.random().toString(36).substring(2, 8).toUpperCase();
     }
 
+    // NOUVEAU : Définition de promptForShareCode
+    async function promptForShareCode() {
+        const shareCode = prompt("Veuillez entrer un code de partage ou cliquez sur OK pour en générer un nouveau (vous pouvez aussi le taper dans le champ ci-dessous) :") || generateShareCode();
+        shareCodeInput.value = shareCode; // Remplit le champ d'entrée
+        await getOrCreateListByShareCode(shareCode);
+    }
+
     function showSection(sectionId) {
         document.querySelectorAll('.section').forEach(section => {
             section.classList.add('hidden');
@@ -398,12 +405,10 @@
     function updateSupabaseHeaders(shareCode) {
         console.log("Dans updateSupabaseHeaders:");
         console.log("supabase est :", supabase);
-        // MODIFICATION ICI : supabase.rest au lieu de supabase.postgrest
-        console.log("supabase.rest est :", supabase ? supabase.rest : 'non défini');
+        console.log("supabase.rest est :", supabase ? supabase.rest : 'non défini'); // Changement ici
 
-        // MODIFICATION ICI : supabase.rest au lieu de supabase.postgrest
-        if (supabase && supabase.rest) {
-            supabase.rest.headers['X-Share-Code'] = shareCode;
+        if (supabase && supabase.rest) { // Changement ici
+            supabase.rest.headers['X-Share-Code'] = shareCode; // Changement ici
             console.log(`Supabase headers updated with X-Share-Code: ${shareCode}`);
         } else {
             console.warn("Supabase client non initialisé ou rest client non prêt, impossible de mettre à jour les headers.");
@@ -993,7 +998,8 @@
         if (code) {
             getOrCreateListByShareCode(code);
         } else {
-            alert("Veuillez entrer un code de partage.");
+            // Si le champ est vide, on invite l'utilisateur à entrer un code ou en générer un nouveau.
+            promptForShareCode(); 
         }
     });
 
@@ -1136,29 +1142,22 @@
       const maxAttempts = 20; // Essayer jusqu'à 20 fois
       const delayMs = 50;     // Attendre 50ms entre chaque tentative
 
-      while (!supabase.rest && attempts < maxAttempts) { // MODIFICATION ICI : !supabase.rest
-          console.log(`Attente de supabase.rest (tentative ${attempts + 1}/${maxAttempts})...`); // MODIFICATION ICI : message
+      while (!supabase.rest && attempts < maxAttempts) {
+          console.log(`Attente de supabase.rest (tentative ${attempts + 1}/${maxAttempts})...`);
           await new Promise(resolve => setTimeout(resolve, delayMs));
           attempts++;
       }
 
-      if (supabase.rest) { // MODIFICATION ICI : supabase.rest
-          console.log("supabase.rest est maintenant prêt !"); // MODIFICATION ICI : message
+      if (supabase.rest) {
+          console.log("supabase.rest est maintenant prêt !");
           // Appeler les fonctions qui dépendent de Supabase ici
-          await promptForShareCode(); // Appelez ceci APRÈS que rest soit prêt
+          await promptForShareCode(); // Ceci déclenchera le prompt et la création/chargement de la liste
       } else {
-          console.error("Erreur: supabase.rest n'est pas devenu prêt après plusieurs tentatives. Impossible de démarrer l'application."); // MODIFICATION ICI : message
+          console.error("Erreur: supabase.rest n'est pas devenu prêt après plusieurs tentatives. Impossible de démarrer l'application.");
           // Gérer l'erreur, par exemple afficher un message à l'utilisateur
           return;
       }
       // --- FIN CODE MODIFIÉ ---
-
-      // IMPORTANT : Initialise le listener Realtime de Supabase
-      // setupRealtimeListener() doit être appelé APRÈS qu'une liste soit chargée/créée (dans getOrCreateListByShareCode)
-      // et donc après que currentListId soit défini.
-      // Il a été déplacé dans getOrCreateListByShareCode.
-
-      // loadShoppingList() est maintenant appelée après la création/chargement de la liste dans getOrCreateListByShareCode.
 
       showSection('shoppingList');
       // Ensure options are hidden on initial load and arrow points down
