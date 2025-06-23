@@ -327,11 +327,16 @@
 
     // Met à jour l'en-tête X-Share-Code pour toutes les requêtes Supabase
     function updateSupabaseHeaders(shareCode) {
+        console.log("Dans updateSupabaseHeaders:");
+        console.log("supabase est :", supabase);
+        console.log("supabase.postgrest est :", supabase ? supabase.postgrest : 'non défini'); // Vérifie postgrest si supabase existe
       if (supabase && supabase.postgrest) { // Ajout d'une vérification pour s'assurer que supabase est initialisé
         if (shareCode) {
           supabase.postgrest.headers['X-Share-Code'] = shareCode;
+          console.log(`Supabase headers updated with X-Share-Code: ${shareCode}`);
         } else {
           // Supprime l'en-tête si le code n'est pas défini
+          console.warn("Supabase client non initialisé ou postgrest non prêt, impossible de mettre à jour les headers.");
           delete supabase.postgrest.headers['X-Share-Code'];
         }
       } else {
