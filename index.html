@@ -1120,7 +1120,7 @@
     // --- Event Listeners ---
     document.addEventListener('DOMContentLoaded', async () => {
       // Initialize Supabase client
-      supabase = supabaseJs.createClient(supabaseUrl, supabaseKey); // CORRECTED: Added createClient call
+      supabase = Supabase.createClient(supabaseUrl, supabaseKey); // CORRECTED: Changed supabaseJs.createClient to Supabase.createClient
 
       if (!supabase) {
           console.error("Supabase client failed to initialize.");
@@ -1196,7 +1196,7 @@
 
       categoryFilterSelect.addEventListener('change', loadSuggestions);
 
-      addBuyLaterForm.addEventListener('submit', (e) => {
+      buyLaterForm.addEventListener('submit', (e) => { // Corrected: Changed addBuyLaterForm to buyLaterForm
           e.preventDefault();
           const buyLaterItemName = newBuyLaterItemInput.value.trim();
           if (buyLaterItemName) {
