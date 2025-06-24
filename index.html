@@ -28,7 +28,7 @@
       padding: 1.5rem;
       border-radius: 1rem;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      margin-bottom: 6rem; /* Added space for bottom nav */
+      margin-bottom: 1rem;
     }
     input[type="text"], input[type="number"], select, button {
       width: calc(100% - 20px);
@@ -70,34 +70,24 @@
         align-items: center;
         gap: 0.5rem;
     }
-    .item-actions, .category-actions, .suggestion-actions {
+    .item-actions {
       display: flex;
       gap: 0.5rem; /* Espace entre les boutons */
       margin-top: 0.5rem; /* Espace si les boutons passent en dessous */
     }
-    .item-actions button, .category-actions button, .suggestion-actions button {
+    .item-actions button {
       width: auto;
       padding: 0.5rem 0.8rem;
       font-size: 0.9rem;
       border-radius: 0.4rem;
       margin-bottom: 0; /* Override default button margin */
     }
-    
-    /* Styles for discrete delete buttons */
-    .discrete-remove-btn {
-      background: none;
-      border: none;
-      color: #f44336;
-      font-size: 1.2rem;
-      padding: 0.2rem;
-      cursor: pointer;
-      width: auto; /* Override general button width */
+    .item-actions .remove-btn {
+      background-color: #f44336;
     }
-    .discrete-remove-btn:hover {
-      color: #d32f2f;
-      background: none;
+    .item-actions .remove-btn:hover {
+      background-color: #d32f2f;
     }
-
     .quantity-control {
         display: flex;
         align-items: center;
@@ -125,8 +115,12 @@
         font-weight: bold;
     }
 
-    /* Removed total-items CSS as the element is removed */
-
+    .total-items {
+        text-align: right;
+        font-weight: bold;
+        margin-top: 1rem;
+        color: #E75480;
+    }
     .bottom-nav {
       position: fixed;
       bottom: 0;
@@ -185,6 +179,11 @@
         font-size: 0.85em;
         color: #666;
     }
+    #suggestionList .suggestion-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem; /* Espace si les boutons passent en dessous */
+    }
 
     /* Styles pour les titres de catégorie dans la liste de courses */
     .section-container h3 {
@@ -201,6 +200,8 @@
     <h1 id="shoppingListTitle">Ma Liste de Courses 🛒</h1>
     
     <ul id="shoppingListToBuy" class="item-list"></ul>
+    <p class="total-items">Articles restants : <span id="totalRemainingItems">0</span></p>
+
     <div id="addItemForm">
         <h3>Ajouter un article</h3>
         <input type="text" id="newItemInput" placeholder="Ajouter un article" />
@@ -276,7 +277,7 @@
   <script>
     // --- Configuration Supabase ---
     const SUPABASE_URL = 'https://cepqcretnxfhjbvdukkk.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlcHFjcmV0bnhmaGbidmR1a2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2MTc1NDcsImV4cCI6MjA2NjE5MzU0N30.H56IGRN14FpfHXQVODKsmTbqMEEEOU';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlcHFjcmV0bnhmaGpidmR1a2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2MTc1NDcsImV4cCI6MjA2NjE5MzU0N30.H56IGRN14FpfHXQVODKsmTbqMEe27_gcCcgGLphEEOU';
 
     let supabase = null; // Sera initialisé dans window.addEventListener('load')
 
@@ -284,7 +285,7 @@
     let currentShareCode = null;
     let currentListId = null;
     const shoppingListToBuy = document.getElementById('shoppingListToBuy');
-    // const totalRemainingItemsSpan = document.getElementById('totalRemainingItems'); // Removed
+    const totalRemainingItemsSpan = document.getElementById('totalRemainingItems');
     const newItemInput = document.getElementById('newItemInput');
     const newQuantityInput = document.getElementById('newQuantityInput');
     const newCategorySelect = document.getElementById('newCategorySelect');
@@ -324,7 +325,7 @@
 
     // Categories section elements
     const newCategoryInput = document.getElementById('newCategoryInput');
-    const addCategoryBtn = document = document.getElementById('addCategoryBtn');
+    const addCategoryBtn = document.getElementById('addCategoryBtn');
     const categoryList = document.getElementById('categoryList');
     const categoryOrderList = document.getElementById('categoryOrderList');
     const saveCategoryOrderBtn = document.getElementById('saveCategoryOrderBtn');
@@ -591,7 +592,7 @@
     async function loadShoppingList() {
         if (!currentListId) {
             shoppingListToBuy.innerHTML = '';
-            // totalRemainingItemsSpan.textContent = '0'; // Removed
+            totalRemainingItemsSpan.textContent = '0';
             return;
         }
         updateSupabaseHeaders(currentShareCode);
@@ -610,7 +611,7 @@
             }
 
             shoppingListToBuy.innerHTML = '';
-            // let remainingItems = 0; // Removed
+            let remainingItems = 0;
 
             const categories = getCategories();
             const categoryOrder = JSON.parse(localStorage.getItem('category_order')) || categories;
@@ -629,7 +630,7 @@
             items.forEach(item => {
                 const category = item.category || 'Autres';
                 groupedItems[category].push(item);
-                // remainingItems++; // Removed
+                remainingItems++; // All items are "remaining" now
             });
 
             // Render items for each category
@@ -651,7 +652,7 @@
                 }
             });
             
-            // totalRemainingItemsSpan.textContent = remainingItems; // Removed
+            totalRemainingItemsSpan.textContent = remainingItems;
         } catch (error) {
             console.error("Erreur inattendue lors du chargement de la liste de courses:", error);
             alert("Une erreur inattendue est survenue: " + error.message);
@@ -693,8 +694,8 @@
         itemActions.classList.add('item-actions');
 
         const removeBtn = document.createElement('button');
-        removeBtn.classList.add('discrete-remove-btn'); /* New class for discreet button */
-        removeBtn.innerHTML = '<i class="fas fa-times"></i>'; /* Cross icon */
+        removeBtn.textContent = 'Supprimer';
+        removeBtn.classList.add('remove-btn');
         removeBtn.onclick = () => deleteItem(item.id);
         itemActions.appendChild(removeBtn);
 
@@ -812,8 +813,8 @@
                 const li = document.createElement('li');
                 li.textContent = item.name;
                 const removeBtn = document.createElement('button');
-                removeBtn.classList.add('discrete-remove-btn');
-                removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                removeBtn.textContent = 'Supprimer';
+                removeBtn.classList.add('remove-btn');
                 removeBtn.onclick = () => deleteBuyLaterItem(item.id);
                 li.appendChild(removeBtn);
                 buyLaterList.appendChild(li);
@@ -932,8 +933,8 @@
         suggestionActions.classList.add('suggestion-actions');
 
         const removeBtn = document.createElement('button');
-        removeBtn.classList.add('discrete-remove-btn'); /* New class for discreet button */
-        removeBtn.innerHTML = '<i class="fas fa-times"></i>'; /* Cross icon */
+        removeBtn.textContent = 'Supprimer';
+        removeBtn.classList.add('remove-btn');
         removeBtn.onclick = (event) => {
             event.stopPropagation();
             deleteSuggestion(item.id);
@@ -952,13 +953,10 @@
         categories.forEach(cat => {
             const li = document.createElement('li');
             li.textContent = cat;
-            
-            const categoryActions = document.createElement('div');
-            categoryActions.classList.add('category-actions');
-
+            // All categories are now deletable
             const removeBtn = document.createElement('button');
-            removeBtn.classList.add('discrete-remove-btn'); /* New class for discreet button */
-            removeBtn.innerHTML = '<i class="fas fa-times"></i>'; /* Cross icon */
+            removeBtn.textContent = 'Supprimer';
+            removeBtn.classList.add('remove-btn');
             removeBtn.onclick = () => {
                 if (confirm(`Êtes-vous sûr de vouloir supprimer la catégorie "${cat}" ? Les articles existants de cette catégorie ne seront pas supprimés, mais leur catégorie pourrait devenir "Autres".`)) {
                     const updatedCategories = categories.filter(c => c !== cat);
@@ -969,8 +967,7 @@
                     loadShoppingList(); // Recharger la liste pour refléter le changement de catégorie
                 }
             };
-            categoryActions.appendChild(removeBtn);
-            li.appendChild(categoryActions); // Append actions to the li
+            li.appendChild(removeBtn);
             categoryList.appendChild(li);
         });
     }
