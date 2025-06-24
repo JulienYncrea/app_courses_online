@@ -384,8 +384,12 @@
 
     // NOUVEAU : Définition de promptForShareCode
     async function promptForShareCode() {
-        const shareCode = prompt("Veuillez entrer un code de partage ou cliquez sur OK pour en générer un nouveau (vous pouvez aussi le taper dans le champ ci-dessous) :") || generateShareCode();
+        let shareCode = localStorage.getItem('lastShareCode'); // Tente de récupérer le dernier code
+        if (!shareCode) { // Si aucun code n'est trouvé, demander à l'utilisateur
+            shareCode = prompt("Veuillez entrer un code de partage ou cliquez sur OK pour en générer un nouveau (vous pouvez aussi le taper dans le champ ci-dessous) :") || generateShareCode();
+        }
         shareCodeInput.value = shareCode; // Remplit le champ d'entrée
+        localStorage.setItem('lastShareCode', shareCode); // Sauvegarde le code pour les prochaines fois
         await getOrCreateListByShareCode(shareCode);
     }
 
@@ -996,6 +1000,7 @@
     loadShareCodeBtn.addEventListener('click', () => {
         const code = shareCodeInput.value.trim();
         if (code) {
+            localStorage.setItem('lastShareCode', code); // Sauvegarde le code manuellement entré
             getOrCreateListByShareCode(code);
         } else {
             // Si le champ est vide, on invite l'utilisateur à entrer un code ou en générer un nouveau.
