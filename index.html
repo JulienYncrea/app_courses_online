@@ -19,6 +19,7 @@
       text-align: center;
       color: #E75480;
       text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+      cursor: pointer; /* Indicate clickable titles for scrolling */
     }
     .section-container {
       max-width: 600px;
@@ -63,7 +64,6 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.05);
       flex-wrap: wrap; /* Permet aux éléments de passer à la ligne */
     }
-    /* No more 'bought' class styling */
     .item-info {
         flex-grow: 1;
         display: flex;
@@ -88,7 +88,6 @@
     .item-actions .remove-btn:hover {
       background-color: #d32f2f;
     }
-    /* No more buy-btn or undo-btn styles */
     .quantity-control {
         display: flex;
         align-items: center;
@@ -116,7 +115,6 @@
         font-weight: bold;
     }
 
-    /* Tab buttons removed */
     .total-items {
         text-align: right;
         font-weight: bold;
@@ -156,74 +154,6 @@
       color: #FAD0C4;
     }
 
-    /* Styles pour la barre de navigation étendue */
-    .navigation-buttons {
-      position: fixed;
-      bottom: 4.5rem; /* Juste au-dessus de la barre de navigation principale */
-      left: 0;
-      width: 100%;
-      background-color: #FFF;
-      box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: column;
-      padding: 0.5rem 0;
-      z-index: 999;
-      transform: translateY(100%); /* Masqué par défaut */
-      transition: transform 0.3s ease-out;
-      border-top-left-radius: 1rem;
-      border-top-right-radius: 1rem;
-      overflow: hidden; /* Cache le contenu qui dépasse pendant l'animation */
-    }
-
-    .navigation-buttons.show-options {
-      transform: translateY(0); /* Affiche la barre */
-    }
-
-    .navigation-buttons button {
-        background: none;
-        border: none;
-        color: #E75480;
-        padding: 0.8rem 1rem;
-        text-align: left;
-        width: 100%;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: background-color 0.2s ease;
-        display: flex;
-        align-items: center;
-    }
-
-    .navigation-buttons button i {
-        margin-right: 0.5rem;
-        font-size: 1.2rem;
-    }
-
-    .navigation-buttons button:hover {
-        background-color: #f0f0f0;
-    }
-
-    /* Icône de la flèche de basculement */
-    .toggle-options {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        padding: 0.2rem 0;
-        background-color: #E75480; /* Couleur de la barre inférieure */
-        color: white;
-        cursor: pointer;
-        font-size: 1.2rem;
-        border-top-left-radius: 1rem;
-        border-top-right-radius: 1rem;
-        position: absolute;
-        top: -1.5rem; /* Pour chevaucher légèrement la barre étendue */
-        left: 0;
-        z-index: 1001; /* Au-dessus de tout */
-    }
-    .nav-item.options {
-        position: relative; /* Pour positionner la flèche par rapport à cet élément */
-    }
-
     /* Style pour les sections cachées */
     .section.hidden {
       display: none;
@@ -254,18 +184,26 @@
         gap: 0.5rem;
         margin-top: 0.5rem; /* Espace si les boutons passent en dessous */
     }
+
+    /* Styles pour les titres de catégorie dans la liste de courses */
+    .section-container h3 {
+        color: #E75480;
+        border-bottom: 1px solid #FFD1DC;
+        padding-bottom: 0.3rem;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+    }
   </style>
 </head>
 <body>
   <div id="shoppingList" class="section-container section">
-    <h1>Ma Liste de Courses 🛒</h1>
+    <h1 id="shoppingListTitle">Ma Liste de Courses 🛒</h1>
     
     <ul id="shoppingListToBuy" class="item-list"></ul>
-    <ul id="shoppingListBought" class="item-list hidden"></ul> 
-
     <p class="total-items">Articles restants : <span id="totalRemainingItems">0</span></p>
 
-    <div id="addItemForm" class="hidden">
+    <div id="addItemForm">
+        <h3>Ajouter un article</h3>
         <input type="text" id="newItemInput" placeholder="Ajouter un article" />
         <input type="number" id="newQuantityInput" placeholder="Quantité (optionnel)" value="1" min="1" />
         <select id="newCategorySelect"></select>
@@ -281,14 +219,16 @@
   </div>
 
   <div id="suggestions" class="section-container section hidden">
-    <h2>Suggestions 💡</h2>
+    <h2 id="suggestionsTitle">Suggestions 💡</h2>
+    <ul id="suggestionList"></ul> <h3>Ajouter une suggestion</h3>
     <input type="text" id="newSuggestionInput" placeholder="Suggérer un article" />
-    <select id="newSuggestionCategorySelect"></select> <button id="addSuggestionBtn">Ajouter Suggestion</button>
-    <ul id="suggestionList"></ul>
+    <select id="newSuggestionCategorySelect"></select>
+    <button id="addSuggestionBtn">Ajouter Suggestion</button>
   </div>
 
   <div id="categories" class="section-container section hidden">
     <h2>Gérer les Catégories 📂</h2>
+    <h3>Vos Catégories</h3>
     <input type="text" id="newCategoryInput" placeholder="Nouvelle catégorie" />
     <button id="addCategoryBtn">Ajouter Catégorie</button>
     <ul id="categoryList"></ul>
@@ -308,14 +248,6 @@
     <button id="changeShareCodeBtn">Changer de liste / Déconnecter</button>
   </div>
 
-
-  <div class="navigation-buttons">
-    <button id="optionsMyListBtn"><i class="fas fa-shopping-basket"></i> Ma Liste</button>
-    <button id="optionsBuyLaterBtn"><i class="fas fa-clock"></i> Acheter Plus Tard</button>
-    <button id="optionsSuggestionsBtn"><i class="fas fa-lightbulb"></i> Suggestions</button>
-    <button id="optionsCategoriesBtn"><i class="fas fa-folder"></i> Gérer Catégories</button>
-    <button id="optionsSettingsBtn"><i class="fas fa-cog"></i> Paramètres</button>
-  </div>
 
   <div class="bottom-nav">
     <div class="nav-item active" id="navShoppingList">
@@ -338,11 +270,6 @@
       <i class="fas fa-cog"></i>
       <span>Paramètres</span>
     </div>
-    <div class="nav-item options" id="navOptions">
-        <i class="fas fa-bars"></i>
-        <span>Options</span>
-        <i class="fas fa-chevron-down toggle-options" id="toggleOptionsIcon"></i>
-    </div>
   </div>
 
 
@@ -358,12 +285,12 @@
     let currentShareCode = null;
     let currentListId = null;
     const shoppingListToBuy = document.getElementById('shoppingListToBuy');
-    const shoppingListBought = document.getElementById('shoppingListBought'); // Kept, but hidden/unused
     const totalRemainingItemsSpan = document.getElementById('totalRemainingItems');
     const newItemInput = document.getElementById('newItemInput');
     const newQuantityInput = document.getElementById('newQuantityInput');
     const newCategorySelect = document.getElementById('newCategorySelect');
     const addItemBtn = document.getElementById('addItemBtn');
+    const shoppingListTitle = document.getElementById('shoppingListTitle'); // Added for scroll
     
     // Moved to settings section
     const shareCodeInput = document.getElementById('shareCodeInput'); 
@@ -375,24 +302,14 @@
     const buyLaterSection = document.getElementById('buyLater');
     const suggestionsSection = document.getElementById('suggestions');
     const categoriesSection = document.getElementById('categories');
-    const settingsSection = document.getElementById('settings'); // Nouvelle section paramètres
+    const settingsSection = document.getElementById('settings');
 
     // Navigation
     const navShoppingList = document.getElementById('navShoppingList');
     const navBuyLater = document.getElementById('navBuyLater');
     const navSuggestions = document.getElementById('navSuggestions');
     const navCategories = document.getElementById('navCategories');
-    const navSettings = document.getElementById('navSettings'); // Nouveau bouton de navigation
-    const navOptions = document.getElementById('navOptions');
-    const navigationButtonsContainer = document.querySelector('.navigation-buttons');
-    const toggleOptionsIcon = document.getElementById('toggleOptionsIcon');
-
-    // Options Navigation Buttons
-    const optionsMyListBtn = document.getElementById('optionsMyListBtn');
-    const optionsBuyLaterBtn = document.getElementById('optionsBuyLaterBtn');
-    const optionsSuggestionsBtn = document.getElementById('optionsSuggestionsBtn');
-    const optionsCategoriesBtn = document.getElementById('optionsCategoriesBtn');
-    const optionsSettingsBtn = document.getElementById('optionsSettingsBtn'); // Nouveau bouton dans le menu étendu
+    const navSettings = document.getElementById('navSettings');
 
     // Buy Later section elements
     const newBuyLaterItemInput = document.getElementById('newBuyLaterItemInput');
@@ -400,8 +317,9 @@
     const buyLaterList = document.getElementById('buyLaterList');
 
     // Suggestions section elements
+    const suggestionsTitle = document.getElementById('suggestionsTitle'); // Added for scroll
     const newSuggestionInput = document.getElementById('newSuggestionInput');
-    const newSuggestionCategorySelect = document.getElementById('newSuggestionCategorySelect'); // Nouveau
+    const newSuggestionCategorySelect = document.getElementById('newSuggestionCategorySelect');
     const addSuggestionBtn = document.getElementById('addSuggestionBtn');
     const suggestionList = document.getElementById('suggestionList');
 
@@ -535,7 +453,7 @@
                 currentListId = lists[0].id;
                 currentShareCode = code;
                 localStorage.setItem('lastShareCode', shareCodeInput.value); // Save on successful load
-                addItemForm.classList.remove('hidden'); // Show add item form
+                // addItemForm.classList.remove('hidden'); // No longer hidden by default for shoppingList section
                 setupRealtimeListener(currentListId);
                 loadShoppingList();
                 activeShareCodeSpan.textContent = currentShareCode; // Met à jour l'affichage dans les paramètres
@@ -560,7 +478,7 @@
                     currentListId = createdList[0].id;
                     currentShareCode = code;
                     localStorage.setItem('lastShareCode', shareCodeInput.value); // Save on successful creation
-                    addItemForm.classList.remove('hidden'); // Show add item form
+                    // addItemForm.classList.remove('hidden'); // No longer hidden by default for shoppingList section
                     setupRealtimeListener(currentListId);
                     loadShoppingList();
                     activeShareCodeSpan.textContent = currentShareCode; // Met à jour l'affichage dans les paramètres
@@ -629,10 +547,23 @@
                 // Item does not exist, insert new
                 const { data, error: insertError } = await supabase
                     .from('list_items')
-                    .insert([{ name, quantity, category, list_id: listId }]); // Removed 'bought' as it's no longer used
+                    .insert([{ name, quantity, category, list_id: listId }]);
                 if (insertError) throw insertError;
                 console.log(`Article '${name}' ajouté à la liste.`);
             }
+
+            // Add category to local storage if it doesn't exist
+            if (category) {
+                const currentCategories = getCategories();
+                if (!currentCategories.includes(category)) {
+                    currentCategories.push(category);
+                    saveCategories(currentCategories);
+                    updateAllCategorySelects(); // Update category dropdowns
+                    renderCategories(); // Re-render category list in 'Gérer les Catégories'
+                    loadCategoryOrder(); // Update category order list
+                }
+            }
+
             newItemInput.value = '';
             newQuantityInput.value = '1';
         } catch (error) {
@@ -641,9 +572,6 @@
         }
     }
     
-    // updateItemStatus is removed as 'bought' status is no longer relevant
-    // async function updateItemStatus(itemId, status) { ... }
-
     async function deleteItem(itemId) {
         if (!currentListId) return;
         try {
@@ -725,7 +653,6 @@
             });
             
             totalRemainingItemsSpan.textContent = remainingItems;
-            // updateTabCounts() is removed
         } catch (error) {
             console.error("Erreur inattendue lors du chargement de la liste de courses:", error);
             alert("Une erreur inattendue est survenue: " + error.message);
@@ -735,7 +662,6 @@
     function renderListItem(item, listElement) {
         const li = document.createElement('li');
         li.dataset.id = item.id;
-        // li.classList.toggle('bought', item.bought); // Removed 'bought' class
 
         const itemInfo = document.createElement('div');
         itemInfo.classList.add('item-info');
@@ -766,9 +692,6 @@
 
         const itemActions = document.createElement('div');
         itemActions.classList.add('item-actions');
-
-        // Removed buy/undo buttons
-        // if (item.bought) { ... } else { ... }
 
         const removeBtn = document.createElement('button');
         removeBtn.textContent = 'Supprimer';
@@ -819,8 +742,6 @@
             })
             .subscribe();
         
-        // Removed supabaseSuggestionsChannel listener
-
       console.log(`Listeners Realtime configurés pour list_id: ${currentListId}`);
     }
 
@@ -950,46 +871,78 @@
         const items = getLocalSuggestions(currentListId);
 
         suggestionList.innerHTML = '';
+        
+        const categories = getCategories();
+        const categoryOrder = JSON.parse(localStorage.getItem('category_order')) || categories;
+
+        const groupedItems = {};
+        // Initialize groupedItems with all known categories in order
+        categoryOrder.forEach(cat => groupedItems[cat] = []);
+        // Add any existing categories from items that might not be in the current user_categories
         items.forEach(item => {
-            const li = document.createElement('li');
-            li.dataset.id = item.id;
-            li.style.cursor = 'pointer'; // Indicate that the item is clickable
-
-            const suggestionInfo = document.createElement('div');
-            suggestionInfo.classList.add('suggestion-info');
-            const nameSpan = document.createElement('span');
-            nameSpan.classList.add('name');
-            nameSpan.textContent = item.name;
-            const categorySpan = document.createElement('span');
-            categorySpan.classList.add('category');
-            categorySpan.textContent = item.category ? `Catégorie: ${item.category}` : 'Pas de catégorie';
-            suggestionInfo.appendChild(nameSpan);
-            suggestionInfo.appendChild(categorySpan);
-            li.appendChild(suggestionInfo);
-
-            // Click handler for adding to main list and incrementing quantity
-            li.onclick = async () => {
-                await addItem(item.name, 1, item.category, currentListId);
-                // No need to remove from suggestions after adding to list, user can reuse them
-            };
-
-            const suggestionActions = document.createElement('div');
-            suggestionActions.classList.add('suggestion-actions');
-
-            // The remove button remains for deleting the suggestion from the local list
-            const removeBtn = document.createElement('button');
-            removeBtn.textContent = 'Supprimer';
-            removeBtn.classList.add('remove-btn');
-            // Prevent click on remove from triggering li.onclick
-            removeBtn.onclick = (event) => {
-                event.stopPropagation(); // Stop propagation to prevent li.onclick
-                deleteSuggestion(item.id);
-            };
-            suggestionActions.appendChild(removeBtn);
-
-            li.appendChild(suggestionActions);
-            suggestionList.appendChild(li);
+            const category = item.category || 'Autres';
+            if (!groupedItems[category]) {
+                groupedItems[category] = [];
+            }
+            groupedItems[category].push(item);
         });
+
+        // Render items for each category, sorted
+        categoryOrder.forEach(category => {
+            if (groupedItems[category] && groupedItems[category].length > 0) {
+                const categoryHeader = document.createElement('h3');
+                categoryHeader.textContent = category;
+                suggestionList.appendChild(categoryHeader);
+                groupedItems[category].forEach(item => renderSuggestionItem(item, suggestionList));
+            }
+        });
+        // Handle items with categories not in the current category order
+        Object.keys(groupedItems).filter(cat => !categoryOrder.includes(cat)).forEach(category => {
+            if (groupedItems[category].length > 0) {
+                const categoryHeader = document.createElement('h3');
+                categoryHeader.textContent = category;
+                suggestionList.appendChild(categoryHeader);
+                groupedItems[category].forEach(item => renderSuggestionItem(item, suggestionList));
+            }
+        });
+    }
+
+    function renderSuggestionItem(item, listElement) {
+        const li = document.createElement('li');
+        li.dataset.id = item.id;
+        li.style.cursor = 'pointer';
+
+        const suggestionInfo = document.createElement('div');
+        suggestionInfo.classList.add('suggestion-info');
+        const nameSpan = document.createElement('span');
+        nameSpan.classList.add('name');
+        nameSpan.textContent = item.name;
+        const categorySpan = document.createElement('span');
+        categorySpan.classList.add('category');
+        categorySpan.textContent = item.category ? `Catégorie: ${item.category}` : 'Pas de catégorie';
+        suggestionInfo.appendChild(nameSpan);
+        suggestionInfo.appendChild(categorySpan);
+        li.appendChild(suggestionInfo);
+
+        // Click handler for adding to main list and incrementing quantity
+        li.onclick = async () => {
+            await addItem(item.name, 1, item.category, currentListId);
+        };
+
+        const suggestionActions = document.createElement('div');
+        suggestionActions.classList.add('suggestion-actions');
+
+        const removeBtn = document.createElement('button');
+        removeBtn.textContent = 'Supprimer';
+        removeBtn.classList.add('remove-btn');
+        removeBtn.onclick = (event) => {
+            event.stopPropagation();
+            deleteSuggestion(item.id);
+        };
+        suggestionActions.appendChild(removeBtn);
+
+        li.appendChild(suggestionActions);
+        listElement.appendChild(li);
     }
 
 
@@ -1000,22 +953,21 @@
         categories.forEach(cat => {
             const li = document.createElement('li');
             li.textContent = cat;
-            if (!initialDefaultCategories.includes(cat)) {
-                const removeBtn = document.createElement('button');
-                removeBtn.textContent = 'Supprimer';
-                removeBtn.classList.add('remove-btn');
-                removeBtn.onclick = () => {
-                    if (confirm(`Êtes-vous sûr de vouloir supprimer la catégorie "${cat}" ? Les articles existants de cette catégorie ne seront pas supprimés, mais leur catégorie pourrait devenir "Autres".`)) {
-                        const updatedCategories = categories.filter(c => c !== cat);
-                        saveCategories(updatedCategories);
-                        updateAllCategorySelects();
-                        renderCategories();
-                        loadCategoryOrder();
-                        loadShoppingList(); // Recharger la liste pour refléter le changement de catégorie
-                    }
-                };
-                li.appendChild(removeBtn);
-            }
+            // All categories are now deletable
+            const removeBtn = document.createElement('button');
+            removeBtn.textContent = 'Supprimer';
+            removeBtn.classList.add('remove-btn');
+            removeBtn.onclick = () => {
+                if (confirm(`Êtes-vous sûr de vouloir supprimer la catégorie "${cat}" ? Les articles existants de cette catégorie ne seront pas supprimés, mais leur catégorie pourrait devenir "Autres".`)) {
+                    const updatedCategories = categories.filter(c => c !== cat);
+                    saveCategories(updatedCategories);
+                    updateAllCategorySelects();
+                    renderCategories();
+                    loadCategoryOrder();
+                    loadShoppingList(); // Recharger la liste pour refléter le changement de catégorie
+                }
+            };
+            li.appendChild(removeBtn);
             categoryList.appendChild(li);
         });
     }
@@ -1109,8 +1061,6 @@
         loadShoppingList();
     }
 
-    // Removed updateTabCounts as tabs are removed
-
     // --- Listeners d'événements ---
     loadShareCodeBtn.addEventListener('click', async () => {
         const code = shareCodeInput.value.trim();
@@ -1135,57 +1085,21 @@
         }
     });
 
-    // Removed tab buttons event listener
-
     // Navigation Buttons Listeners
     navShoppingList.addEventListener('click', () => showSection('shoppingList'));
     navBuyLater.addEventListener('click', () => showSection('buyLater'));
     navSuggestions.addEventListener('click', () => showSection('suggestions'));
     navCategories.addEventListener('click', () => showSection('categories'));
-    navSettings.addEventListener('click', () => showSection('settings')); // Listener pour le bouton Paramètres
+    navSettings.addEventListener('click', () => showSection('settings'));
 
-    navOptions.addEventListener('click', () => {
-        navigationButtonsContainer.classList.toggle('show-options');
-        toggleOptionsIcon.classList.toggle('fa-chevron-down');
-        toggleOptionsIcon.classList.toggle('fa-chevron-up');
+    // Scroll to form listeners
+    shoppingListTitle.addEventListener('click', () => {
+        addItemForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
-    // Options menu buttons
-    optionsMyListBtn.addEventListener('click', () => {
-        showSection('shoppingList');
-        navigationButtonsContainer.classList.remove('show-options');
-        toggleOptionsIcon.classList.remove('fa-chevron-up');
-        toggleOptionsIcon.classList.add('fa-chevron-down');
+    suggestionsTitle.addEventListener('click', () => {
+        newSuggestionInput.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
-
-    optionsBuyLaterBtn.addEventListener('click', () => {
-        showSection('buyLater');
-        navigationButtonsContainer.classList.remove('show-options');
-        toggleOptionsIcon.classList.remove('fa-chevron-up');
-        toggleOptionsIcon.classList.add('fa-chevron-down');
-    });
-
-    optionsSuggestionsBtn.addEventListener('click', () => {
-        showSection('suggestions');
-        navigationButtonsContainer.classList.remove('show-options');
-        toggleOptionsIcon.classList.remove('fa-chevron-up');
-        toggleOptionsIcon.classList.add('fa-chevron-down');
-    });
-
-    optionsCategoriesBtn.addEventListener('click', () => {
-        showSection('categories');
-        navigationButtonsContainer.classList.remove('show-options');
-        toggleOptionsIcon.classList.remove('fa-chevron-up');
-        toggleOptionsIcon.classList.add('fa-chevron-down');
-    });
-
-    optionsSettingsBtn.addEventListener('click', () => { // Nouveau listener pour Paramètres
-        showSection('settings');
-        navigationButtonsContainer.classList.remove('show-options');
-        toggleOptionsIcon.classList.remove('fa-chevron-up');
-        toggleOptionsIcon.classList.add('fa-chevron-down');
-    });
-
 
     // Buy Later Listeners
     addBuyLaterItemBtn.addEventListener('click', () => {
@@ -1225,8 +1139,11 @@
       if (!localStorage.getItem('user_categories')) {
           localStorage.setItem('user_categories', JSON.stringify(initialDefaultCategories));
       }
-      if (!localStorage.getItem('category_order')) {
-          localStorage.setItem('category_order', JSON.stringify(getCategories()));
+      // Ensure category_order is initialized, and includes all current categories
+      let currentCategoryOrder = JSON.parse(localStorage.getItem('category_order'));
+      const allCategories = getCategories();
+      if (!currentCategoryOrder || !allCategories.every(cat => currentCategoryOrder.includes(cat))) {
+          localStorage.setItem('category_order', JSON.stringify(allCategories));
       }
 
       updateAllCategorySelects();
@@ -1253,16 +1170,11 @@
 
       if (supabase.rest) {
           console.log("supabase.rest est maintenant prêt !");
-          await handleInitialLoad(); // Gère le chargement initial de la liste ou l'affichage des paramètres
+          await handleInitialLoad();
       } else {
           console.error("Erreur: supabase.rest n'est pas devenu prêt après plusieurs tentatives. Impossible de démarrer l'application.");
           return;
       }
-      
-      // Ensure options are hidden on initial load and arrow points down
-      navigationButtonsContainer.classList.remove('show-options');
-      toggleOptionsIcon.classList.remove('fa-chevron-up');
-      toggleOptionsIcon.classList.add('fa-chevron-down');
     });
   </script>
 </body>
