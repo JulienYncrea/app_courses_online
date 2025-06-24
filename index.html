@@ -288,9 +288,7 @@
 <body>
   <div id="shoppingList" class="section-container section">
     <h1>Ma Liste de Courses 🛒</h1>
-    <input type="text" id="shareCodeInput" placeholder="Entrez un code de partage" />
-    <button id="loadShareCodeBtn">Charger/Créer Liste</button>
-
+    
     <div id="addItemForm" class="hidden">
         <input type="text" id="newItemInput" placeholder="Ajouter un article" />
         <input type="number" id="newQuantityInput" placeholder="Quantité (optionnel)" value="1" min="1" />
@@ -336,6 +334,11 @@
   <div id="settings" class="section-container section hidden">
     <h2>Paramètres ⚙️</h2>
     <p>Code de la liste active : <strong id="activeShareCode">N/A</strong></p>
+    <hr>
+    <h3>Charger / Créer une liste</h3>
+    <input type="text" id="shareCodeInput" placeholder="Entrez un code de partage" />
+    <button id="loadShareCodeBtn">Charger/Créer Liste</button>
+    <hr>
     <button id="changeShareCodeBtn">Changer de liste / Déconnecter</button>
   </div>
 
@@ -395,7 +398,9 @@
     const newQuantityInput = document.getElementById('newQuantityInput');
     const newCategorySelect = document.getElementById('newCategorySelect');
     const addItemBtn = document.getElementById('addItemBtn');
-    const shareCodeInput = document.getElementById('shareCodeInput');
+    
+    // Moved to settings section
+    const shareCodeInput = document.getElementById('shareCodeInput'); 
     const loadShareCodeBtn = document.getElementById('loadShareCodeBtn');
     const addItemForm = document.getElementById('addItemForm');
 
@@ -465,14 +470,19 @@
         return Math.random().toString(36).substring(2, 8).toUpperCase();
     }
 
-    async function promptForShareCode() {
+    async function handleInitialLoad() {
         let shareCode = localStorage.getItem('lastShareCode');
-        if (!shareCode) {
-            shareCode = prompt("Veuillez entrer un code de partage ou cliquez sur OK pour en générer un nouveau (vous pouvez aussi le taper dans le champ ci-dessous) :") || generateShareCode();
-            localStorage.setItem('lastShareCode', shareCode); // Sauvegarde le code pour les prochaines fois
+        if (shareCode) {
+            shareCodeInput.value = shareCode; // Set the input in settings
+            await getOrCreateListByShareCode(shareCode);
+            showSection('shoppingList'); // Show shopping list if connected
+        } else {
+            // If no share code, go to settings for the user to enter one
+            showSection('settings');
+            // Optionally, pre-fill with a generated code to suggest creation
+            shareCodeInput.value = generateShareCode(); 
+            alert("Bienvenue ! Veuillez entrer un code de partage ou cliquez sur 'Charger/Créer Liste' pour en générer un nouveau.");
         }
-        shareCodeInput.value = shareCode;
-        await getOrCreateListByShareCode(shareCode);
     }
 
     function showSection(sectionId) {
@@ -558,8 +568,8 @@
                 console.log(`Liste trouvée pour le code ${code}:`, lists[0]);
                 currentListId = lists[0].id;
                 currentShareCode = code;
-                shareCodeInput.value = code;
-                addItemForm.classList.remove('hidden');
+                localStorage.setItem('lastShareCode', shareCodeInput.value); // Save on successful load
+                addItemForm.classList.remove('hidden'); // Show add item form
                 setupRealtimeListener(currentListId);
                 loadShoppingList();
                 activeShareCodeSpan.textContent = currentShareCode; // Met à jour l'affichage dans les paramètres
@@ -583,8 +593,8 @@
                     console.log("Nouvelle liste créée:", createdList[0]);
                     currentListId = createdList[0].id;
                     currentShareCode = code;
-                    shareCodeInput.value = code;
-                    addItemForm.classList.remove('hidden');
+                    localStorage.setItem('lastShareCode', shareCodeInput.value); // Save on successful creation
+                    addItemForm.classList.remove('hidden'); // Show add item form
                     setupRealtimeListener(currentListId);
                     loadShoppingList();
                     activeShareCodeSpan.textContent = currentShareCode; // Met à jour l'affichage dans les paramètres
@@ -1209,13 +1219,15 @@
     }
 
     // --- Listeners d'événements ---
-    loadShareCodeBtn.addEventListener('click', () => {
+    loadShareCodeBtn.addEventListener('click', async () => {
         const code = shareCodeInput.value.trim();
         if (code) {
-            localStorage.setItem('lastShareCode', code);
-            getOrCreateListByShareCode(code);
+            await getOrCreateListByShareCode(code);
+            if (currentListId) { // If successfully connected/created
+                showSection('shoppingList'); // Go to My List
+            }
         } else {
-            promptForShareCode();
+            alert("Veuillez entrer un code de partage.");
         }
     });
 
@@ -1362,13 +1374,13 @@
 
       if (supabase.rest) {
           console.log("supabase.rest est maintenant prêt !");
-          await promptForShareCode();
+          await handleInitialLoad(); // Gère le chargement initial de la liste ou l'affichage des paramètres
       } else {
           console.error("Erreur: supabase.rest n'est pas devenu prêt après plusieurs tentatives. Impossible de démarrer l'application.");
           return;
       }
       
-      showSection('shoppingList');
+      // Ensure options are hidden on initial load and arrow points down
       navigationButtonsContainer.classList.remove('show-options');
       toggleOptionsIcon.classList.remove('fa-chevron-up');
       toggleOptionsIcon.classList.add('fa-chevron-down');
