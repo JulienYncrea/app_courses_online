@@ -26,449 +26,489 @@
       background: #FFFFFF;
       padding: 1.5rem;
       border-radius: 1rem;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      display: none;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      margin-bottom: 1rem;
     }
-    .section-container.active {
-        display: block;
-    }
-    label {
-      display: block;
-      margin-top: 0.75rem;
-      font-weight: bold;
-      color: #6A057F;
-    }
-    input, button, select {
-      width: 100%;
-      padding: 0.7rem;
-      margin-top: 0.4rem;
-      border: 1px solid #DDA0DD;
+    input[type="text"], input[type="number"], select, button {
+      width: calc(100% - 20px);
+      padding: 0.8rem;
+      margin-bottom: 0.5rem;
+      border: 1px solid #ddd;
       border-radius: 0.5rem;
       box-sizing: border-box;
-      color: #333;
       font-size: 1rem;
     }
     button {
-      background: #FF69B4;
-      color: #FFFFFF;
-      font-weight: bold;
+      background-color: #E75480;
+      color: white;
       cursor: pointer;
-      transition: all 0.3s ease;
       border: none;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transition: background-color 0.2s ease;
     }
     button:hover {
-      background: #C71585;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      background-color: #D4426A;
     }
-    select {
-        background: #F8F8FF;
-        appearance: none;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        background-image: url("data:image/svg+xml;utf8,<svg fill='%23C71585' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
-        background-repeat: no-repeat;
-        background-position: right 0.7em top 50%;
-        background-size: 0.65em auto;
-        padding-right: 2.5em;
+    ul {
+      list-style: none;
+      padding: 0;
     }
-
-    /* Styles for navigation buttons */
-    .navigation-buttons {
-        text-align: center;
-        margin-bottom: 2rem;
+    li {
+      background: #f9f9f9;
+      padding: 0.8rem;
+      margin-bottom: 0.5rem;
+      border-radius: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      flex-wrap: wrap; /* Permet aux éléments de passer à la ligne */
+    }
+    li.bought {
+      text-decoration: line-through;
+      color: #888;
+      background-color: #e9e9e9;
+    }
+    .item-info {
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .item-actions {
+      display: flex;
+      gap: 0.5rem; /* Espace entre les boutons */
+      margin-top: 0.5rem; /* Espace si les boutons passent en dessous */
+    }
+    .item-actions button {
+      width: auto;
+      padding: 0.5rem 0.8rem;
+      font-size: 0.9rem;
+      border-radius: 0.4rem;
+      margin-bottom: 0; /* Override default button margin */
+    }
+    .item-actions .remove-btn {
+      background-color: #f44336;
+    }
+    .item-actions .remove-btn:hover {
+      background-color: #d32f2f;
+    }
+    .item-actions .buy-btn {
+      background-color: #4CAF50;
+    }
+    .item-actions .buy-btn:hover {
+      background-color: #45a049;
+    }
+    .item-actions .undo-btn {
+      background-color: #ff9800;
+    }
+    .item-actions .undo-btn:hover {
+      background-color: #e68a00;
+    }
+    .quantity-control {
+        display: flex;
+        align-items: center;
+        gap: 0.2rem;
+        margin-left: 0.5rem;
+    }
+    .quantity-control button {
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        font-size: 1.2rem;
+        border-radius: 50%;
         display: flex;
         justify-content: center;
-        gap: 1.5rem;
-        flex-wrap: wrap;
-    }
-    .navigation-buttons button {
-        width: auto;
-        padding: 0.8rem 1.8rem;
-        font-size: 1.1rem;
-        background-color: #EE82EE;
-        color: #FFFFFF;
-        border: 2px solid #DA70D6;
-        border-radius: 25px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        display: inline-flex; /* Use flex to align icon and text */
         align-items: center;
-        justify-content: center;
+        background-color: #ddd;
+        color: #333;
     }
-    .navigation-buttons button.active {
-        background: #FFD700;
-        color: #6A057F;
-        border-color: #FFA500;
-        font-weight: bold;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    .quantity-control button:hover {
+        background-color: #ccc;
     }
-    .navigation-buttons button:hover:not(.active) {
-        background-color: #DDA0DD;
-        border-color: #BA55D3;
-    }
-    .navigation-buttons .toggle-options-btn {
-        background-color: #9370DB; /* Couleur différente pour le bouton toggle */
-        border-color: #8A2BE2;
-        padding: 0.8rem 1.2rem; /* Plus petit pour l'icône */
-    }
-    .navigation-buttons .toggle-options-btn:hover {
-        background-color: #8A2BE2;
-        border-color: #6A057F;
-    }
-    .navigation-buttons .toggle-options-btn i {
-        transition: transform 0.3s ease;
-    }
-    .navigation-buttons .option-button {
-        display: none; /* Hidden by default */
-    }
-    .navigation-buttons.show-options .option-button {
-        display: inline-flex; /* Show when parent has show-options class */
-    }
-
-    /* Styles for the shopping list */
-    .shopping-list-item, .buy-later-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #FFF0F5;
-      padding: 0.7rem 1.2rem;
-      margin-top: 0.7rem;
-      border-radius: 0.75rem;
-      font-size: 1.1rem;
-      color: #6A057F;
-      border: 1px solid #FFC0CB;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      /* Prevent text selection on drag for iOS/Safari */
-      -webkit-user-select: none; /* Safari */
-      -moz-user-select: none;    /* Firefox */
-      -ms-user-select: none;     /* IE10+ */
-      user-select: none;         /* Standard */
-    }
-    .shopping-list-item .delete-btn, 
-    .shopping-list-item .decrement-btn,
-    .buy-later-item .delete-btn {
-      background: none;
-      border: none;
-      color: #FF6347;
-      font-size: 1.6rem;
-      cursor: pointer;
-      padding: 0 0.5rem;
-      margin: 0;
-      width: auto;
-      transition: color 0.3s ease;
-      line-height: 1; /* Ensure consistent vertical alignment */
-    }
-    .shopping-list-item .decrement-btn {
-        color: #6A057F; /* Darker color for decrement */
-        font-size: 1.8rem; /* Slightly larger for visibility */
-        margin-right: 5px; /* Space between - and quantity */
-    }
-    .shopping-list-item .delete-btn:hover, 
-    .buy-later-item .delete-btn:hover {
-      color: #DC143C;
-    }
-    .shopping-list-item .decrement-btn:hover {
-        color: #8A2BE2; /* Change color on hover for decrement */
-    }
-
-    .shopping-list-item span, .buy-later-item span {
-        flex-grow: 1;
-        padding-right: 10px;
-    }
-    .quantity {
-        font-weight: bold;
-        margin-left: 8px; /* Space after quantity */
-        margin-right: 8px; /* Space before quantity if decrement is present */
-        color: #FF8C00;
-        min-width: 20px; /* Ensure space for quantity */
+    .quantity-control span {
+        min-width: 20px;
         text-align: center;
+        font-weight: bold;
     }
 
-    /* Styles for the suggestions list */
-    .suggestions-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-      gap: 0.7rem;
-      margin-top: 1.5rem;
-    }
-    .suggestion-item {
-      position: relative;
-      background: #9370DB;
-      color: #FFFFFF;
-      padding: 0.6rem 1rem;
-      border-radius: 0.75rem;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      user-select: none;
-      white-space: nowrap; /* Prevent wrapping */
-      overflow: hidden; /* Hide overflow */
-      text-overflow: ellipsis; /* Add ellipsis for overflowed text */
+    .tab-buttons {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-right: 5px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      justify-content: center;
+      margin-bottom: 1rem;
     }
-    .suggestion-item:hover {
-      background: #8A2BE2;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    .tab-buttons button {
+      flex: 1;
+      margin: 0 0.2rem;
+      background-color: #f0f0f0;
+      color: #E75480;
+      border: 1px solid #E75480;
     }
-    .suggestion-item-text {
-        flex-grow: 1;
-        padding-right: 5px;
-        font-weight: 500;
-        overflow: hidden; /* Ensure text overflow ellipsis works */
-        text-overflow: ellipsis;
-        white-space: nowrap; /* Keep on single line */
+    .tab-buttons button.active {
+      background-color: #E75480;
+      color: white;
     }
-    .delete-suggestion-btn {
-      background: none;
-      border: none;
-      color: #FFD700;
-      font-size: 1.3rem;
+    .total-items {
+        text-align: right;
+        font-weight: bold;
+        margin-top: 1rem;
+        color: #E75480;
+    }
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: #E75480;
+      display: flex;
+      justify-content: space-around;
+      padding: 0.5rem 0;
+      box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+      z-index: 1000;
+      border-top-left-radius: 1rem;
+      border-top-right-radius: 1rem;
+    }
+    .nav-item {
+      color: white;
+      text-align: center;
+      padding: 0.5rem;
       cursor: pointer;
-      padding: 0 0.2rem;
-      margin: 0;
-      width: auto;
-      transition: color 0.3s ease;
-      line-height: 1;
-      flex-shrink: 0; /* Prevent button from shrinking */
+      font-size: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    .delete-suggestion-btn:hover {
-      color: #FF4500;
+    .nav-item i {
+      font-size: 1.5rem;
+      margin-bottom: 0.2rem;
     }
-
-    .add-form { /* General style for add forms */
-        margin-top: 1.5rem;
-        border-top: 1px solid #DDA0DD;
-        padding-top: 1rem;
-    }
-    .filter-controls {
-        margin-bottom: 1.5rem;
+    .nav-item.active {
+      font-weight: bold;
+      color: #FAD0C4;
     }
 
-    /* Style for empty list text */
-    p[style*="text-align: center"] {
-        color: #C71585 !important;
-        font-style: italic;
-        font-size: 0.95rem;
+    /* Styles pour la barre de navigation étendue */
+    .navigation-buttons {
+      position: fixed;
+      bottom: 4.5rem; /* Juste au-dessus de la barre de navigation principale */
+      left: 0;
+      width: 100%;
+      background-color: #FFF;
+      box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      padding: 0.5rem 0;
+      z-index: 999;
+      transform: translateY(100%); /* Masqué par défaut */
+      transition: transform 0.3s ease-out;
+      border-top-left-radius: 1rem;
+      border-top-right-radius: 1rem;
+      overflow: hidden; /* Cache le contenu qui dépasse pendant l'animation */
     }
 
-    /* Category order list styles */
-    #categoryOrderList, #manageCategoryList {
-        list-style: none;
-        padding: 0;
+    .navigation-buttons.show-options {
+      transform: translateY(0); /* Affiche la barre */
     }
-    #categoryOrderList li, #manageCategoryList li {
-        background: #F8F8FF;
-        border: 1px solid #DDA0DD;
-        padding: 0.75rem 1rem;
-        margin-bottom: 0.5rem;
-        border-radius: 0.5rem;
+
+    .navigation-buttons button {
+        background: none;
+        border: none;
+        color: #E75480;
+        padding: 0.8rem 1rem;
+        text-align: left;
+        width: 100%;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        display: flex;
+        align-items: center;
+    }
+
+    .navigation-buttons button i {
+        margin-right: 0.5rem;
+        font-size: 1.2rem;
+    }
+
+    .navigation-buttons button:hover {
+        background-color: #f0f0f0;
+    }
+
+    /* Icône de la flèche de basculement */
+    .toggle-options {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        padding: 0.2rem 0;
+        background-color: #E75480; /* Couleur de la barre inférieure */
+        color: white;
+        cursor: pointer;
+        font-size: 1.2rem;
+        border-top-left-radius: 1rem;
+        border-top-right-radius: 1rem;
+        position: absolute;
+        top: -1.5rem; /* Pour chevaucher légèrement la barre étendue */
+        left: 0;
+        z-index: 1001; /* Au-dessus de tout */
+    }
+    .nav-item.options {
+        position: relative; /* Pour positionner la flèche par rapport à cet élément */
+    }
+
+    /* Style pour les sections cachées */
+    .section.hidden {
+      display: none;
+    }
+
+    /* Style pour la liste de suggestions */
+    #suggestionList li {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-wrap: wrap;
+    }
+    #suggestionList .suggestion-info {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column; /* Nom et catégorie sur des lignes différentes */
+    }
+    #suggestionList .suggestion-info .name {
         font-weight: bold;
-        color: #6A057F;
-        cursor: grab; /* Indicate draggable */
-        transition: background-color 0.2s ease, transform 0.2s ease;
-        /* Prevent text selection on drag for iOS/Safari */
-        -webkit-user-select: none; /* Safari */
-        -moz-user-select: none;    /* Firefox */
-        -ms-user-select: none;     /* IE10+ */
-        user-select: none;         /* Standard */
     }
-    #categoryOrderList li:hover {
-        background-color: #E6E6FA;
-        transform: scale(1.01);
+    #suggestionList .suggestion-info .category {
+        font-size: 0.85em;
+        color: #666;
     }
-    #categoryOrderList li.dragging {
-        opacity: 0.7;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    }
-    .drag-handle {
-        font-size: 1.5rem;
-        cursor: grab;
-        margin-right: 10px;
-        color: #EE82EE;
-    }
-    #manageCategoryList li .delete-category-btn {
-        background: none;
-        border: none;
-        color: #FF6347;
-        font-size: 1.2rem;
-        cursor: pointer;
-        padding: 0 0.2rem;
-        margin-left: 10px;
-        transition: color 0.3s ease;
-    }
-    #manageCategoryList li .delete-category-btn:hover {
-        color: #DC143C;
-    }
-
-    /* Styles for the new "Manage Categories" subsection */
-    .manage-categories-subsection {
-        margin-top: 2rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid #DDA0DD;
-    }
-    .manage-categories-subsection h3 {
-        color: #E75480;
-        text-align: center;
-        margin-bottom: 1rem;
-    }
-
-    @media (max-width: 640px) {
-        .suggestions-grid {
-            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-        }
-        .navigation-buttons button {
-          padding: 0.6rem 1rem;
-          font-size: 0.9rem;
-        }
-        .navigation-buttons .toggle-options-btn {
-            padding: 0.6rem 1rem; /* Adjust padding for smaller screens */
-        }
+    #suggestionList .suggestion-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem; /* Espace si les boutons passent en dessous */
     }
   </style>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-          .then(reg => console.log('Service Worker registered:', reg.scope))
-          .catch(err => console.error('SW error:', err));
-      });
-    }
-  </script>
 </head>
 <body>
-  <h1>My Shopping List 🛒</h1>
+  <div id="shoppingList" class="section-container section">
+    <h1>Ma Liste de Courses 🛒</h1>
+    <input type="text" id="shareCodeInput" placeholder="Entrez un code de partage" />
+    <button id="loadShareCodeBtn">Charger/Créer Liste</button>
 
-  <div class="navigation-buttons" id="navigationButtonsContainer">
-    <button id="showShoppingListBtn" class="active">My List</button>
-    <button id="toggleOptionsBtn" class="toggle-options-btn"><i class="fas fa-chevron-up"></i></button>
-    <button id="showSuggestionsBtn" class="option-button">Suggestions</button>
-    <button id="showCategoryOrderBtn" class="option-button">Order by Category</button>
-    <button id="showBuyLaterBtn" class="option-button">Buy Later</button>
-    <button id="showSettingsBtn" class="option-button">Settings</button>
-  </div>
-
-  <div id="shoppingListSection" class="section-container active">
-    <h2>Items to Buy</h2>
-    <div id="shoppingList" style="margin-top: 1rem;">
-      </div>
-    <form id="shoppingForm" autocomplete="off" class="add-form">
-        <label for="newItem">Add an item:</label>
-        <input type="text" id="newItem" placeholder="Ex: Milk, Bread, Apples..." required />
-        <button type="submit">Add to List ✅</button>
-    </form>
-  </div>
-
-  <div id="suggestionsSection" class="section-container">
-    <h2>Suggestions by Category</h2>
-    <div class="filter-controls">
-        <label for="categoryFilter">Filter by category:</label>
-        <select id="categoryFilter">
-            </select>
+    <div id="addItemForm" class="hidden">
+        <input type="text" id="newItemInput" placeholder="Ajouter un article" />
+        <input type="number" id="newQuantityInput" placeholder="Quantité (optionnel)" value="1" min="1" />
+        <select id="newCategorySelect"></select>
+        <button id="addItemBtn">Ajouter à la liste</button>
     </div>
-    <div id="suggestionsList" class="suggestions-grid">
-      </div>
+    
+    <div class="tab-buttons" id="itemTabs">
+      <button class="tab-btn active" data-tab="toBuy">À Acheter</button>
+      <button class="tab-btn" data-tab="bought">Achetés</button>
+    </div>
+    
+    <ul id="shoppingListToBuy" class="item-list"></ul>
+    <ul id="shoppingListBought" class="item-list hidden"></ul>
 
-    <form id="addSuggestionForm" autocomplete="off" class="add-form">
-        <label for="newSuggestion">New suggestion:</label>
-        <input type="text" id="newSuggestion" placeholder="Ex: Cheese, Chocolate..." required />
-        
-        <label for="suggestionCategory">Category:</label>
-        <select id="suggestionCategory" required>
-            </select>
-        
-        <button type="submit">Add as suggestion ✨</button>
-    </form>
+    <p class="total-items">Articles restants : <span id="totalRemainingItems">0</span></p>
   </div>
 
-  <div id="categoryOrderSection" class="section-container">
-    <h2>Order Categories</h2>
-    <p style="text-align: center; color: #6A057F; margin-top: 0.5rem;">Drag and drop categories to set their order in 'My List'.</p>
-    <ul id="categoryOrderList">
-        </ul>
+  <div id="buyLater" class="section-container section hidden">
+    <h2>Acheter Plus Tard 🛒</h2>
+    <input type="text" id="newBuyLaterItemInput" placeholder="Article à acheter plus tard" />
+    <button id="addBuyLaterItemBtn">Ajouter</button>
+    <ul id="buyLaterList"></ul>
+  </div>
 
-    <div class="manage-categories-subsection">
-        <h3>Manage Categories</h3>
-        <form id="addCategoryForm" autocomplete="off" class="add-form">
-            <label for="newCategoryName">Add new category:</label>
-            <input type="text" id="newCategoryName" placeholder="Ex: Pet Food, Snacks..." required />
-            <button type="submit">Add Category ➕</button>
-        </form>
-        <ul id="manageCategoryList">
-            </ul>
+  <div id="suggestions" class="section-container section hidden">
+    <h2>Suggestions 💡</h2>
+    <input type="text" id="newSuggestionInput" placeholder="Suggérer un article" />
+    <select id="newSuggestionCategorySelect"></select> <button id="addSuggestionBtn">Ajouter Suggestion</button>
+    <ul id="suggestionList"></ul>
+  </div>
+
+  <div id="categories" class="section-container section hidden">
+    <h2>Gérer les Catégories 📂</h2>
+    <input type="text" id="newCategoryInput" placeholder="Nouvelle catégorie" />
+    <button id="addCategoryBtn">Ajouter Catégorie</button>
+    <ul id="categoryList"></ul>
+    <h3>Ordre des Catégories</h3>
+    <ul id="categoryOrderList" class="sortable-list"></ul>
+    <button id="saveCategoryOrderBtn">Sauvegarder Ordre</button>
+  </div>
+
+  <div id="settings" class="section-container section hidden">
+    <h2>Paramètres ⚙️</h2>
+    <p>Code de la liste active : <strong id="activeShareCode">N/A</strong></p>
+    <button id="changeShareCodeBtn">Changer de liste / Déconnecter</button>
+  </div>
+
+
+  <div class="navigation-buttons">
+    <button id="optionsMyListBtn"><i class="fas fa-shopping-basket"></i> Ma Liste</button>
+    <button id="optionsBuyLaterBtn"><i class="fas fa-clock"></i> Acheter Plus Tard</button>
+    <button id="optionsSuggestionsBtn"><i class="fas fa-lightbulb"></i> Suggestions</button>
+    <button id="optionsCategoriesBtn"><i class="fas fa-folder"></i> Gérer Catégories</button>
+    <button id="optionsSettingsBtn"><i class="fas fa-cog"></i> Paramètres</button>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item active" id="navShoppingList">
+      <i class="fas fa-shopping-basket"></i>
+      <span>Ma Liste</span>
+    </div>
+    <div class="nav-item" id="navBuyLater">
+      <i class="fas fa-clock"></i>
+      <span>Plus Tard</span>
+    </div>
+    <div class="nav-item" id="navSuggestions">
+      <i class="fas fa-lightbulb"></i>
+      <span>Suggestions</span>
+    </div>
+    <div class="nav-item" id="navCategories">
+      <i class="fas fa-folder"></i>
+      <span>Catégories</span>
+    </div>
+    <div class="nav-item" id="navSettings">
+      <i class="fas fa-cog"></i>
+      <span>Paramètres</span>
+    </div>
+    <div class="nav-item options" id="navOptions">
+        <i class="fas fa-bars"></i>
+        <span>Options</span>
+        <i class="fas fa-chevron-down toggle-options" id="toggleOptionsIcon"></i>
     </div>
   </div>
 
-  <div id="buyLaterSection" class="section-container">
-    <h2>Items to Buy Later</h2>
-    <div id="buyLaterList" style="margin-top: 1rem;">
-    </div>
-    <form id="buyLaterForm" autocomplete="off" class="add-form">
-        <label for="newBuyLaterItem">Add item to buy later:</label>
-        <input type="text" id="newBuyLaterItem" placeholder="Ex: New book, Fancy gadget..." required />
-        <button type="submit">Add to Buy Later ➡️</button>
-    </form>
-  </div>
 
-  <div id="settingsSection" class="section-container">
-    <h2>Settings</h2>
-    <p style="text-align: center; color: #6A057F; margin-top: 0.5rem;">Settings will be managed here. Currently, the option to change list numbers is not available.</p>
-    </div>
-
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const shoppingForm = document.getElementById('shoppingForm');
-    const newItemInput = document.getElementById('newItem');
-    const shoppingListDiv = document.getElementById('shoppingList');
+    // --- Configuration Supabase ---
+    const SUPABASE_URL = 'https://cepqcretnxfhjbvdukkk.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlcHFjcmV0bnhmaGpidmR1a2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2MTc1NDcsImV4cCI6MjA2NjE5MzU0N30.H56IGRN14FpfHXQVODKsmTbqMEe27_gcCcgGLphEEOU';
 
-    const addSuggestionForm = document.getElementById('addSuggestionForm');
-    const newSuggestionInput = document.getElementById('newSuggestion');
-    const suggestionCategorySelect = document.getElementById('suggestionCategory');
-    const suggestionsListDiv = document.getElementById('suggestionsList');
-    const categoryFilterSelect = document.getElementById('categoryFilter');
+    let supabase = null; // Sera initialisé dans window.addEventListener('load')
 
-    const buyLaterForm = document.getElementById('buyLaterForm');
-    const newBuyLaterItemInput = document.getElementById('newBuyLaterItem');
-    const buyLaterListDiv = document.getElementById('buyLaterList');
-
-    const addCategoryForm = document.getElementById('addCategoryForm');
-    const newCategoryNameInput = document.getElementById('newCategoryName');
-    const manageCategoryList = document.getElementById('manageCategoryList');
-
-    // Navigation buttons
-    const navigationButtonsContainer = document.getElementById('navigationButtonsContainer');
-    const showShoppingListBtn = document.getElementById('showShoppingListBtn');
-    const toggleOptionsBtn = document.getElementById('toggleOptionsBtn');
-    const toggleOptionsIcon = toggleOptionsBtn.querySelector('i');
-    const showSuggestionsBtn = document.getElementById('showSuggestionsBtn');
-    const showCategoryOrderBtn = document.getElementById('showCategoryOrderBtn');
-    const showBuyLaterBtn = document.getElementById('showBuyLaterBtn');
-    const showSettingsBtn = document.getElementById('showSettingsBtn'); // New settings button
+    // --- Variables Globales ---
+    let currentShareCode = null;
+    let currentListId = null;
+    const shoppingListToBuy = document.getElementById('shoppingListToBuy');
+    const shoppingListBought = document.getElementById('shoppingListBought');
+    const totalRemainingItemsSpan = document.getElementById('totalRemainingItems');
+    const newItemInput = document.getElementById('newItemInput');
+    const newQuantityInput = document.getElementById('newQuantityInput');
+    const newCategorySelect = document.getElementById('newCategorySelect');
+    const addItemBtn = document.getElementById('addItemBtn');
+    const shareCodeInput = document.getElementById('shareCodeInput');
+    const loadShareCodeBtn = document.getElementById('loadShareCodeBtn');
+    const addItemForm = document.getElementById('addItemForm');
 
     // Sections
-    const shoppingListSection = document.getElementById('shoppingListSection');
-    const suggestionsSection = document.getElementById('suggestionsSection');
-    const categoryOrderSection = document.getElementById('categoryOrderSection');
-    const buyLaterSection = document.getElementById('buyLaterSection');
-    const settingsSection = document.getElementById('settingsSection'); // New settings section
+    const shoppingListSection = document.getElementById('shoppingList');
+    const buyLaterSection = document.getElementById('buyLater');
+    const suggestionsSection = document.getElementById('suggestions');
+    const categoriesSection = document.getElementById('categories');
+    const settingsSection = document.getElementById('settings'); // Nouvelle section paramètres
 
+    // Navigation
+    const navShoppingList = document.getElementById('navShoppingList');
+    const navBuyLater = document.getElementById('navBuyLater');
+    const navSuggestions = document.getElementById('navSuggestions');
+    const navCategories = document.getElementById('navCategories');
+    const navSettings = document.getElementById('navSettings'); // Nouveau bouton de navigation
+    const navOptions = document.getElementById('navOptions');
+    const navigationButtonsContainer = document.querySelector('.navigation-buttons');
+    const toggleOptionsIcon = document.getElementById('toggleOptionsIcon');
+
+    // Options Navigation Buttons
+    const optionsMyListBtn = document.getElementById('optionsMyListBtn');
+    const optionsBuyLaterBtn = document.getElementById('optionsBuyLaterBtn');
+    const optionsSuggestionsBtn = document.getElementById('optionsSuggestionsBtn');
+    const optionsCategoriesBtn = document.getElementById('optionsCategoriesBtn');
+    const optionsSettingsBtn = document.getElementById('optionsSettingsBtn'); // Nouveau bouton dans le menu étendu
+
+    // Buy Later section elements
+    const newBuyLaterItemInput = document.getElementById('newBuyLaterItemInput');
+    const addBuyLaterItemBtn = document.getElementById('addBuyLaterItemBtn');
+    const buyLaterList = document.getElementById('buyLaterList');
+
+    // Suggestions section elements
+    const newSuggestionInput = document.getElementById('newSuggestionInput');
+    const newSuggestionCategorySelect = document.getElementById('newSuggestionCategorySelect'); // Nouveau
+    const addSuggestionBtn = document.getElementById('addSuggestionBtn');
+    const suggestionList = document.getElementById('suggestionList');
+
+    // Categories section elements
+    const newCategoryInput = document.getElementById('newCategoryInput');
+    const addCategoryBtn = document.getElementById('addCategoryBtn');
+    const categoryList = document.getElementById('categoryList');
     const categoryOrderList = document.getElementById('categoryOrderList');
+    const saveCategoryOrderBtn = document.getElementById('saveCategoryOrderBtn');
 
-    // Default categories (now only for initial setup)
+    // Settings section elements
+    const activeShareCodeSpan = document.getElementById('activeShareCode');
+    const changeShareCodeBtn = document.getElementById('changeShareCodeBtn');
+
+
+    // --- Catégories par défaut ---
     const initialDefaultCategories = [
-        "Petit déjeuner", "Boisson", "Viande", "Fruit", "Légume",
-        "Produit ménager", "Produit de beauté", "Autre"
+        "Fruits et Légumes",
+        "Produits Laitiers",
+        "Viandes et Poissons",
+        "Produits d'Épicerie",
+        "Boulangerie",
+        "Boissons",
+        "Surgelés",
+        "Entretien",
+        "Hygiène",
+        "Autres"
     ];
 
-    // --- Category Management (core functions) ---
+    // --- Fonctions utilitaires ---
+    function generateShareCode() {
+        return Math.random().toString(36).substring(2, 8).toUpperCase();
+    }
+
+    async function promptForShareCode() {
+        let shareCode = localStorage.getItem('lastShareCode');
+        if (!shareCode) {
+            shareCode = prompt("Veuillez entrer un code de partage ou cliquez sur OK pour en générer un nouveau (vous pouvez aussi le taper dans le champ ci-dessous) :") || generateShareCode();
+            localStorage.setItem('lastShareCode', shareCode); // Sauvegarde le code pour les prochaines fois
+        }
+        shareCodeInput.value = shareCode;
+        await getOrCreateListByShareCode(shareCode);
+    }
+
+    function showSection(sectionId) {
+        document.querySelectorAll('.section').forEach(section => {
+            section.classList.add('hidden');
+        });
+        document.getElementById(sectionId).classList.remove('hidden');
+
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        document.getElementById('nav' + sectionId.charAt(0).toUpperCase() + sectionId.slice(1)).classList.add('active');
+
+        // Spécifique pour la section settings
+        if (sectionId === 'settings') {
+            activeShareCodeSpan.textContent = currentShareCode || 'N/A';
+        }
+        // Charger les données spécifiques à la section si nécessaire
+        if (sectionId === 'buyLater') {
+            loadBuyLaterList();
+        } else if (sectionId === 'suggestions') {
+            loadSuggestions();
+        } else if (sectionId === 'categories') {
+            renderCategories();
+            loadCategoryOrder();
+        }
+    }
+
+    function updateSupabaseHeaders(shareCode) {
+        if (supabase && supabase.rest) {
+            supabase.rest.headers['X-Share-Code'] = shareCode;
+            console.log(`Supabase headers updated with X-Share-Code: ${shareCode}`);
+        } else {
+            console.warn("Supabase client non initialisé ou rest client non prêt, impossible de mettre à jour les headers.");
+        }
+    }
 
     function getCategories() {
         return JSON.parse(localStorage.getItem('user_categories')) || initialDefaultCategories;
@@ -476,590 +516,821 @@
 
     function saveCategories(categories) {
         localStorage.setItem('user_categories', JSON.stringify(categories));
-        updateAllCategorySelects(); // Update all selects when categories change
-        loadCategoryOrder(); // Update order list (also reloads manage list within it now)
-        loadShoppingList(); // Reload shopping list to reflect category changes
-        loadSuggestions(); // Reload suggestions to reflect category changes
-    }
-
-    function addCategory(categoryName) {
-        if (!categoryName.trim()) {
-            alert('Please enter a category name.');
-            return;
-        }
-        let categories = getCategories();
-        if (categories.some(cat => cat.toLowerCase() === categoryName.trim().toLowerCase())) {
-            alert(`Category "${categoryName.trim()}" already exists!`);
-            return;
-        }
-        categories.push(categoryName.trim());
-        saveCategories(categories);
-        newCategoryNameInput.value = '';
-    }
-
-    function deleteCategory(categoryName) {
-        if (!confirm(`Are you sure you want to delete the category "${categoryName}"? This will also remove any suggestions linked to it.`)) {
-            return;
-        }
-        let categories = getCategories();
-        categories = categories.filter(cat => cat !== categoryName);
-        saveCategories(categories);
-
-        // Also delete suggestions associated with this category
-        let suggestions = JSON.parse(localStorage.getItem('shopping_suggestions')) || [];
-        suggestions = suggestions.filter(sug => sug.category !== categoryName);
-        localStorage.setItem('shopping_suggestions', JSON.stringify(suggestions));
-        loadSuggestions(); // Refresh suggestions list
     }
 
     function updateAllCategorySelects() {
         const categories = getCategories();
-        const allCategoryOptions = ['Toutes', ...categories]; // Add 'Toutes' for filter
-
-        // Update categoryFilterSelect
-        categoryFilterSelect.innerHTML = '';
-        allCategoryOptions.forEach(cat => {
-            const option = document.createElement('option');
-            option.value = cat;
-            option.textContent = cat;
-            categoryFilterSelect.appendChild(option);
+        const selects = document.querySelectorAll('select#newCategorySelect, select#newSuggestionCategorySelect');
+        selects.forEach(select => {
+            select.innerHTML = '';
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                select.appendChild(option);
+            });
         });
-
-        // Update suggestionCategorySelect
-        suggestionCategorySelect.innerHTML = '<option value="">Choisir une catégorie</option>';
-        categories.forEach(cat => {
-            const option = document.createElement('option');
-            option.value = cat;
-            option.textContent = cat;
-            suggestionCategorySelect.appendChild(option);
-        });
+        if (categories.length > 0) {
+            newCategorySelect.value = categories[0];
+            newSuggestionCategorySelect.value = categories[0];
+        }
     }
 
-    function loadManageCategories() {
-        const categories = getCategories();
-        manageCategoryList.innerHTML = '';
-        if (categories.length === 0) {
-            manageCategoryList.innerHTML = '<p style="text-align: center; color: #C71585; margin-top: 0.5rem;">No categories defined yet. Add some above!</p>';
-            return;
-        }
-        categories.forEach(category => {
-            const li = document.createElement('li');
-            li.textContent = category;
-            li.innerHTML = `
-                <span>${category}</span>
-                <button class="delete-category-btn" data-category="${category}">✖</button>
-            `;
-            manageCategoryList.appendChild(li);
-        });
-    }
+    // --- Fonctions Supabase ---
 
-    // --- Shopping list management functions ---
+    async function getOrCreateListByShareCode(code) {
+        updateSupabaseHeaders(code);
+        
+        try {
+            const { data: lists, error: selectError } = await supabase
+                .from('lists')
+                .select('id, name')
+                .eq('share_code', code);
 
-    function loadShoppingList() {
-        let items = JSON.parse(localStorage.getItem('shopping_list_items')) || [];
-        const currentCategoryOrder = JSON.parse(localStorage.getItem('category_order')) || getCategories();
-        shoppingListDiv.innerHTML = '';
+            if (selectError && selectError.code !== '406') {
+                if (selectError.code === 'PGRST400' && selectError.message.includes('406')) {
+                } else {
+                  throw selectError;
+                }
+            }
 
-        if (items.length === 0) {
-            shoppingListDiv.innerHTML = '<p style="text-align: center; color: #C71585; margin-top: 0.5rem;">Your list is empty for now!</p>';
-            return;
-        }
-
-        // Sort items alphabetically before categorization
-        items.sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
-
-        const categorizedItems = {};
-        currentCategoryOrder.forEach(cat => categorizedItems[cat] = []);
-
-        const itemsInUncategorized = []; // Renamed from itemsInOtherOrUncategorized
-
-        items.forEach(item => {
-            const category = getCategoryForItem(item.name);
-            if (currentCategoryOrder.includes(category)) {
-                categorizedItems[category].push(item);
+            if (lists && lists.length > 0) {
+                console.log(`Liste trouvée pour le code ${code}:`, lists[0]);
+                currentListId = lists[0].id;
+                currentShareCode = code;
+                shareCodeInput.value = code;
+                addItemForm.classList.remove('hidden');
+                setupRealtimeListener(currentListId);
+                loadShoppingList();
+                activeShareCodeSpan.textContent = currentShareCode; // Met à jour l'affichage dans les paramètres
+                return lists[0];
             } else {
-                itemsInUncategorized.push(item);
+                console.log(`Aucune liste trouvée pour le code ${code}. Création d'une nouvelle liste.`);
+                const newList = {
+                    name: `Liste ${code}`,
+                    share_code: code
+                };
+                const { data: createdList, error: insertError } = await supabase
+                    .from('lists')
+                    .insert([newList])
+                    .select('id, name');
+
+                if (insertError) {
+                    console.error("Erreur lors de la création de la liste:", insertError);
+                    alert("Erreur lors de la création de la liste: " + insertError.message);
+                    return null;
+                } else {
+                    console.log("Nouvelle liste créée:", createdList[0]);
+                    currentListId = createdList[0].id;
+                    currentShareCode = code;
+                    shareCodeInput.value = code;
+                    addItemForm.classList.remove('hidden');
+                    setupRealtimeListener(currentListId);
+                    loadShoppingList();
+                    activeShareCodeSpan.textContent = currentShareCode; // Met à jour l'affichage dans les paramètres
+                    return createdList[0];
+                }
             }
-        });
-
-        currentCategoryOrder.forEach(category => {
-            if (categorizedItems[category] && categorizedItems[category].length > 0) {
-                const categoryHeader = document.createElement('h3');
-                categoryHeader.style.color = '#E75480';
-                categoryHeader.style.marginTop = '1rem';
-                categoryHeader.textContent = category;
-                shoppingListDiv.appendChild(categoryHeader);
-
-                // Sort items within each category alphabetically
-                categorizedItems[category].sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
-
-                categorizedItems[category].forEach((item) => {
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = 'shopping-list-item';
-                    
-                    // Use item name as identifier for actions, safer than array index after sorting/filtering
-                    // For actual deletion/decrement, we'll find the item by name in the stored array
-                    itemDiv.innerHTML = `
-                        <button class="decrement-btn" data-item-name="${item.name}">-</button>
-                        <span class="quantity">${item.quantity}x</span>
-                        <span>${item.name}</span>
-                        <button class="delete-btn" data-item-name="${item.name}">✖</button>
-                    `;
-                    shoppingListDiv.appendChild(itemDiv);
-                });
-            }
-        });
-
-        if (itemsInUncategorized.length > 0) {
-            const otherCategoryHeader = document.createElement('h3');
-            otherCategoryHeader.style.color = '#E75480';
-            otherCategoryHeader.style.marginTop = '1rem';
-            otherCategoryHeader.textContent = 'Non classé'; // Simplified category name
-            shoppingListDiv.appendChild(otherCategoryHeader);
-
-            // Sort 'Uncategorized' items alphabetically
-            itemsInUncategorized.sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
-
-            itemsInUncategorized.forEach((item) => {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'shopping-list-item';
-                itemDiv.innerHTML = `
-                    <button class="decrement-btn" data-item-name="${item.name}">-</button>
-                    <span class="quantity">${item.quantity}x</span>
-                    <span>${item.name}</span>
-                    <button class="delete-btn" data-item-name="${item.name}">✖</button>
-                `;
-                shoppingListDiv.appendChild(itemDiv);
-            });
+        } catch (error) {
+            console.error("Erreur inattendue dans getOrCreateListByShareCode:", error);
+            alert("Une erreur inattendue est survenue: " + error.message);
+            return null;
         }
     }
 
-    function addShoppingItem(itemName) {
-      if (!itemName.trim()) return;
+    // Modifié pour inclure la mise à jour de quantité
+    async function updateItemQuantity(itemId, newQuantity) {
+        if (!currentListId) return;
 
-      let items = JSON.parse(localStorage.getItem('shopping_list_items')) || [];
-      const lowerCaseItemName = itemName.trim().toLowerCase();
-
-      const existingItemIndex = items.findIndex(item => item.name.toLowerCase() === lowerCaseItemName);
-
-      if (existingItemIndex !== -1) {
-        items[existingItemIndex].quantity++;
-      } else {
-        items.push({ name: itemName.trim(), quantity: 1 });
-      }
-
-      localStorage.setItem('shopping_list_items', JSON.stringify(items));
-      loadShoppingList();
-    }
-
-    function decrementShoppingItemByName(itemName) {
-        let items = JSON.parse(localStorage.getItem('shopping_list_items')) || [];
-        const index = items.findIndex(item => item.name === itemName);
-
-        if (index !== -1) {
-            items[index].quantity--;
-            if (items[index].quantity <= 0) {
-                items.splice(index, 1);
-            }
-            localStorage.setItem('shopping_list_items', JSON.stringify(items));
-            loadShoppingList();
-        }
-    }
-
-    function deleteShoppingItemByName(itemName) {
-      let items = JSON.parse(localStorage.getItem('shopping_list_items')) || [];
-      items = items.filter(item => item.name !== itemName);
-      localStorage.setItem('shopping_list_items', JSON.stringify(items));
-      loadShoppingList();
-    }
-
-    function getCategoryForItem(itemName) {
-        const suggestions = JSON.parse(localStorage.getItem('shopping_suggestions')) || [];
-        const foundSuggestion = suggestions.find(sug => sug.name.toLowerCase() === itemName.toLowerCase());
-        // If a suggestion for the item exists, return its category, otherwise default to 'Autre'
-        return foundSuggestion ? foundSuggestion.category : 'Autre'; 
-    }
-
-    // --- Suggestions management functions ---
-
-    function loadSuggestions() {
-      let allSuggestions = JSON.parse(localStorage.getItem('shopping_suggestions')) || [];
-      suggestionsListDiv.innerHTML = '';
-
-      const selectedCategory = categoryFilterSelect.value;
-      
-      let filteredSuggestions = selectedCategory === 'Toutes' 
-        ? allSuggestions 
-        : allSuggestions.filter(sug => sug.category === selectedCategory);
-
-      // Sort filtered suggestions alphabetically
-      filteredSuggestions.sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
-
-      if (filteredSuggestions.length === 0) {
-          suggestionsListDiv.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: #C71585;">No suggestions for this category. Add some below!</p>';
-      }
-
-      filteredSuggestions.forEach((suggestion) => {
-        const suggestionDiv = document.createElement('div');
-        suggestionDiv.className = 'suggestion-item';
-        suggestionDiv.innerHTML = `
-            <span class="suggestion-item-text">${suggestion.name}</span>
-            <button class="delete-suggestion-btn" data-name="${suggestion.name}" data-category="${suggestion.category}">✖</button>
-        `;
-        
-        suggestionDiv.querySelector('.suggestion-item-text').addEventListener('click', () => {
-          addShoppingItem(suggestion.name); 
-        });
-
-        suggestionDiv.querySelector('.delete-suggestion-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            const nameToDelete = e.target.dataset.name;
-            const categoryToDelete = e.target.dataset.category;
-            if (confirm(`Delete suggestion "${nameToDelete}" (${categoryToDelete})?`)) {
-                deleteSuggestion(nameToDelete, categoryToDelete);
-            }
-        });
-
-        suggestionsListDiv.appendChild(suggestionDiv);
-      });
-    }
-
-    function addSuggestion(suggestionName, category) {
-      if (!suggestionName.trim() || !category.trim()) {
-        alert('Please enter a suggestion name AND choose a category.');
-        return;
-      }
-
-      let suggestions = JSON.parse(localStorage.getItem('shopping_suggestions')) || [];
-      const lowerCaseSuggestionName = suggestionName.trim().toLowerCase();
-
-      if (!suggestions.some(sug => sug.name.toLowerCase() === lowerCaseSuggestionName && sug.category === category)) {
-          suggestions.push({ name: suggestionName.trim(), category: category.trim() });
-          localStorage.setItem('shopping_suggestions', JSON.stringify(suggestions));
-          loadSuggestions(); 
-      } else {
-          alert(`"${suggestionName.trim()}" is already a suggestion in the "${category}" category!`);
-      }
-    }
-
-    function deleteSuggestion(name, category) {
-        let suggestions = JSON.parse(localStorage.getItem('shopping_suggestions')) || [];
-        const updatedSuggestions = suggestions.filter(sug => !(sug.name === name && sug.category === category));
-        localStorage.setItem('shopping_suggestions', JSON.stringify(updatedSuggestions));
-        loadSuggestions();
-    }
-
-    // --- Buy Later list management functions ---
-
-    function loadBuyLaterList() {
-        let items = JSON.parse(localStorage.getItem('buy_later_items')) || [];
-        buyLaterListDiv.innerHTML = '';
-
-        if (items.length === 0) {
-            buyLaterListDiv.innerHTML = '<p style="text-align: center; color: #C71585; margin-top: 0.5rem;">Your "Buy Later" list is empty!</p>';
+        if (newQuantity <= 0) {
+            // Si la quantité est 0 ou moins, supprimer l'article
+            await deleteItem(itemId);
             return;
         }
 
-        // Sort buy later items alphabetically
-        items.sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
-
-        items.forEach((item, index) => {
-            const itemDiv = document.createElement('div');
-            itemDiv.className = 'buy-later-item';
-            // Use item name for deletion
-            itemDiv.innerHTML = `
-                <span>${item.name}</span>
-                <button class="delete-btn" data-item-name="${item.name}">✖</button>
-            `;
-            buyLaterListDiv.appendChild(itemDiv);
-        });
-    }
-
-    function addBuyLaterItem(itemName) {
-        if (!itemName.trim()) return;
-
-        let items = JSON.parse(localStorage.getItem('buy_later_items')) || [];
-        if (!items.some(item => item.name.toLowerCase() === itemName.trim().toLowerCase())) {
-            items.push({ name: itemName.trim() });
-            localStorage.setItem('buy_later_items', JSON.stringify(items));
-            loadBuyLaterList();
-        } else {
-            alert(`"${itemName.trim()}" is already in your "Buy Later" list!`);
-        }
-    }
-
-    function deleteBuyLaterItemByName(itemName) {
-        let items = JSON.parse(localStorage.getItem('buy_later_items')) || [];
-        items = items.filter(item => item.name !== itemName);
-        localStorage.setItem('buy_later_items', JSON.stringify(items));
-        loadBuyLaterList();
-    }
-
-    // --- Category Order management functions (Drag and Drop) ---
-
-    let draggedItem = null;
-    let touchStartTimer = null; // Timer for long press
-    const LONG_PRESS_THRESHOLD = 500; // ms for long press
-
-    function loadCategoryOrder() {
-        const allAvailableCategories = getCategories();
-        let categoryOrder = JSON.parse(localStorage.getItem('category_order')) || allAvailableCategories;
-        
-        categoryOrder = categoryOrder.filter(cat => allAvailableCategories.includes(cat));
-        categoryOrder = [...new Set(categoryOrder)];
-        
-        allAvailableCategories.forEach(cat => {
-            if (!categoryOrder.includes(cat)) {
-                categoryOrder.push(cat);
+        try {
+            const { data, error } = await supabase
+                .from('list_items')
+                .update({ quantity: newQuantity })
+                .eq('id', itemId);
+            if (error) {
+                console.error("Erreur lors de la mise à jour de la quantité de l'article:", error);
+                alert("Erreur lors de la mise à jour de la quantité de l'article: " + error.message);
             }
-        });
+            // La liste sera rechargée par le listener Realtime
+        } catch (error) {
+            console.error("Erreur inattendue lors de la mise à jour de la quantité:", error);
+            alert("Une erreur inattendue est survenue: " + error.message);
+        }
+    }
 
-        categoryOrderList.innerHTML = '';
+    async function addItem(name, quantity, category, listId) {
+        if (!listId) {
+            alert("Veuillez charger ou créer une liste d'abord.");
+            return;
+        }
+        try {
+            const { data, error } = await supabase
+                .from('list_items')
+                .insert([{ name, quantity, category, list_id: listId, bought: false }]);
+            if (error) {
+                console.error("Erreur lors de l'ajout de l'article:", error);
+                alert("Erreur lors de l'ajout de l'article: " + error.message);
+            } else {
+                newItemInput.value = '';
+                newQuantityInput.value = '1';
+            }
+        } catch (error) {
+            console.error("Erreur inattendue lors de l'ajout de l'article:", error);
+            alert("Une erreur inattendue est survenue: " + error.message);
+        }
+    }
 
-        if (categoryOrder.length === 0) {
-            categoryOrderList.innerHTML = '<p style="text-align: center; color: #C71585; margin-top: 0.5rem;">No categories to order. Add some in "Manage Categories" below!</p>';
-        } else {
-            categoryOrder.forEach(category => {
-                const li = document.createElement('li');
-                li.textContent = category;
-                li.setAttribute('draggable', true); // Keep for desktop
-                li.dataset.category = category;
-                li.innerHTML = `<span class="drag-handle">⠿</span> ${category}`;
+    async function updateItemStatus(itemId, status) {
+        if (!currentListId) return;
+        try {
+            const { data, error } = await supabase
+                .from('list_items')
+                .update({ bought: status })
+                .eq('id', itemId);
+            if (error) {
+                console.error("Erreur lors de la mise à jour du statut de l'article:", error);
+                alert("Erreur lors de la mise à jour du statut de l'article: " + error.message);
+            }
+        } catch (error) {
+            console.error("Erreur inattendue lors de la mise à jour du statut:", error);
+            alert("Une erreur inattendue est survenue: " + error.message);
+        }
+    }
 
-                // Touch events for mobile (long press to drag)
-                li.addEventListener('touchstart', (e) => {
-                    e.stopPropagation(); // Prevent immediate text selection/scroll interference
-                    if (touchStartTimer) clearTimeout(touchStartTimer);
-                    
-                    touchStartTimer = setTimeout(() => {
-                        draggedItem = li;
-                        li.classList.add('dragging');
-                        // Optional: Add haptic feedback for long press
-                        if (navigator.vibrate) navigator.vibrate(50);
-                    }, LONG_PRESS_THRESHOLD);
-                }, { passive: false }); 
+    async function deleteItem(itemId) {
+        if (!currentListId) return;
+        try {
+            const { data, error } = await supabase
+                .from('list_items')
+                .delete()
+                .eq('id', itemId);
+            if (error) {
+                console.error("Erreur lors de la suppression de l'article:", error);
+                alert("Erreur lors de la suppression de l'article: " + error.message);
+            }
+        } catch (error) {
+            console.error("Erreur inattendue lors de la suppression:", error);
+            alert("Une erreur inattendue est survenue: " + error.message);
+        }
+    }
 
-                li.addEventListener('touchmove', (e) => {
-                    if (touchStartTimer) clearTimeout(touchStartTimer); // Cancel long press if moved
-                    if (!draggedItem) return; // Only proceed if drag is active
+    async function loadShoppingList() {
+        if (!currentListId) {
+            shoppingListToBuy.innerHTML = '';
+            shoppingListBought.innerHTML = '';
+            totalRemainingItemsSpan.textContent = '0';
+            return;
+        }
+        updateSupabaseHeaders(currentShareCode);
 
-                    e.preventDefault(); // Prevent scrolling while dragging
-                    const touch = e.touches[0];
-                    const target = document.elementFromPoint(touch.clientX, touch.clientY);
-                    
-                    if (target && target.closest('#categoryOrderList li') && target.closest('#categoryOrderList li') !== draggedItem) {
-                        const draggingOver = target.closest('#categoryOrderList li');
-                        const container = categoryOrderList;
-                        const children = Array.from(container.children);
+        try {
+            const { data: items, error } = await supabase
+                .from('list_items')
+                .select('*')
+                .eq('list_id', currentListId)
+                .order('id', { ascending: true });
 
-                        const draggingOverIndex = children.indexOf(draggingOver);
-                        const draggedItemIndex = children.indexOf(draggedItem);
+            if (error) {
+                console.error("Erreur lors du chargement de la liste de courses:", error);
+                alert("Erreur lors du chargement de la liste: " + error.message);
+                return;
+            }
 
-                        const rect = draggingOver.getBoundingClientRect();
-                        const offset = touch.clientY - rect.top;
+            shoppingListToBuy.innerHTML = '';
+            shoppingListBought.innerHTML = '';
+            let remainingItems = 0;
 
-                        if (draggedItemIndex < draggingOverIndex) {
-                            if (offset > rect.height / 2) {
-                                container.insertBefore(draggedItem, draggingOver.nextSibling);
-                            }
-                        } else {
-                            if (offset < rect.height / 2) {
-                                container.insertBefore(draggedItem, draggingOver);
-                            }
-                        }
-                    }
-                }, { passive: false });
+            const categories = getCategories();
+            const categoryOrder = JSON.parse(localStorage.getItem('category_order')) || categories;
 
-                li.addEventListener('touchend', () => {
-                    if (touchStartTimer) clearTimeout(touchStartTimer);
-                    if (draggedItem) {
-                        draggedItem.classList.remove('dragging');
-                        draggedItem = null;
-                        saveCategoryOrder();
-                        loadShoppingList();
-                    }
-                });
-
-                // Standard desktop drag events
-                li.addEventListener('dragstart', (e) => {
-                    draggedItem = li;
-                    setTimeout(() => li.classList.add('dragging'), 0);
-                });
-
-                li.addEventListener('dragend', () => {
-                    draggedItem.classList.remove('dragging');
-                    draggedItem = null;
-                    saveCategoryOrder();
-                    loadShoppingList();
-                });
-
-                li.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    const draggingOver = li;
-                    const container = categoryOrderList;
-                    const children = Array.from(container.children);
-
-                    if (draggedItem === draggingOver) return;
-
-                    const draggingOverIndex = children.indexOf(draggingOver);
-                    const draggedItemIndex = children.indexOf(draggedItem);
-
-                    const rect = draggingOver.getBoundingClientRect();
-                    const offset = e.clientY - rect.top;
-
-                    if (draggedItemIndex < draggingOverIndex) {
-                        if (offset > rect.height / 2) {
-                            container.insertBefore(draggedItem, draggingOver.nextSibling);
-                        }
-                    } else {
-                        if (offset < rect.height / 2) {
-                            container.insertBefore(draggedItem, draggingOver);
-                        }
-                    }
-                });
-
-                categoryOrderList.appendChild(li);
+            const groupedItems = {};
+            // Initialize groupedItems with all known categories in order
+            categoryOrder.forEach(cat => groupedItems[cat] = { toBuy: [], bought: [] });
+            // Add any existing categories from items that might not be in the current user_categories
+            items.forEach(item => {
+                const category = item.category || 'Autres';
+                if (!groupedItems[category]) {
+                    groupedItems[category] = { toBuy: [], bought: [] };
+                }
             });
+
+
+            items.forEach(item => {
+                const category = item.category || 'Autres';
+                if (item.bought) {
+                    groupedItems[category].bought.push(item);
+                } else {
+                    groupedItems[category].toBuy.push(item);
+                    remainingItems++;
+                }
+            });
+
+            // Render "To Buy" items for each category
+            categoryOrder.forEach(category => {
+                if (groupedItems[category] && groupedItems[category].toBuy.length > 0) {
+                    const categoryHeader = document.createElement('h3');
+                    categoryHeader.textContent = category;
+                    shoppingListToBuy.appendChild(categoryHeader);
+                    groupedItems[category].toBuy.forEach(item => renderListItem(item, shoppingListToBuy));
+                }
+            });
+            // Handle items with categories not in the current category order (e.g., deleted categories)
+            Object.keys(groupedItems).filter(cat => !categoryOrder.includes(cat)).forEach(category => {
+                if (groupedItems[category].toBuy.length > 0) {
+                    const categoryHeader = document.createElement('h3');
+                    categoryHeader.textContent = category;
+                    shoppingListToBuy.appendChild(categoryHeader);
+                    groupedItems[category].toBuy.forEach(item => renderListItem(item, shoppingListToBuy));
+                }
+            });
+
+
+            // Render "Bought" items for each category
+            categoryOrder.forEach(category => {
+                if (groupedItems[category] && groupedItems[category].bought.length > 0) {
+                    const categoryHeader = document.createElement('h3');
+                    categoryHeader.textContent = category;
+                    shoppingListBought.appendChild(categoryHeader);
+                    groupedItems[category].bought.forEach(item => renderListItem(item, shoppingListBought));
+                }
+            });
+            // Handle items with categories not in the current category order
+            Object.keys(groupedItems).filter(cat => !categoryOrder.includes(cat)).forEach(category => {
+                if (groupedItems[category].bought.length > 0) {
+                    const categoryHeader = document.createElement('h3');
+                    categoryHeader.textContent = category;
+                    shoppingListBought.appendChild(categoryHeader);
+                    groupedItems[category].bought.forEach(item => renderListItem(item, shoppingListBought));
+                }
+            });
+
+            totalRemainingItemsSpan.textContent = remainingItems;
+            updateTabCounts();
+
+        } catch (error) {
+            console.error("Erreur inattendue lors du chargement de la liste de courses:", error);
+            alert("Une erreur inattendue est survenue: " + error.message);
         }
-        saveCategoryOrder();
-        loadManageCategories();
     }
 
-    function saveCategoryOrder() {
-        const order = Array.from(categoryOrderList.children).map(li => li.dataset.category);
-        localStorage.setItem('category_order', JSON.stringify(order));
-    }
+    function renderListItem(item, listElement) {
+        const li = document.createElement('li');
+        li.dataset.id = item.id;
+        li.classList.toggle('bought', item.bought);
 
+        const itemInfo = document.createElement('div');
+        itemInfo.classList.add('item-info');
 
-    // --- Section navigation functions ---
-    function showSection(sectionToShow) {
-        // Hide all sections
-        shoppingListSection.classList.remove('active');
-        suggestionsSection.classList.remove('active');
-        categoryOrderSection.classList.remove('active');
-        buyLaterSection.classList.remove('active');
-        settingsSection.classList.remove('active'); // Hide new settings section
+        const itemName = document.createElement('span');
+        itemName.textContent = item.name;
+        itemInfo.appendChild(itemName);
 
-        // Remove 'active' class from all navigation buttons
-        showShoppingListBtn.classList.remove('active');
-        showSuggestionsBtn.classList.remove('active');
-        showCategoryOrderBtn.classList.remove('active');
-        showBuyLaterBtn.classList.remove('active');
-        showSettingsBtn.classList.remove('active'); // Deactivate new settings button
+        const quantityControl = document.createElement('div');
+        quantityControl.classList.add('quantity-control');
 
-        // Show the desired section and update the active button
-        if (sectionToShow === 'shoppingList') {
-            shoppingListSection.classList.add('active');
-            showShoppingListBtn.classList.add('active');
-            loadShoppingList();
-        } else if (sectionToShow === 'suggestions') {
-            suggestionsSection.classList.add('active');
-            showSuggestionsBtn.classList.add('active');
-            updateAllCategorySelects();
-            loadSuggestions();
-        } else if (sectionToShow === 'categoryOrder') {
-            categoryOrderSection.classList.add('active');
-            showCategoryOrderBtn.classList.add('active');
-            loadCategoryOrder();
-        } else if (sectionToShow === 'buyLater') {
-            buyLaterSection.classList.add('active');
-            showBuyLaterBtn.classList.add('active');
-            loadBuyLaterList();
-        } else if (sectionToShow === 'settings') { // Handle new settings section
-            settingsSection.classList.add('active');
-            showSettingsBtn.classList.add('active');
-            // No specific load function for settings for now
+        const minusBtn = document.createElement('button');
+        minusBtn.textContent = '-';
+        minusBtn.onclick = () => updateItemQuantity(item.id, item.quantity - 1);
+        quantityControl.appendChild(minusBtn);
+
+        const quantitySpan = document.createElement('span');
+        quantitySpan.textContent = item.quantity;
+        quantityControl.appendChild(quantitySpan);
+
+        const plusBtn = document.createElement('button');
+        plusBtn.textContent = '+';
+        plusBtn.onclick = () => updateItemQuantity(item.id, item.quantity + 1);
+        quantityControl.appendChild(plusBtn);
+
+        itemInfo.appendChild(quantityControl);
+        li.appendChild(itemInfo);
+
+        const itemActions = document.createElement('div');
+        itemActions.classList.add('item-actions');
+
+        if (item.bought) {
+            const undoBtn = document.createElement('button');
+            undoBtn.textContent = 'Annuler';
+            undoBtn.classList.add('undo-btn');
+            undoBtn.onclick = () => updateItemStatus(item.id, false);
+            itemActions.appendChild(undoBtn);
+        } else {
+            const buyBtn = document.createElement('button');
+            buyBtn.textContent = 'Acheter';
+            buyBtn.classList.add('buy-btn');
+            buyBtn.onclick = () => updateItemStatus(item.id, true);
+            itemActions.appendChild(buyBtn);
         }
+
+        const removeBtn = document.createElement('button');
+        removeBtn.textContent = 'Supprimer';
+        removeBtn.classList.add('remove-btn');
+        removeBtn.onclick = () => deleteItem(item.id);
+        itemActions.appendChild(removeBtn);
+
+        li.appendChild(itemActions);
+        listElement.appendChild(li);
     }
 
-    // --- Event handlers ---
-
-    shoppingForm.addEventListener('submit', e => {
-      e.preventDefault();
-      addShoppingItem(newItemInput.value);
-      newItemInput.value = '';
-    });
-
-    shoppingListDiv.addEventListener('click', e => {
-      if (e.target.classList.contains('delete-btn')) {
-        const itemName = e.target.dataset.itemName;
-        deleteShoppingItemByName(itemName);
-      } else if (e.target.classList.contains('decrement-btn')) {
-        const itemName = e.target.dataset.itemName;
-        decrementShoppingItemByName(itemName);
+    function setupRealtimeListener() {
+      if (window.supabaseChannel) {
+          supabase.removeChannel(window.supabaseChannel);
       }
-    });
 
-    addSuggestionForm.addEventListener('submit', e => {
-      e.preventDefault();
-      const newSugName = newSuggestionInput.value;
-      const sugCategory = suggestionCategorySelect.value;
-      
-      if (!sugCategory) {
-          alert("Please select a category for the suggestion.");
+      if (!currentListId) {
+          console.warn("Pas de currentListId défini, impossible de configurer le listener Realtime.");
           return;
       }
 
-      addSuggestion(newSugName, sugCategory);
-      newSuggestionInput.value = '';
-    });
+      window.supabaseChannel = supabase.channel(`list_items_changes:${currentListId}`)
+        .on('postgres_changes', {
+            event: '*',
+            schema: 'public',
+            table: 'list_items',
+            filter: `list_id=eq.${currentListId}`
+        }, (payload) => {
+            console.log('Changement Realtime détecté:', payload);
+            loadShoppingList();
+        })
+        .subscribe();
 
-    categoryFilterSelect.addEventListener('change', loadSuggestions);
+        // Listener pour les changements sur buy_later_items
+        window.supabaseBuyLaterChannel = supabase.channel(`buy_later_items_changes:${currentListId}`)
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'buy_later_items',
+                filter: `list_id=eq.${currentListId}`
+            }, (payload) => {
+                console.log('Changement Buy Later Realtime détecté:', payload);
+                if (document.getElementById('buyLater').classList.contains('hidden')) {
+                  // Ne recharger que si la section est active pour éviter des appels inutiles
+                } else {
+                  loadBuyLaterList();
+                }
+            })
+            .subscribe();
+        
+        // Listener pour les changements sur suggestions
+        window.supabaseSuggestionsChannel = supabase.channel(`suggestions_changes:${currentListId}`)
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'suggestions',
+                filter: `list_id=eq.${currentListId}`
+            }, (payload) => {
+                console.log('Changement Suggestions Realtime détecté:', payload);
+                if (document.getElementById('suggestions').classList.contains('hidden')) {
+                    // Ne recharger que si la section est active pour éviter des appels inutiles
+                } else {
+                    loadSuggestions();
+                }
+            })
+            .subscribe();
 
-    buyLaterForm.addEventListener('submit', e => {
-        e.preventDefault();
-        addBuyLaterItem(newBuyLaterItemInput.value);
-        newBuyLaterItemInput.value = '';
-    });
+      console.log(`Listeners Realtime configurés pour list_id: ${currentListId}`);
+    }
 
-    buyLaterListDiv.addEventListener('click', e => {
-        if (e.target.classList.contains('delete-btn')) {
-            const itemName = e.target.dataset.itemName;
-            deleteBuyLaterItemByName(itemName);
+
+    // --- Fonctions Buy Later ---
+    async function addBuyLaterItem(name) {
+        if (!currentListId) {
+            alert("Veuillez charger ou créer une liste d'abord.");
+            return;
         }
-    });
-
-    addCategoryForm.addEventListener('submit', e => {
-        e.preventDefault();
-        addCategory(newCategoryNameInput.value);
-    });
-
-    manageCategoryList.addEventListener('click', e => {
-        if (e.target.classList.contains('delete-category-btn')) {
-            const categoryToDelete = e.target.dataset.category;
-            deleteCategory(categoryToDelete);
+        try {
+            const { data, error } = await supabase
+                .from('buy_later_items')
+                .insert([{ name, list_id: currentListId }]);
+            if (error) {
+                console.error("Erreur lors de l'ajout de l'article 'Acheter Plus Tard':", error);
+                alert("Erreur lors de l'ajout de l'article 'Acheter Plus Tard': " + error.message);
+            } else {
+                newBuyLaterItemInput.value = '';
+                // loadBuyLaterList est géré par le listener Realtime
+            }
+        } catch (error) {
+            console.error("Erreur inattendue lors de l'ajout de l'article 'Acheter Plus Tard':", error);
+            alert("Une erreur inattendue est survenue: " + error.message);
         }
-    });
+    }
 
-    // Event handlers for navigation buttons
-    showShoppingListBtn.addEventListener('click', () => showSection('shoppingList'));
-    showSuggestionsBtn.addEventListener('click', () => showSection('suggestions'));
-    showCategoryOrderBtn.addEventListener('click', () => showSection('categoryOrder'));
-    showBuyLaterBtn.addEventListener('click', () => showSection('buyLater'));
-    showSettingsBtn.addEventListener('click', () => showSection('settings')); // Event listener for new settings button
+    async function deleteBuyLaterItem(itemId) {
+        if (!currentListId) return;
+        try {
+            const { data, error } = await supabase
+                .from('buy_later_items')
+                .delete()
+                .eq('id', itemId);
+            if (error) {
+                console.error("Erreur lors de la suppression de l'article 'Acheter Plus Tard':", error);
+                alert("Erreur lors de la suppression de l'article 'Acheter Plus Tard': " + error.message);
+            } else {
+                // loadBuyLaterList est géré par le listener Realtime
+            }
+        } catch (error) {
+            console.error("Erreur inattendue lors de la suppression d'article 'Acheter Plus Tard':", error);
+            alert("Une erreur inattendue est survenue: " + error.message);
+        }
+    }
 
-    // Toggle options functionality
-    let optionsVisible = true; // Start with options visible
-    toggleOptionsBtn.addEventListener('click', () => {
-        optionsVisible = !optionsVisible;
-        if (optionsVisible) {
-            navigationButtonsContainer.classList.add('show-options');
-            toggleOptionsIcon.classList.remove('fa-chevron-down');
-            toggleOptionsIcon.classList.add('fa-chevron-up');
+    async function loadBuyLaterList() {
+        if (!currentListId) {
+            buyLaterList.innerHTML = '';
+            return;
+        }
+        updateSupabaseHeaders(currentShareCode);
+
+        try {
+            const { data: items, error } = await supabase
+                .from('buy_later_items')
+                .select('*')
+                .eq('list_id', currentListId)
+                .order('id', { ascending: true });
+
+            if (error) {
+                console.error("Erreur lors du chargement de la liste 'Acheter Plus Tard':", error);
+                alert("Erreur lors du chargement de la liste 'Acheter Plus Tard': " + error.message);
+                return;
+            }
+
+            buyLaterList.innerHTML = '';
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item.name;
+                const removeBtn = document.createElement('button');
+                removeBtn.textContent = 'Supprimer';
+                removeBtn.classList.add('remove-btn');
+                removeBtn.onclick = () => deleteBuyLaterItem(item.id);
+                li.appendChild(removeBtn);
+                buyLaterList.appendChild(li);
+            });
+        } catch (error) {
+            console.error("Erreur inattendue lors du chargement de la liste 'Acheter Plus Tard':", error);
+            alert("Une erreur inattendue est survenue: " + error.message);
+        }
+    }
+
+
+    // --- Fonctions Suggestions ---
+    async function addSuggestion(name, category) {
+        if (!currentListId) {
+            alert("Veuillez charger ou créer une liste d'abord.");
+            return;
+        }
+        try {
+            const { data, error } = await supabase
+                .from('suggestions')
+                .insert([{ name, category, list_id: currentListId }]);
+            if (error) {
+                console.error("Erreur lors de l'ajout de la suggestion:", error);
+                alert("Erreur lors de l'ajout de la suggestion: " + error.message);
+            } else {
+                newSuggestionInput.value = '';
+                // loadSuggestions est géré par le listener Realtime
+            }
+        } catch (error) {
+            console.error("Erreur inattendue lors de l'ajout de la suggestion:", error);
+            alert("Une erreur inattendue est survenue: " + error.message);
+        }
+    }
+
+    async function deleteSuggestion(itemId) {
+        if (!currentListId) return;
+        try {
+            const { data, error } = await supabase
+                .from('suggestions')
+                .delete()
+                .eq('id', itemId);
+            if (error) {
+                console.error("Erreur lors de la suppression de la suggestion:", error);
+                alert("Erreur lors de la suppression de la suggestion: " + error.message);
+            } else {
+                // loadSuggestions est géré par le listener Realtime
+            }
+        } catch (error) {
+            console.error("Erreur inattendue lors de la suppression de suggestion:", error);
+            alert("Une erreur inattendue est survenue: " + error.message);
+        }
+    }
+
+    async function loadSuggestions() {
+        if (!currentListId) {
+            suggestionList.innerHTML = '';
+            return;
+        }
+        updateSupabaseHeaders(currentShareCode);
+
+        try {
+            const { data: items, error } = await supabase
+                .from('suggestions')
+                .select('*')
+                .eq('list_id', currentListId)
+                .order('id', { ascending: true });
+
+            if (error) {
+                console.error("Erreur lors du chargement des suggestions:", error);
+                alert("Erreur lors du chargement des suggestions: " + error.message);
+                return;
+            }
+
+            suggestionList.innerHTML = '';
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.dataset.id = item.id;
+
+                const suggestionInfo = document.createElement('div');
+                suggestionInfo.classList.add('suggestion-info');
+                const nameSpan = document.createElement('span');
+                nameSpan.classList.add('name');
+                nameSpan.textContent = item.name;
+                const categorySpan = document.createElement('span');
+                categorySpan.classList.add('category');
+                categorySpan.textContent = item.category ? `Catégorie: ${item.category}` : 'Pas de catégorie';
+                suggestionInfo.appendChild(nameSpan);
+                suggestionInfo.appendChild(categorySpan);
+                li.appendChild(suggestionInfo);
+
+
+                const suggestionActions = document.createElement('div');
+                suggestionActions.classList.add('suggestion-actions');
+
+                const addToListBtn = document.createElement('button');
+                addToListBtn.textContent = 'Ajouter à la liste';
+                addToListBtn.classList.add('buy-btn'); // Réutilise le style du bouton acheter
+                addToListBtn.onclick = () => addItem(item.name, 1, item.category, currentListId);
+                suggestionActions.appendChild(addToListBtn);
+
+                const removeBtn = document.createElement('button');
+                removeBtn.textContent = 'Supprimer';
+                removeBtn.classList.add('remove-btn');
+                removeBtn.onclick = () => deleteSuggestion(item.id);
+                suggestionActions.appendChild(removeBtn);
+
+                li.appendChild(suggestionActions);
+                suggestionList.appendChild(li);
+            });
+        } catch (error) {
+            console.error("Erreur inattendue lors du chargement des suggestions:", error);
+            alert("Une erreur inattendue est survenue: " + error.message);
+        }
+    }
+
+
+    // --- Fonctions Catégories ---
+    function renderCategories() {
+        const categories = getCategories();
+        categoryList.innerHTML = '';
+        categories.forEach(cat => {
+            const li = document.createElement('li');
+            li.textContent = cat;
+            if (!initialDefaultCategories.includes(cat)) {
+                const removeBtn = document.createElement('button');
+                removeBtn.textContent = 'Supprimer';
+                removeBtn.classList.add('remove-btn');
+                removeBtn.onclick = () => {
+                    if (confirm(`Êtes-vous sûr de vouloir supprimer la catégorie "${cat}" ? Les articles existants de cette catégorie ne seront pas supprimés, mais leur catégorie pourrait devenir "Autres".`)) {
+                        const updatedCategories = categories.filter(c => c !== cat);
+                        saveCategories(updatedCategories);
+                        updateAllCategorySelects();
+                        renderCategories();
+                        loadCategoryOrder();
+                        loadShoppingList(); // Recharger la liste pour refléter le changement de catégorie
+                    }
+                };
+                li.appendChild(removeBtn);
+            }
+            categoryList.appendChild(li);
+        });
+    }
+
+    function addCategory() {
+        const newCat = newCategoryInput.value.trim();
+        if (newCat && !getCategories().includes(newCat)) {
+            const categories = getCategories();
+            categories.push(newCat);
+            saveCategories(categories);
+            newCategoryInput.value = '';
+            updateAllCategorySelects();
+            renderCategories();
+            loadCategoryOrder();
+        } else if (newCat) {
+            alert("Cette catégorie existe déjà.");
+        }
+    }
+
+    function loadCategoryOrder() {
+        const categories = getCategories();
+        const currentOrder = JSON.parse(localStorage.getItem('category_order')) || [];
+
+        const filteredOrder = currentOrder.filter(cat => categories.includes(cat));
+        const newCategories = categories.filter(cat => !filteredOrder.includes(cat));
+        const finalOrder = [...filteredOrder, ...newCategories];
+
+        localStorage.setItem('category_order', JSON.stringify(finalOrder));
+        renderCategoryOrder(finalOrder);
+    }
+
+    function renderCategoryOrder(order) {
+        categoryOrderList.innerHTML = '';
+        order.forEach(cat => {
+            const li = document.createElement('li');
+            li.textContent = cat;
+            li.dataset.category = cat;
+            li.draggable = true;
+            categoryOrderList.appendChild(li);
+        });
+        addDragAndDropListeners();
+    }
+
+    function addDragAndDropListeners() {
+        let draggedItem = null;
+
+        categoryOrderList.querySelectorAll('li').forEach(item => {
+            item.addEventListener('dragstart', () => {
+                draggedItem = item;
+                setTimeout(() => item.style.display = 'none', 0);
+            });
+
+            item.addEventListener('dragend', () => {
+                setTimeout(() => {
+                    draggedItem.style.display = 'flex';
+                    draggedItem = null;
+                }, 0);
+            });
+
+            item.addEventListener('dragover', e => e.preventDefault());
+
+            item.addEventListener('dragenter', function(e) {
+                e.preventDefault();
+                this.style.backgroundColor = '#f0f0f0';
+            });
+
+            item.addEventListener('dragleave', function() {
+                this.style.backgroundColor = '';
+            });
+
+            item.addEventListener('drop', function() {
+                this.style.backgroundColor = '';
+                if (draggedItem && draggedItem !== this) {
+                    const thisIndex = Array.from(categoryOrderList.children).indexOf(this);
+                    const draggedIndex = Array.from(categoryOrderList.children).indexOf(draggedItem);
+
+                    if (thisIndex > draggedIndex) {
+                        categoryOrderList.insertBefore(draggedItem, this.nextSibling);
+                    } else {
+                        categoryOrderList.insertBefore(draggedItem, this);
+                    }
+                }
+            });
+        });
+    }
+
+    function saveCategoryOrder() {
+        const newOrder = Array.from(categoryOrderList.children).map(li => li.dataset.category);
+        localStorage.setItem('category_order', JSON.stringify(newOrder));
+        alert("Ordre des catégories sauvegardé !");
+        loadShoppingList();
+    }
+
+    // --- Gestion des onglets Achetés/À Acheter ---
+    function updateTabCounts() {
+        const toBuyCount = shoppingListToBuy.querySelectorAll('li:not(.bought)').length;
+        const boughtCount = shoppingListBought.querySelectorAll('li.bought').length;
+
+        document.querySelector('.tab-btn[data-tab="toBuy"]').textContent = `À Acheter (${toBuyCount})`;
+        document.querySelector('.tab-btn[data-tab="bought"]').textContent = `Achetés (${boughtCount})`;
+    }
+
+    // --- Listeners d'événements ---
+    loadShareCodeBtn.addEventListener('click', () => {
+        const code = shareCodeInput.value.trim();
+        if (code) {
+            localStorage.setItem('lastShareCode', code);
+            getOrCreateListByShareCode(code);
         } else {
-            navigationButtonsContainer.classList.remove('show-options');
-            toggleOptionsIcon.classList.remove('fa-chevron-up');
-            toggleOptionsIcon.classList.add('fa-chevron-down');
-            // If the current section is one of the hidden ones, switch to "My List"
-            if (!shoppingListSection.classList.contains('active')) {
-                showSection('shoppingList');
+            promptForShareCode();
+        }
+    });
+
+    addItemBtn.addEventListener('click', () => {
+        const name = newItemInput.value.trim();
+        const quantity = parseInt(newQuantityInput.value) || 1;
+        const category = newCategorySelect.value;
+        if (name && currentListId) {
+            addItem(name, quantity, category, currentListId);
+        } else if (!name) {
+            alert("Veuillez entrer le nom de l'article.");
+        }
+    });
+
+    document.getElementById('itemTabs').addEventListener('click', (e) => {
+        if (e.target.classList.contains('tab-btn')) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+
+            const tab = e.target.dataset.tab;
+            if (tab === 'toBuy') {
+                shoppingListToBuy.classList.remove('hidden');
+                shoppingListBought.classList.add('hidden');
+            } else {
+                shoppingListToBuy.classList.add('hidden');
+                shoppingListBought.classList.remove('hidden');
             }
         }
     });
 
+    // Navigation Buttons Listeners
+    navShoppingList.addEventListener('click', () => showSection('shoppingList'));
+    navBuyLater.addEventListener('click', () => showSection('buyLater'));
+    navSuggestions.addEventListener('click', () => showSection('suggestions'));
+    navCategories.addEventListener('click', () => showSection('categories'));
+    navSettings.addEventListener('click', () => showSection('settings')); // Listener pour le bouton Paramètres
+
+    navOptions.addEventListener('click', () => {
+        navigationButtonsContainer.classList.toggle('show-options');
+        toggleOptionsIcon.classList.toggle('fa-chevron-down');
+        toggleOptionsIcon.classList.toggle('fa-chevron-up');
+    });
+
+    // Options menu buttons
+    optionsMyListBtn.addEventListener('click', () => {
+        showSection('shoppingList');
+        navigationButtonsContainer.classList.remove('show-options');
+        toggleOptionsIcon.classList.remove('fa-chevron-up');
+        toggleOptionsIcon.classList.add('fa-chevron-down');
+    });
+
+    optionsBuyLaterBtn.addEventListener('click', () => {
+        showSection('buyLater');
+        navigationButtonsContainer.classList.remove('show-options');
+        toggleOptionsIcon.classList.remove('fa-chevron-up');
+        toggleOptionsIcon.classList.add('fa-chevron-down');
+    });
+
+    optionsSuggestionsBtn.addEventListener('click', () => {
+        showSection('suggestions');
+        navigationButtonsContainer.classList.remove('show-options');
+        toggleOptionsIcon.classList.remove('fa-chevron-up');
+        toggleOptionsIcon.classList.add('fa-chevron-down');
+    });
+
+    optionsCategoriesBtn.addEventListener('click', () => {
+        showSection('categories');
+        navigationButtonsContainer.classList.remove('show-options');
+        toggleOptionsIcon.classList.remove('fa-chevron-up');
+        toggleOptionsIcon.classList.add('fa-chevron-down');
+    });
+
+    optionsSettingsBtn.addEventListener('click', () => { // Nouveau listener pour Paramètres
+        showSection('settings');
+        navigationButtonsContainer.classList.remove('show-options');
+        toggleOptionsIcon.classList.remove('fa-chevron-up');
+        toggleOptionsIcon.classList.add('fa-chevron-down');
+    });
+
+
+    // Buy Later Listeners
+    addBuyLaterItemBtn.addEventListener('click', () => {
+        const name = newBuyLaterItemInput.value.trim();
+        if (name) {
+            addBuyLaterItem(name);
+        } else {
+            alert("Veuillez entrer un article.");
+        }
+    });
+
+    // Suggestions Listeners
+    addSuggestionBtn.addEventListener('click', () => {
+        const name = newSuggestionInput.value.trim();
+        const category = newSuggestionCategorySelect.value; // Récupère la catégorie de la suggestion
+        if (name) {
+            addSuggestion(name, category);
+        } else {
+            alert("Veuillez entrer une suggestion.");
+        }
+    });
+
+    // Categories Listeners
+    addCategoryBtn.addEventListener('click', addCategory);
+    saveCategoryOrderBtn.addEventListener('click', saveCategoryOrder);
+
+    // Settings Listeners
+    changeShareCodeBtn.addEventListener('click', () => {
+        if (confirm("Voulez-vous vraiment changer de liste ? Cela vous déconnectera de la liste actuelle.")) {
+            localStorage.removeItem('lastShareCode'); // Efface le code mémorisé
+            location.reload(); // Recharge l'application pour redemander un code
+        }
+    });
 
     // --- Initialization on page load ---
-    window.addEventListener('load', () => {
+    window.addEventListener('load', async () => {
       if (!localStorage.getItem('user_categories')) {
           localStorage.setItem('user_categories', JSON.stringify(initialDefaultCategories));
       }
@@ -1068,16 +1339,39 @@
       }
 
       updateAllCategorySelects();
-      loadShoppingList();
-      loadSuggestions();
-      loadBuyLaterList();
-      loadCategoryOrder(); 
+      
+      // Initialisation du client Supabase
+      if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
+          supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          console.log("Supabase client initialized successfully.");
+      } else {
+          console.error("Erreur: La fonction 'createClient' de Supabase n'est pas définie ou la bibliothèque Supabase n'est pas chargée correctement.");
+          alert("Erreur de chargement: La bibliothèque Supabase n'a pas pu être initialisée. Vérifiez votre connexion internet ou la configuration.");
+          return;
+      }
 
+      let attempts = 0;
+      const maxAttempts = 20;
+      const delayMs = 50;
+
+      while (!supabase.rest && attempts < maxAttempts) {
+          console.log(`Attente de supabase.rest (tentative ${attempts + 1}/${maxAttempts})...`);
+          await new Promise(resolve => setTimeout(resolve, delayMs));
+          attempts++;
+      }
+
+      if (supabase.rest) {
+          console.log("supabase.rest est maintenant prêt !");
+          await promptForShareCode();
+      } else {
+          console.error("Erreur: supabase.rest n'est pas devenu prêt après plusieurs tentatives. Impossible de démarrer l'application.");
+          return;
+      }
+      
       showSection('shoppingList');
-      // Ensure options are visible on initial load
-      navigationButtonsContainer.classList.add('show-options');
-      toggleOptionsIcon.classList.remove('fa-chevron-down');
-      toggleOptionsIcon.classList.add('fa-chevron-up');
+      navigationButtonsContainer.classList.remove('show-options');
+      toggleOptionsIcon.classList.remove('fa-chevron-up');
+      toggleOptionsIcon.classList.add('fa-chevron-down');
     });
   </script>
 </body>
