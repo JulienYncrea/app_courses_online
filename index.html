@@ -757,6 +757,7 @@
             if (lists && lists.length > 0) {
                 console.log(`Liste trouvée pour le code ${code}:`, lists[0]);
                 currentListId = lists[0].id;
+                console.log(currentListId)
                 currentShareCode = code;
                 localStorage.setItem('lastShareCode', shareCodeInput.value); // Save on successful load
                 // addItemForm.classList.remove('hidden'); // No longer hidden by default for shoppingList section
