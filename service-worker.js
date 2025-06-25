@@ -4,7 +4,6 @@ const urlsToCache = [
   '/app_courses_online/index.html',
   '/app_courses_online/manifest.json',
   '/app_courses_online/icon.png',
-  '/app_courses_online/supabase.js', // CHANGEMENT ICI : Référence locale au lieu du CDN // URL externe, pas besoin de la changer
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css' // URL externe
 ];
 
