@@ -1,4 +1,4 @@
-const CACHE_NAME = 'shopping-list-cache-v1';
+const CACHE_NAME = 'shopping-list-cache-v2';
 const urlsToCache = [
   '/app_courses_online/',        // Référence à la racine de ton projet
   '/app_courses_online/index.html',
