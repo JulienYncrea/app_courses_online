@@ -285,24 +285,7 @@
         font-size: 0.85em;
         color: rgba(255, 255, 255, 0.8); /* Lighter color for category */
     }
-    #suggestionList .suggestion-actions .add-to-shopping-list-btn {
-      background: none;
-      border: none;
-      color: #FFD700; /* From index copy */
-      font-size: 1.3rem; /* From index copy */
-      cursor: pointer;
-      padding: 0 0.2rem;
-      margin: 0;
-      width: auto;
-      height: auto;
-      border-radius: 0;
-      transition: color 0.3s ease;
-      line-height: 1;
-      flex-shrink: 0;
-    }
-    #suggestionList .suggestion-actions .add-to-shopping-list-btn:hover {
-      color: #FF4500; /* From index copy */
-    }
+    /* Removed add-to-shopping-list-btn styles as the button is removed from HTML */
     #suggestionList .suggestion-actions .remove-btn {
       background: none;
       border: none;
@@ -1256,17 +1239,11 @@
                     <span class="category">${suggestion.category}</span>
                 </div>
                 <div class="suggestion-actions">
-                    <button class="add-to-shopping-list-btn" data-name="${suggestion.name}" data-category="${suggestion.category}">+</button>
                     <button class="remove-btn" data-id="${suggestion.id}">✖</button>
                 </div>
             `;
             // Add event listener to add to shopping list when clicking the item text
             li.querySelector('.suggestion-info').addEventListener('click', () => {
-                addItem(suggestion.name, 1, suggestion.category, currentListId);
-            });
-            // Add event listener for the "+" button
-            li.querySelector('.add-to-shopping-list-btn').addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevent li click from firing
                 addItem(suggestion.name, 1, suggestion.category, currentListId);
             });
             // Add event listener for the "✖" button
