@@ -7,7 +7,7 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icon.png" />
   <meta name="theme-color" content="#FFC0CB" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -102,7 +102,7 @@
     .quantity-control {
       display: flex;
       align-items: center;
-      margin-right: 10px; /* Space between quantity and item name */
+      /* margin-right: 10px; Removed as it's part of flex-grow now */
       flex-shrink: 0; /* Prevent it from shrinking */
     }
     .quantity-control button { /* This will be the decrement/increment buttons */
@@ -155,23 +155,14 @@
       background-color: transparent; /* Ensure no background on hover */
       color: #DC143C; /* From index copy */
     }
-    .item-actions .remove-btn::before {
-        content: "\f00d"; /* Font Awesome 'times' icon */
-        font-family: "Font Awesome 5 Free";
+    /* Updated to use <i> tag directly, removing ::before */
+    .item-actions .remove-btn i {
+        font-family: "Font Awesome 6 Free"; /* Ensure correct font-family for FA6 */
         font-weight: 900;
     }
     .item-actions .remove-btn span {
         display: none; /* Hide original text */
     }
-
-    /* .total-items {
-        color: #C71585 !important;
-        font-style: italic;
-        font-size: 0.95rem;
-        text-align: center;
-        margin-top: 1rem;
-        font-weight: bold;
-    } */ /* REMOVED */
 
     /* Fixed bottom navigation (from index.html, retaining structure) */
     .bottom-nav {
@@ -304,9 +295,9 @@
     #suggestionList .suggestion-actions .remove-btn:hover {
       color: #FF4500; /* From index copy */
     }
-    #suggestionList .suggestion-actions .remove-btn::before {
-        content: "\f00d"; /* Font Awesome 'times' icon */
-        font-family: "Font Awesome 5 Free";
+    /* Updated to use <i> tag directly, removing ::before */
+    #suggestionList .suggestion-actions .remove-btn i {
+        font-family: "Font Awesome 6 Free"; /* Ensure correct font-family for FA6 */
         font-weight: 900;
     }
     #suggestionList .suggestion-actions .remove-btn span {
@@ -363,9 +354,9 @@
         background-color: transparent;
         color: #DC143C; /* From index copy */
     }
-    #categoryList .remove-btn::before {
-        content: "\f00d"; /* Font Awesome 'times' icon */
-        font-family: "Font Awesome 5 Free";
+    /* Updated to use <i> tag directly, removing ::before */
+    #categoryList .remove-btn i {
+        font-family: "Font Awesome 6 Free"; /* Ensure correct font-family for FA6 */
         font-weight: 900;
     }
     #categoryList .remove-btn span {
@@ -989,8 +980,16 @@
         const li = document.createElement('li');
         li.dataset.id = item.id;
 
+        // Container pour la quantité et le nom de l'article
+        const quantityAndNameContainer = document.createElement('div');
+        quantityAndNameContainer.style.display = 'flex'; // Utiliser flexbox
+        quantityAndNameContainer.style.alignItems = 'center';
+        quantityAndNameContainer.style.flexGrow = '1'; // Permet de prendre l'espace disponible
+
         const quantityControl = document.createElement('div');
         quantityControl.classList.add('quantity-control');
+        quantityControl.style.display = 'flex'; // Assurer que les boutons sont en ligne
+        quantityControl.style.alignItems = 'center';
 
         const minusBtn = document.createElement('button');
         minusBtn.textContent = '-';
@@ -998,7 +997,7 @@
         quantityControl.appendChild(minusBtn);
 
         const quantitySpan = document.createElement('span');
-        quantitySpan.textContent = item.quantity;
+        quantitySpan.textContent = `${item.quantity}x`; // Ajouter 'x' ici
         quantityControl.appendChild(quantitySpan);
 
         const plusBtn = document.createElement('button');
@@ -1006,20 +1005,25 @@
         plusBtn.onclick = () => updateItemQuantity(item.id, item.quantity + 1);
         quantityControl.appendChild(plusBtn);
 
-        li.appendChild(quantityControl); // Place quantity control first
+        // Ajouter les contrôles de quantité au container
+        quantityAndNameContainer.appendChild(quantityControl);
 
-        const itemInfo = document.createElement('div');
-        itemInfo.classList.add('item-info');
         const itemName = document.createElement('span');
         itemName.textContent = item.name;
-        itemInfo.appendChild(itemName);
-        li.appendChild(itemInfo); // Then item name
+        itemName.style.marginLeft = '10px'; // Espacement entre la quantité et le nom
+        itemName.style.fontWeight = 'normal'; // Le nom n'est pas en gras comme la quantité
+        itemName.style.color = '#6A057F'; // Couleur du texte de l'article
+        quantityAndNameContainer.appendChild(itemName);
+
+        li.appendChild(quantityAndNameContainer); // Ajout du container principal
 
         const itemActions = document.createElement('div');
         itemActions.classList.add('item-actions');
 
         const removeBtn = document.createElement('button');
         removeBtn.classList.add('remove-btn');
+        // Utilisez l'icône de croix Font Awesome directement
+        removeBtn.innerHTML = '<i class="fas fa-times"></i>';
         removeBtn.onclick = () => deleteItem(item.id);
         itemActions.appendChild(removeBtn);
 
@@ -1164,6 +1168,7 @@
                 li.textContent = item.name;
                 const removeBtn = document.createElement('button');
                 removeBtn.classList.add('remove-btn');
+                removeBtn.innerHTML = '<i class="fas fa-times"></i>'; // Use Font Awesome icon
                 removeBtn.onclick = () => deleteBuyLaterItem(item.id);
                 li.appendChild(removeBtn);
                 buyLaterList.appendChild(li);
@@ -1239,7 +1244,7 @@
                     <span class="category">${suggestion.category}</span>
                 </div>
                 <div class="suggestion-actions">
-                    <button class="remove-btn" data-id="${suggestion.id}">✖</button>
+                    <button class="remove-btn" data-id="${suggestion.id}"><i class="fas fa-times"></i></button>
                 </div>
             `;
             // Add event listener to add to shopping list when clicking the item text
@@ -1318,7 +1323,7 @@
             li.textContent = category;
             li.innerHTML = `
                 <span>${category}</span>
-                <button class="remove-btn" data-category="${category}">✖</button>
+                <button class="remove-btn" data-category="${category}"><i class="fas fa-times"></i></button>
             `;
             li.querySelector('.remove-btn').addEventListener('click', (e) => {
                 deleteCategory(e.target.dataset.category);
@@ -1361,7 +1366,7 @@
 
     function saveCategoryOrder() {
         const items = Array.from(categoryOrderList.children);
-        const newOrder = items.map(li => li.textContent.trim()); // Trim to remove potential handle text
+        const newOrder = items.map(li => li.querySelector('span').textContent.trim()); // Get text from span
         localStorage.setItem('category_order', JSON.stringify(newOrder));
         console.log('Ordre des catégories sauvegardé !'); // Log instead of alert
         loadShoppingList(); // Reload shopping list to apply new order
