@@ -91,10 +91,10 @@
     #categoryList .remove-btn,
     #suggestionList .remove-btn {
       background-color: #f44336;
-      width: 30px; /* Plus petit */
-      height: 30px; /* Plus petit */
+      width: 28px; /* Plus petit */
+      height: 28px; /* Plus petit */
       padding: 0;
-      font-size: 1.2rem; /* Taille de la croix */
+      font-size: 1rem; /* Taille de la croix plus petite */
       border-radius: 50%; /* Rond */
       display: flex;
       justify-content: center;
@@ -130,10 +130,10 @@
         margin-left: 0.5rem;
     }
     .quantity-control button {
-        width: 30px;
-        height: 30px;
+        width: 28px; /* Rendre les boutons + et - plus petits */
+        height: 28px; /* Rendre les boutons + et - plus petits */
         padding: 0;
-        font-size: 1.2rem;
+        font-size: 1.1rem; /* Taille de la police légèrement réduite */
         border-radius: 50%;
         display: flex;
         justify-content: center;
@@ -171,6 +171,7 @@
       border-top-right-radius: 1rem;
       transform: translateY(0); /* Position initiale visible */
       transition: transform 0.3s ease-out; /* Animation douce */
+      position: relative; /* Pour positionner la flèche à droite */
     }
     .bottom-nav.hidden-nav {
       transform: translateY(100%); /* Masque le menu en le déplaçant vers le bas */
@@ -196,8 +197,7 @@
     .toggle-nav-button {
       position: absolute;
       top: -20px; /* Positionne la flèche au-dessus du menu */
-      left: 50%;
-      transform: translateX(-50%);
+      right: 20px; /* Positionne la flèche à droite */
       background-color: #E75480;
       color: white;
       border: none;
@@ -281,7 +281,8 @@
 
   <div id="suggestions" class="section-container section hidden">
     <h2 id="suggestionsTitle">Suggestions 💡</h2>
-    <ul id="suggestionList"></ul> <h3>Ajouter une suggestion</h3>
+    <select id="suggestionCategoryFilter"></select> <ul id="suggestionList"></ul>
+    <h3>Ajouter une suggestion</h3>
     <input type="text" id="newSuggestionInput" placeholder="Suggérer un article" />
     <select id="newSuggestionCategorySelect"></select>
     <button id="addSuggestionBtn">Ajouter Suggestion</button>
@@ -382,6 +383,7 @@
 
     // Suggestions section elements
     const suggestionsTitle = document.getElementById('suggestionsTitle'); // Added for scroll
+    const suggestionCategoryFilter = document.getElementById('suggestionCategoryFilter'); // Nouveau filtre de catégorie
     const newSuggestionInput = document.getElementById('newSuggestionInput');
     const newSuggestionCategorySelect = document.getElementById('newSuggestionCategorySelect');
     const addSuggestionBtn = document.getElementById('addSuggestionBtn');
@@ -455,7 +457,8 @@
         if (sectionId === 'buyLater') {
             loadBuyLaterList();
         } else if (sectionId === 'suggestions') {
-            loadSuggestions();
+            updateSuggestionCategoryFilter(); // Mettre à jour le filtre de catégories
+            loadSuggestions(); // Charger les suggestions après la mise à jour du filtre
         } else if (sectionId === 'categories') {
             renderCategories();
             loadCategoryOrder();
@@ -522,6 +525,25 @@
             newCategorySelect.value = categories[0];
             newSuggestionCategorySelect.value = categories[0];
         }
+    }
+
+    function updateSuggestionCategoryFilter() {
+        const categories = getCategories();
+        suggestionCategoryFilter.innerHTML = '';
+
+        // Add "Toutes les catégories" option
+        const allOption = document.createElement('option');
+        allOption.value = 'all';
+        allOption.textContent = 'Toutes les catégories';
+        suggestionCategoryFilter.appendChild(allOption);
+
+        categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            suggestionCategoryFilter.appendChild(option);
+        });
+        suggestionCategoryFilter.value = 'all'; // Default to "All Categories"
     }
 
     // --- Fonctions Supabase ---
@@ -653,6 +675,7 @@
                     currentCategories.push(category);
                     saveCategories(currentCategories);
                     updateAllCategorySelects(); // Update category dropdowns
+                    updateSuggestionCategoryFilter(); // Update filter dropdown
                     renderCategories(); // Re-render category list in 'Gérer les Catégories'
                     loadCategoryOrder(); // Update category order list
                 }
@@ -963,42 +986,20 @@
             return;
         }
         const items = getLocalSuggestions(currentListId);
+        const selectedCategory = suggestionCategoryFilter.value;
 
         suggestionList.innerHTML = '';
 
-        const categories = getCategories();
-        const categoryOrder = JSON.parse(localStorage.getItem('category_order')) || categories;
+        const filteredItems = selectedCategory === 'all'
+            ? items
+            : items.filter(item => item.category === selectedCategory);
 
-        const groupedItems = {};
-        // Initialize groupedItems with all known categories in order
-        categoryOrder.forEach(cat => groupedItems[cat] = []);
-        // Add any existing categories from items that might not be in the current user_categories
-        items.forEach(item => {
-            const category = item.category || 'Autres';
-            if (!groupedItems[category]) {
-                groupedItems[category] = [];
-            }
-            groupedItems[category].push(item);
-        });
+        // Display items without grouping by category when filtered by 'all'
+        filteredItems.forEach(item => renderSuggestionItem(item, suggestionList));
 
-        // Render items for each category, sorted
-        categoryOrder.forEach(category => {
-            if (groupedItems[category] && groupedItems[category].length > 0) {
-                const categoryHeader = document.createElement('h3');
-                categoryHeader.textContent = category;
-                suggestionList.appendChild(categoryHeader);
-                groupedItems[category].forEach(item => renderSuggestionItem(item, suggestionList));
-            }
-        });
-        // Handle items with categories not in the current category order
-        Object.keys(groupedItems).filter(cat => !categoryOrder.includes(cat)).forEach(category => {
-            if (groupedItems[category].length > 0) {
-                const categoryHeader = document.createElement('h3');
-                categoryHeader.textContent = category;
-                suggestionList.appendChild(categoryHeader);
-                groupedItems[category].forEach(item => renderSuggestionItem(item, suggestionList));
-            }
-        });
+        // If you still want to sort by category even when "all" is selected,
+        // you would need to re-introduce grouping logic here, but for "en vrac",
+        // simply rendering all filtered items is enough.
     }
 
     function renderSuggestionItem(item, listElement) {
@@ -1056,6 +1057,7 @@
                     const updatedCategories = categories.filter(c => c !== cat);
                     saveCategories(updatedCategories);
                     updateAllCategorySelects();
+                    updateSuggestionCategoryFilter(); // Update filter dropdown
                     renderCategories();
                     loadCategoryOrder();
                     loadShoppingList(); // Recharger la liste pour refléter le changement de catégorie
@@ -1074,6 +1076,7 @@
             saveCategories(categories);
             newCategoryInput.value = '';
             updateAllCategorySelects();
+            updateSuggestionCategoryFilter(); // Update filter dropdown
             renderCategories();
             loadCategoryOrder();
         } else if (newCat) {
@@ -1216,6 +1219,11 @@
         }
     });
 
+    // Filter Suggestions by Category
+    suggestionCategoryFilter.addEventListener('change', () => {
+        loadSuggestions();
+    });
+
     // Categories Listeners
     addCategoryBtn.addEventListener('click', addCategory);
     saveCategoryOrderBtn.addEventListener('click', saveCategoryOrder);
@@ -1244,6 +1252,7 @@
       }
 
       updateAllCategorySelects();
+      updateSuggestionCategoryFilter(); // Initialize suggestion filter
 
       // Initialisation du client Supabase
       if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
