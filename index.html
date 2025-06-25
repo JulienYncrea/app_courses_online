@@ -13,10 +13,10 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
       padding: 1rem;
-      padding-bottom: 70px; /* Espace initial pour le menu du bas */
+      padding-bottom: 70px; /* Initial space for the bottom menu */
       background: linear-gradient(to bottom right, #FAD0C4, #FFD1DC);
       color: #333;
-      transition: padding-bottom 0.3s ease-out; /* Animation pour le padding */
+      transition: padding-bottom 0.3s ease-out; /* Animation for padding */
     }
     h1, h2 {
       text-align: center;
@@ -30,138 +30,147 @@
       background: #FFFFFF;
       padding: 1.5rem;
       border-radius: 1rem;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Updated shadow */
       margin-bottom: 1rem;
     }
-    input[type="text"], input[type="number"], select, button {
-      width: calc(100% - 20px);
-      padding: 0.8rem;
-      margin-bottom: 0.5rem;
-      border: 1px solid #ddd;
+    label {
+      display: block;
+      margin-top: 0.75rem;
+      font-weight: bold;
+      color: #6A057F; /* Color from index copy */
+    }
+    input[type="text"], input[type="number"], select {
+      width: 100%; /* Changed from calc(100% - 20px) for consistency with padding */
+      padding: 0.7rem; /* Adjusted from 0.8rem */
+      margin-top: 0.4rem; /* Adjusted from margin-bottom */
+      border: 1px solid #DDA0DD; /* Color from index copy */
       border-radius: 0.5rem;
       box-sizing: border-box;
+      color: #333;
       font-size: 1rem;
     }
     button {
-      background-color: #E75480;
-      color: white;
+      background: #FF69B4; /* From index copy */
+      color: #FFFFFF; /* From index copy */
+      font-weight: bold; /* From index copy */
       cursor: pointer;
-      border: none;
-      transition: background-color 0.2s ease;
+      transition: all 0.3s ease; /* From index copy */
+      border: none; /* From index copy */
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* From index copy */
+      width: 100%; /* Ensure full width for general buttons */
+      padding: 0.7rem; /* From index copy */
+      margin-top: 0.4rem; /* From index copy */
+      border-radius: 0.5rem; /* From index copy */
     }
     button:hover {
-      background-color: #D4426A;
+      background: #C71585; /* From index copy */
+      transform: translateY(-2px); /* From index copy */
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* From index copy */
     }
-    ul {
-      list-style: none;
-      padding: 0;
+    select {
+        background: #F8F8FF; /* From index copy */
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url("data:image/svg+xml;utf8,<svg fill='%23C71585' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>"); /* From index copy */
+        background-repeat: no-repeat;
+        background-position: right 0.7em top 50%;
+        background-size: 0.65em auto;
+        padding-right: 2.5em;
     }
-    li {
-      background: #f9f9f9;
-      padding: 0.8rem;
-      margin-bottom: 0.5rem;
-      border-radius: 0.5rem;
+
+    /* Styles for the shopping list items (adapting from index copy's .shopping-list-item) */
+    #shoppingListToBuy li, #buyLaterList li {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      flex-wrap: wrap; /* Permet aux éléments de passer à la ligne */
+      background: #FFF0F5; /* From index copy */
+      padding: 0.7rem 1.2rem; /* From index copy */
+      margin-top: 0.7rem; /* From index copy */
+      border-radius: 0.75rem; /* From index copy */
+      font-size: 1.1rem; /* From index copy */
+      color: #6A057F; /* From index copy */
+      border: 1px solid #FFC0CB; /* From index copy */
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* From index copy */
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      flex-wrap: nowrap; /* Prevent wrapping in main list items */
     }
-    .item-info {
-        flex-grow: 1;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+    /* Adapting delete/decrement buttons from index copy */
+    .quantity-control button { /* This will be the decrement/increment buttons */
+        background: none; /* Changed from #ddd */
+        border: none; /* Changed from none */
+        color: #6A057F; /* Darker color for decrement, from index copy */
+        font-size: 1.8rem; /* Slightly larger for visibility, from index copy */
+        cursor: pointer;
+        padding: 0 0.5rem; /* Adjusted padding */
+        margin: 0;
+        width: auto; /* Ensure auto width */
+        height: auto; /* Ensure auto height */
+        border-radius: 0; /* Remove round border */
+        transition: color 0.3s ease;
     }
-    .item-actions {
-      display: flex;
-      gap: 0.5rem; /* Espace entre les boutons */
-      margin-top: 0.5rem; /* Espace si les boutons passent en dessous */
+    .quantity-control button:hover {
+        background-color: transparent; /* Ensure no background on hover */
+        color: #8A2BE2; /* Change color on hover for decrement, from index copy */
     }
-    .item-actions button {
+    .quantity-control span {
+        font-weight: bold; /* From index copy */
+        margin-left: 8px;
+        margin-right: 8px;
+        color: #FF8C00; /* From index copy */
+        min-width: 20px;
+        text-align: center;
+    }
+
+    .item-actions .remove-btn { /* This will be the main delete button for list items */
+      background: none; /* Changed from #f44336 */
+      border: none;
+      color: #FF6347; /* From index copy */
+      font-size: 1.6rem; /* From index copy */
+      cursor: pointer;
+      padding: 0 0.5rem;
+      margin: 0;
       width: auto;
-      padding: 0.5rem 0.8rem;
-      font-size: 0.9rem;
-      border-radius: 0.4rem;
-      margin-bottom: 0; /* Override default button margin */
-    }
-    /* Styles pour les boutons de suppression en croix dans la liste de courses */
-    .item-actions .remove-btn,
-    #buyLaterList .remove-btn,
-    #categoryList .remove-btn,
-    #suggestionList .remove-btn {
-      background-color: #f44336;
-      width: 28px; /* Plus petit */
-      height: 28px; /* Plus petit */
-      padding: 0;
-      font-size: 1rem; /* Taille de la croix plus petite */
-      border-radius: 50%; /* Rond */
+      height: auto;
+      border-radius: 0;
       display: flex;
       justify-content: center;
       align-items: center;
-      color: white;
-      text-align: center;
-      line-height: 1; /* Pour centrer le 'X' */
+      transition: color 0.3s ease;
+      line-height: 1;
     }
-    .item-actions .remove-btn:hover,
-    #buyLaterList .remove-btn:hover,
-    #categoryList .remove-btn:hover,
-    #suggestionList .remove-btn:hover {
-      background-color: #d32f2f;
+    .item-actions .remove-btn:hover {
+      background-color: transparent; /* Ensure no background on hover */
+      color: #DC143C; /* From index copy */
     }
-    /* Masque le texte "Supprimer" pour les croix */
-    .item-actions .remove-btn::before,
-    #buyLaterList .remove-btn::before,
-    #categoryList .remove-btn::before,
-    #suggestionList .remove-btn::before {
-      content: "X";
+    .item-actions .remove-btn::before {
+        content: "\f00d"; /* Font Awesome 'times' icon */
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
     }
-    .item-actions .remove-btn span,
-    #buyLaterList .remove-btn span,
-    #categoryList .remove-btn span,
-    #suggestionList .remove-btn span {
-        display: none; /* Cache le texte original */
-    }
-
-    .quantity-control {
-        display: flex;
-        align-items: center;
-        gap: 0.2rem;
-        margin-left: 0.5rem;
-    }
-    .quantity-control button {
-        width: 28px; /* Rendre les boutons + et - plus petits */
-        height: 28px; /* Rendre les boutons + et - plus petits */
-        padding: 0;
-        font-size: 1.1rem; /* Taille de la police légèrement réduite */
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background-color: #ddd;
-        color: #333;
-    }
-    .quantity-control button:hover {
-        background-color: #ccc;
-    }
-    .quantity-control span {
-        min-width: 20px;
-        text-align: center;
-        font-weight: bold;
+    .item-actions .remove-btn span {
+        display: none; /* Hide original text */
     }
 
     .total-items {
-        text-align: right;
-        font-weight: bold;
+        color: #C71585 !important; /* From index copy, specific style for empty text */
+        font-style: italic; /* From index copy */
+        font-size: 0.95rem; /* From index copy */
+        text-align: center; /* From index copy, but keeping original for context */
         margin-top: 1rem;
-        color: #E75480;
+        font-weight: bold; /* Keeping original for clarity */
     }
+
+    /* Fixed bottom navigation (from index.html, retaining structure) */
     .bottom-nav {
       position: fixed;
       bottom: 0;
       left: 0;
       width: 100%;
-      background-color: #E75480;
+      background-color: #EE82EE; /* From index copy's navigation buttons */
       display: flex;
       justify-content: space-around;
       padding: 0.5rem 0;
@@ -169,15 +178,14 @@
       z-index: 1000;
       border-top-left-radius: 1rem;
       border-top-right-radius: 1rem;
-      transform: translateY(0); /* Position initiale visible */
-      transition: transform 0.3s ease-out; /* Animation douce */
-      position: relative; /* Pour positionner la flèche à droite */
+      transform: translateY(0);
+      transition: transform 0.3s ease-out;
     }
     .bottom-nav.hidden-nav {
-      transform: translateY(100%); /* Masque le menu en le déplaçant vers le bas */
+      transform: translateY(100%);
     }
     .nav-item {
-      color: white;
+      color: #FFFFFF; /* From index copy's navigation buttons */
       text-align: center;
       padding: 0.5rem;
       cursor: pointer;
@@ -192,13 +200,13 @@
     }
     .nav-item.active {
       font-weight: bold;
-      color: #FAD0C4;
+      color: #FFD700; /* Active color from index copy's navigation buttons */
     }
     .toggle-nav-button {
       position: absolute;
-      top: -20px; /* Positionne la flèche au-dessus du menu */
-      right: 20px; /* Positionne la flèche à droite */
-      background-color: #E75480;
+      top: -20px;
+      right: 20px;
+      background-color: #9370DB; /* From index copy's toggle button */
       color: white;
       border: none;
       border-radius: 50%;
@@ -209,61 +217,228 @@
       align-items: center;
       cursor: pointer;
       box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
-      z-index: 1001; /* Assure qu'il est au-dessus du menu */
+      z-index: 1001;
+      transition: background-color 0.3s ease, transform 0.3s ease; /* Added transform for consistency */
+    }
+    .toggle-nav-button:hover {
+        background-color: #8A2BE2; /* From index copy's toggle button hover */
+        transform: translateY(-2px); /* Added for consistency */
     }
     .toggle-nav-button i {
       font-size: 1.2rem;
+      transition: transform 0.3s ease; /* For icon rotation */
     }
 
-    /* Style pour les sections cachées */
+    /* Style for hidden sections */
     .section.hidden {
       display: none;
     }
 
-    /* Style pour la liste de suggestions */
+    /* Style for suggestion list items (adapting from index copy's .suggestion-item) */
     #suggestionList li {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        cursor: pointer; /* Indiquer que l'élément est cliquable */
+      position: relative;
+      background: #9370DB; /* From index copy */
+      color: #FFFFFF; /* From index copy */
+      padding: 0.6rem 1rem; /* From index copy */
+      border-radius: 0.75rem; /* From index copy */
+      text-align: left; /* Adjust from center for content */
+      cursor: pointer;
+      transition: all 0.3s ease;
+      user-select: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-right: 5px; /* From index copy */
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* From index copy */
+      margin-top: 0.7rem; /* Consistent spacing */
+    }
+    #suggestionList li:hover {
+      background: #8A2BE2; /* From index copy */
+      transform: translateY(-2px); /* From index copy */
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* From index copy */
     }
     #suggestionList .suggestion-info {
         flex-grow: 1;
-        display: flex;
-        flex-direction: column; /* Nom et catégorie sur des lignes différentes */
+        padding-right: 5px;
+        font-weight: 500;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
     #suggestionList .suggestion-info .name {
         font-weight: bold;
+        color: #FFFFFF; /* Ensure visibility */
     }
     #suggestionList .suggestion-info .category {
         font-size: 0.85em;
-        color: #666;
+        color: rgba(255, 255, 255, 0.8); /* Lighter color for category */
     }
-    #suggestionList .suggestion-actions {
-        display: flex;
-        gap: 0.5rem;
-        margin-top: 0.5rem; /* Espace si les boutons passent en dessous */
+    #suggestionList .suggestion-actions .remove-btn {
+      background: none;
+      border: none;
+      color: #FFD700; /* From index copy */
+      font-size: 1.3rem; /* From index copy */
+      cursor: pointer;
+      padding: 0 0.2rem;
+      margin: 0;
+      width: auto;
+      height: auto;
+      border-radius: 0;
+      transition: color 0.3s ease;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    #suggestionList .suggestion-actions .remove-btn:hover {
+      color: #FF4500; /* From index copy */
+    }
+    #suggestionList .suggestion-actions .remove-btn::before {
+        content: "\f00d"; /* Font Awesome 'times' icon */
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+    }
+    #suggestionList .suggestion-actions .remove-btn span {
+        display: none; /* Hide original text */
     }
 
-    /* Styles pour les titres de catégorie dans la liste de courses */
+    /* Styles for category list items (adapting from index copy's #categoryOrderList li) */
+    #categoryList li, #categoryOrderList li {
+        background: #F8F8FF; /* From index copy */
+        border: 1px solid #DDA0DD; /* From index copy */
+        padding: 0.75rem 1rem; /* From index copy */
+        margin-bottom: 0.5rem;
+        border-radius: 0.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: bold; /* From index copy */
+        color: #6A057F; /* From index copy */
+        cursor: grab; /* From index copy */
+        transition: background-color 0.2s ease, transform 0.2s ease; /* From index copy */
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+    #categoryList li:hover, #categoryOrderList li:hover {
+        background-color: #E6E6FA; /* From index copy */
+        transform: scale(1.01); /* From index copy */
+    }
+    #categoryOrderList li.dragging { /* From index copy */
+        opacity: 0.7;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    .drag-handle { /* From index copy */
+        font-size: 1.5rem;
+        cursor: grab;
+        margin-right: 10px;
+        color: #EE82EE;
+    }
+    #categoryList .remove-btn { /* Adapting delete button for categories */
+        background: none;
+        border: none;
+        color: #FF6347; /* From index copy */
+        font-size: 1.2rem; /* From index copy */
+        cursor: pointer;
+        padding: 0 0.2rem;
+        margin-left: 10px;
+        transition: color 0.3s ease;
+        width: auto;
+        height: auto;
+        border-radius: 0;
+    }
+    #categoryList .remove-btn:hover {
+        background-color: transparent;
+        color: #DC143C; /* From index copy */
+    }
+    #categoryList .remove-btn::before {
+        content: "\f00d"; /* Font Awesome 'times' icon */
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+    }
+    #categoryList .remove-btn span {
+        display: none; /* Hide original text */
+    }
+
+    /* Styles for add forms */
+    .add-form { /* New style based on index copy structure */
+        margin-top: 1.5rem;
+        border-top: 1px solid #DDA0DD;
+        padding-top: 1rem;
+    }
+    /* Apply add-form to specific elements */
+    #addItemForm, #addBuyLaterItemForm, #addSuggestionForm, #addCategoryForm {
+        margin-top: 1.5rem;
+        border-top: 1px solid #DDA0DD;
+        padding-top: 1rem;
+    }
+    #addItemForm label, #addBuyLaterItemForm label, #addSuggestionForm label, #addCategoryForm label {
+        display: block;
+        margin-top: 0.75rem;
+        font-weight: bold;
+        color: #6A057F;
+    }
+
+    /* Style for empty list text (adapting existing .total-items style) */
+    p.empty-list-message { /* New class for clear distinction */
+        color: #C71585 !important;
+        font-style: italic;
+        font-size: 0.95rem;
+        text-align: center;
+        margin-top: 0.5rem;
+    }
+
+    /* Styles for section headers */
     .section-container h3 {
-        color: #E75480;
-        border-bottom: 1px solid #FFD1DC;
+        color: #E75480; /* From index copy */
+        border-bottom: 1px solid #FFD1DC; /* From index copy */
         padding-bottom: 0.3rem;
         margin-top: 1.5rem;
         margin-bottom: 1rem;
     }
+
+    @media (max-width: 640px) {
+        .bottom-nav {
+            padding: 0.5rem 0;
+        }
+        .nav-item {
+            font-size: 0.7rem;
+            padding: 0.3rem;
+        }
+        .nav-item i {
+            font-size: 1.2rem;
+        }
+        .toggle-nav-button {
+            width: 35px;
+            height: 35px;
+            top: -18px;
+            right: 15px;
+        }
+        .toggle-nav-button i {
+            font-size: 1rem;
+        }
+    }
   </style>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('Service Worker registered:', reg.scope))
+          .catch(err => console.error('SW error:', err));
+      });
+    }
+  </script>
 </head>
 <body>
   <div id="shoppingList" class="section-container section">
     <h1 id="shoppingListTitle">Ma Liste de Courses 🛒</h1>
 
     <ul id="shoppingListToBuy" class="item-list"></ul>
-    <p class="total-items">Articles restants : <span id="totalRemainingItems">0</span></p>
+    <p class="total-items empty-list-message">Articles restants : <span id="totalRemainingItems">0</span></p>
 
-    <div id="addItemForm">
+    <div id="addItemForm" class="add-form">
         <h3>Ajouter un article</h3>
         <input type="text" id="newItemInput" placeholder="Ajouter un article" />
         <input type="number" id="newQuantityInput" placeholder="Quantité (optionnel)" value="1" min="1" />
@@ -274,27 +449,41 @@
 
   <div id="buyLater" class="section-container section hidden">
     <h2>Acheter Plus Tard 🛒</h2>
-    <input type="text" id="newBuyLaterItemInput" placeholder="Article à acheter plus tard" />
-    <button id="addBuyLaterItemBtn">Ajouter</button>
+    <div id="addBuyLaterItemForm" class="add-form">
+        <label for="newBuyLaterItemInput">Ajouter article à acheter plus tard:</label>
+        <input type="text" id="newBuyLaterItemInput" placeholder="Article à acheter plus tard" />
+        <button id="addBuyLaterItemBtn">Ajouter</button>
+    </div>
     <ul id="buyLaterList"></ul>
   </div>
 
   <div id="suggestions" class="section-container section hidden">
     <h2 id="suggestionsTitle">Suggestions 💡</h2>
-    <select id="suggestionCategoryFilter"></select> <ul id="suggestionList"></ul>
-    <h3>Ajouter une suggestion</h3>
-    <input type="text" id="newSuggestionInput" placeholder="Suggérer un article" />
-    <select id="newSuggestionCategorySelect"></select>
-    <button id="addSuggestionBtn">Ajouter Suggestion</button>
+    <div class="filter-controls">
+        <label for="suggestionCategoryFilter">Filtrer par catégorie:</label>
+        <select id="suggestionCategoryFilter"></select>
+    </div>
+    <ul id="suggestionList"></ul>
+    <div id="addSuggestionForm" class="add-form">
+        <label for="newSuggestionInput">Ajouter une suggestion:</label>
+        <input type="text" id="newSuggestionInput" placeholder="Suggérer un article" />
+        <label for="newSuggestionCategorySelect">Catégorie:</label>
+        <select id="newSuggestionCategorySelect"></select>
+        <button id="addSuggestionBtn">Ajouter Suggestion</button>
+    </div>
   </div>
 
   <div id="categories" class="section-container section hidden">
     <h2>Gérer les Catégories 📂</h2>
+    <div id="addCategoryForm" class="add-form">
+        <label for="newCategoryInput">Ajouter nouvelle catégorie:</label>
+        <input type="text" id="newCategoryInput" placeholder="Nouvelle catégorie" />
+        <button id="addCategoryBtn">Ajouter Catégorie</button>
+    </div>
     <h3>Vos Catégories</h3>
-    <input type="text" id="newCategoryInput" placeholder="Nouvelle catégorie" />
-    <button id="addCategoryBtn">Ajouter Catégorie</button>
     <ul id="categoryList"></ul>
     <h3>Ordre des Catégories</h3>
+    <p class="empty-list-message">Faites glisser les catégories pour définir leur ordre.</p>
     <ul id="categoryOrderList" class="sortable-list"></ul>
     <button id="saveCategoryOrderBtn">Sauvegarder Ordre</button>
   </div>
@@ -485,12 +674,15 @@
     // Nouvelle fonction pour ajuster le padding-bottom du body
     function updateBodyPadding() {
         const bottomNavHeight = bottomNav.offsetHeight;
-        if (bottomNav.classList.contains('hidden-nav')) {
-            document.body.style.paddingBottom = '20px'; // Un petit padding quand le menu est caché
-        } else {
-            document.body.style.paddingBottom = `${bottomNavHeight + 20}px`; // Hauteur du menu + un peu d'espace
-        }
+        // The toggle button is outside the bottom-nav for fixed positioning.
+        // We need to account for both the nav and the toggle button's height
+        // to avoid content being hidden. Assuming toggle button is 40px height + 20px top margin from nav.
+        const effectiveNavHeight = bottomNav.classList.contains('hidden-nav') ? 0 : bottomNavHeight;
+        const toggleButtonHeight = bottomNav.classList.contains('hidden-nav') ? 40 : 0; // Only visible when nav is hidden
+
+        document.body.style.paddingBottom = `${effectiveNavHeight + toggleButtonHeight + 20}px`;
     }
+
 
     function updateSupabaseHeaders(shareCode) {
         if (supabase && supabase.rest) {
@@ -708,7 +900,7 @@
 
     async function loadShoppingList() {
         if (!currentListId) {
-            shoppingListToBuy.innerHTML = '';
+            shoppingListToBuy.innerHTML = '<p class="empty-list-message">Votre liste est vide pour le moment !</p>';
             totalRemainingItemsSpan.textContent = '0';
             return;
         }
@@ -729,6 +921,12 @@
 
             shoppingListToBuy.innerHTML = '';
             let remainingItems = 0;
+
+            if (items.length === 0) {
+                shoppingListToBuy.innerHTML = '<p class="empty-list-message">Votre liste est vide pour le moment !</p>';
+                totalRemainingItemsSpan.textContent = '0';
+                return;
+            }
 
             const categories = getCategories();
             const categoryOrder = JSON.parse(localStorage.getItem('category_order')) || categories;
@@ -756,6 +954,8 @@
                     const categoryHeader = document.createElement('h3');
                     categoryHeader.textContent = category;
                     shoppingListToBuy.appendChild(categoryHeader);
+                    // Sort items alphabetically within each category
+                    groupedItems[category].sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
                     groupedItems[category].forEach(item => renderListItem(item, shoppingListToBuy));
                 }
             });
@@ -765,6 +965,8 @@
                     const categoryHeader = document.createElement('h3');
                     categoryHeader.textContent = category;
                     shoppingListToBuy.appendChild(categoryHeader);
+                    // Sort items alphabetically within 'Autres' category
+                    groupedItems[category].sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
                     groupedItems[category].forEach(item => renderListItem(item, shoppingListToBuy));
                 }
             });
@@ -811,7 +1013,6 @@
         itemActions.classList.add('item-actions');
 
         const removeBtn = document.createElement('button');
-        // removeBtn.textContent = 'Supprimer'; // Ne pas mettre de texte ici, on utilise le pseudo-élément CSS
         removeBtn.classList.add('remove-btn');
         removeBtn.onclick = () => deleteItem(item.id);
         itemActions.appendChild(removeBtn);
@@ -855,6 +1056,23 @@
                   // Ne recharger que si la section est active pour éviter des appels inutiles
                 } else {
                   loadBuyLaterList();
+                }
+            })
+            .subscribe();
+
+        // Listener pour les changements sur list_suggestions
+        window.supabaseSuggestionsChannel = supabase.channel(`list_suggestions_changes:${currentListId}`)
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'list_suggestions',
+                filter: `list_id=eq.${currentListId}`
+            }, (payload) => {
+                console.log('Changement Suggestions Realtime détecté:', payload);
+                if (document.getElementById('suggestions').classList.contains('hidden')) {
+                    // Ne recharger que si la section est active
+                } else {
+                    loadSuggestions();
                 }
             })
             .subscribe();
@@ -907,7 +1125,7 @@
 
     async function loadBuyLaterList() {
         if (!currentListId) {
-            buyLaterList.innerHTML = '';
+            buyLaterList.innerHTML = '<p class="empty-list-message">Votre liste "Acheter Plus Tard" est vide !</p>';
             return;
         }
         updateSupabaseHeaders(currentShareCode);
@@ -926,11 +1144,18 @@
             }
 
             buyLaterList.innerHTML = '';
+            if (items.length === 0) {
+                buyLaterList.innerHTML = '<p class="empty-list-message">Votre liste "Acheter Plus Tard" est vide !</p>';
+                return;
+            }
+            // Sort buy later items alphabetically
+            items.sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
+
             items.forEach(item => {
                 const li = document.createElement('li');
+                li.dataset.id = item.id;
                 li.textContent = item.name;
                 const removeBtn = document.createElement('button');
-                // removeBtn.textContent = 'Supprimer'; // Utilise le CSS pour l'icône X
                 removeBtn.classList.add('remove-btn');
                 removeBtn.onclick = () => deleteBuyLaterItem(item.id);
                 li.appendChild(removeBtn);
@@ -942,318 +1167,370 @@
         }
     }
 
-
-    // --- Fonctions Suggestions (Local Storage) ---
-
-    // Local suggestions storage
-    function getLocalSuggestions(listId) {
-        if (!listId) return [];
-        const key = `local_suggestions_${listId}`;
-        return JSON.parse(localStorage.getItem(key)) || [];
-    }
-
-    function saveLocalSuggestions(listId, suggestions) {
-        if (!listId) return;
-        const key = `local_suggestions_${listId}`;
-        localStorage.setItem(key, JSON.stringify(suggestions));
-    }
-
+    // --- Fonctions Suggestions ---
     async function addSuggestion(name, category) {
         if (!currentListId) {
             alert("Veuillez charger ou créer une liste d'abord.");
             return;
         }
-        const suggestions = getLocalSuggestions(currentListId);
-        // Generate a simple unique ID for local items
-        const newSuggestion = { id: Date.now(), name, category };
-        suggestions.push(newSuggestion);
-        saveLocalSuggestions(currentListId, suggestions);
-        newSuggestionInput.value = '';
-        loadSuggestions(); // Reload to update UI
+        if (!name.trim() || !category) {
+            alert("Veuillez entrer un nom et choisir une catégorie pour la suggestion.");
+            return;
+        }
+        try {
+            // Check for existing suggestion in the same list and category
+            const { data: existingSuggestions, error: selectError } = await supabase
+                .from('list_suggestions')
+                .select('id')
+                .eq('list_id', currentListId)
+                .eq('name', name.trim())
+                .eq('category', category);
+
+            if (selectError) throw selectError;
+
+            if (existingSuggestions && existingSuggestions.length > 0) {
+                alert(`"${name.trim()}" est déjà une suggestion dans la catégorie "${category}" !`);
+                return;
+            }
+
+            const { data, error } = await supabase
+                .from('list_suggestions')
+                .insert([{ name: name.trim(), category, list_id: currentListId }]);
+            if (error) {
+                console.error("Erreur lors de l'ajout de la suggestion:", error);
+                alert("Erreur lors de l'ajout de la suggestion: " + error.message);
+            } else {
+                newSuggestionInput.value = '';
+                // loadSuggestions géré par le listener Realtime
+            }
+        } catch (error) {
+            console.error("Erreur inattendue lors de l'ajout de la suggestion:", error);
+            alert("Une erreur inattendue est survenue: " + error.message);
+        }
     }
 
-    async function deleteSuggestion(itemId) {
+    async function deleteSuggestion(suggestionId) {
         if (!currentListId) return;
-        let suggestions = getLocalSuggestions(currentListId);
-        suggestions = suggestions.filter(item => item.id !== itemId);
-        saveLocalSuggestions(currentListId, suggestions);
-        loadSuggestions(); // Reload to update UI
+        try {
+            const { data, error } = await supabase
+                .from('list_suggestions')
+                .delete()
+                .eq('id', suggestionId);
+            if (error) {
+                console.error("Erreur lors de la suppression de la suggestion:", error);
+                alert("Erreur lors de la suppression de la suggestion: " + error.message);
+            } else {
+                // loadSuggestions géré par le listener Realtime
+            }
+        } catch (error) {
+            console.error("Erreur inattendue lors de la suppression de la suggestion:", error);
+            alert("Une erreur inattendue est survenue: " + error.message);
+        }
     }
 
     async function loadSuggestions() {
         if (!currentListId) {
-            suggestionList.innerHTML = '';
+            suggestionList.innerHTML = '<p class="empty-list-message">Aucune suggestion disponible pour le moment.</p>';
             return;
         }
-        const items = getLocalSuggestions(currentListId);
-        const selectedCategory = suggestionCategoryFilter.value;
+        updateSupabaseHeaders(currentShareCode);
 
-        suggestionList.innerHTML = '';
+        try {
+            const { data: suggestions, error } = await supabase
+                .from('list_suggestions')
+                .select('*')
+                .eq('list_id', currentListId)
+                .order('name', { ascending: true }); // Order by name
 
-        const filteredItems = selectedCategory === 'all'
-            ? items
-            : items.filter(item => item.category === selectedCategory);
+            if (error) {
+                console.error("Erreur lors du chargement des suggestions:", error);
+                alert("Erreur lors du chargement des suggestions: " + error.message);
+                return;
+            }
 
-        // Display items without grouping by category when filtered by 'all'
-        filteredItems.forEach(item => renderSuggestionItem(item, suggestionList));
+            suggestionList.innerHTML = '';
+            
+            const selectedCategory = suggestionCategoryFilter.value;
+            let filteredSuggestions = selectedCategory === 'all'
+                ? suggestions
+                : suggestions.filter(sug => sug.category === selectedCategory);
 
-        // If you still want to sort by category even when "all" is selected,
-        // you would need to re-introduce grouping logic here, but for "en vrac",
-        // simply rendering all filtered items is enough.
+            if (filteredSuggestions.length === 0) {
+                suggestionList.innerHTML = '<p class="empty-list-message">Aucune suggestion pour cette catégorie. Ajoutez-en ci-dessous !</p>';
+                return;
+            }
+
+            filteredSuggestions.forEach(suggestion => {
+                const li = document.createElement('li');
+                li.dataset.id = suggestion.id; // Store ID for deletion
+                li.innerHTML = `
+                    <div class="suggestion-info">
+                        <span class="name">${suggestion.name}</span>
+                        <span class="category">${suggestion.category}</span>
+                    </div>
+                    <div class="suggestion-actions">
+                        <button class="add-to-shopping-list-btn" data-name="${suggestion.name}" data-category="${suggestion.category}">+</button>
+                        <button class="remove-btn" data-id="${suggestion.id}">✖</button>
+                    </div>
+                `;
+                // Add event listener to add to shopping list when clicking the item text
+                li.querySelector('.suggestion-info').addEventListener('click', () => {
+                    addItem(suggestion.name, 1, suggestion.category, currentListId);
+                });
+                // Add event listener for the "+" button
+                li.querySelector('.add-to-shopping-list-btn').addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent li click from firing
+                    addItem(suggestion.name, 1, suggestion.category, currentListId);
+                });
+                // Add event listener for the "✖" button
+                li.querySelector('.remove-btn').addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent li click from firing
+                    if (confirm(`Supprimer la suggestion "${suggestion.name}" (${suggestion.category})?`)) {
+                        deleteSuggestion(suggestion.id);
+                    }
+                });
+                suggestionList.appendChild(li);
+            });
+        } catch (error) {
+            console.error("Erreur inattendue lors du chargement des suggestions:", error);
+            alert("Une erreur inattendue est survenue: " + error.message);
+        }
     }
-
-    function renderSuggestionItem(item, listElement) {
-        const li = document.createElement('li');
-        li.dataset.id = item.id;
-        li.style.cursor = 'pointer';
-
-        const suggestionInfo = document.createElement('div');
-        suggestionInfo.classList.add('suggestion-info');
-        const nameSpan = document.createElement('span');
-        nameSpan.classList.add('name');
-        nameSpan.textContent = item.name;
-        const categorySpan = document.createElement('span');
-        categorySpan.classList.add('category');
-        categorySpan.textContent = item.category ? `Catégorie: ${item.category}` : 'Pas de catégorie';
-        suggestionInfo.appendChild(nameSpan);
-        suggestionInfo.appendChild(categorySpan);
-        li.appendChild(suggestionInfo);
-
-        // Click handler for adding to main list and incrementing quantity
-        li.onclick = async () => {
-            await addItem(item.name, 1, item.category, currentListId);
-        };
-
-        const suggestionActions = document.createElement('div');
-        suggestionActions.classList.add('suggestion-actions');
-
-        const removeBtn = document.createElement('button');
-        // removeBtn.textContent = 'Supprimer'; // Utilise le CSS pour l'icône X
-        removeBtn.classList.add('remove-btn');
-        removeBtn.onclick = (event) => {
-            event.stopPropagation();
-            deleteSuggestion(item.id);
-        };
-        suggestionActions.appendChild(removeBtn);
-
-        li.appendChild(suggestionActions);
-        listElement.appendChild(li);
-    }
-
 
     // --- Fonctions Catégories ---
+    async function addCategory(categoryName) {
+        if (!categoryName.trim()) {
+            alert('Veuillez entrer un nom de catégorie.');
+            return;
+        }
+        let categories = getCategories();
+        if (categories.some(cat => cat.toLowerCase() === categoryName.trim().toLowerCase())) {
+            alert(`La catégorie "${categoryName.trim()}" existe déjà !`);
+            return;
+        }
+        categories.push(categoryName.trim());
+        saveCategories(categories);
+        newCategoryInput.value = '';
+        updateAllCategorySelects();
+        updateSuggestionCategoryFilter();
+        renderCategories();
+        loadCategoryOrder(); // Refresh the order list
+    }
+
+    function deleteCategory(categoryName) {
+        if (!confirm(`Êtes-vous sûr de vouloir supprimer la catégorie "${categoryName}" ? Cela supprimera également toutes les suggestions liées à celle-ci.`)) {
+            return;
+        }
+        let categories = getCategories();
+        categories = categories.filter(cat => cat !== categoryName);
+        saveCategories(categories);
+
+        // Remove from local category order if present
+        let currentOrder = JSON.parse(localStorage.getItem('category_order')) || [];
+        currentOrder = currentOrder.filter(cat => cat !== categoryName);
+        localStorage.setItem('category_order', JSON.stringify(currentOrder));
+
+        // Logic to remove suggestions linked to this category from Supabase (or locally if not using DB for suggestions)
+        // For now, assuming suggestions are managed via Supabase, you might need a server-side trigger
+        // or a client-side deletion loop for suggestions if they are local:
+        // let suggestions = JSON.parse(localStorage.getItem('shopping_suggestions')) || [];
+        // suggestions = suggestions.filter(sug => sug.category !== categoryName);
+        // localStorage.setItem('shopping_suggestions', JSON.stringify(suggestions));
+        // loadSuggestions(); // Refresh suggestions list
+        
+        // If using Supabase for suggestions, you would need to delete them from the DB:
+        if (currentListId) {
+            supabase
+                .from('list_suggestions')
+                .delete()
+                .eq('list_id', currentListId)
+                .eq('category', categoryName)
+                .then(({ error }) => {
+                    if (error) {
+                        console.error("Erreur lors de la suppression des suggestions liées:", error);
+                    } else {
+                        console.log(`Suggestions liées à la catégorie "${categoryName}" supprimées.`);
+                        loadSuggestions(); // Refresh suggestions list
+                    }
+                });
+        }
+        
+        updateAllCategorySelects();
+        updateSuggestionCategoryFilter();
+        renderCategories();
+        loadCategoryOrder();
+        loadShoppingList(); // Reload shopping list to reflect category changes
+    }
+
     function renderCategories() {
         const categories = getCategories();
         categoryList.innerHTML = '';
-        categories.forEach(cat => {
+        if (categories.length === 0) {
+            categoryList.innerHTML = '<p class="empty-list-message">Aucune catégorie définie. Ajoutez-en ci-dessus !</p>';
+            return;
+        }
+        categories.forEach(category => {
             const li = document.createElement('li');
-            li.textContent = cat;
-            // All categories are now deletable
-            const removeBtn = document.createElement('button');
-            // removeBtn.textContent = 'Supprimer'; // Utilise le CSS pour l'icône X
-            removeBtn.classList.add('remove-btn');
-            removeBtn.onclick = () => {
-                if (confirm(`Êtes-vous sûr de vouloir supprimer la catégorie "${cat}" ? Les articles existants de cette catégorie ne seront pas supprimés, mais leur catégorie pourrait devenir "Autres".`)) {
-                    const updatedCategories = categories.filter(c => c !== cat);
-                    saveCategories(updatedCategories);
-                    updateAllCategorySelects();
-                    updateSuggestionCategoryFilter(); // Update filter dropdown
-                    renderCategories();
-                    loadCategoryOrder();
-                    loadShoppingList(); // Recharger la liste pour refléter le changement de catégorie
-                }
-            };
-            li.appendChild(removeBtn);
+            li.textContent = category;
+            li.innerHTML = `
+                <span>${category}</span>
+                <button class="remove-btn" data-category="${category}">✖</button>
+            `;
+            li.querySelector('.remove-btn').addEventListener('click', (e) => {
+                deleteCategory(e.target.dataset.category);
+            });
             categoryList.appendChild(li);
         });
     }
 
-    function addCategory() {
-        const newCat = newCategoryInput.value.trim();
-        if (newCat && !getCategories().includes(newCat)) {
-            const categories = getCategories();
-            categories.push(newCat);
-            saveCategories(categories);
-            newCategoryInput.value = '';
-            updateAllCategorySelects();
-            updateSuggestionCategoryFilter(); // Update filter dropdown
-            renderCategories();
-            loadCategoryOrder();
-        } else if (newCat) {
-            alert("Cette catégorie existe déjà.");
-        }
-    }
+    let draggingCategoryElement = null;
 
     function loadCategoryOrder() {
-        const categories = getCategories();
-        const currentOrder = JSON.parse(localStorage.getItem('category_order')) || [];
+        let categories = getCategories();
+        let currentOrder = JSON.parse(localStorage.getItem('category_order')) || [];
 
-        const filteredOrder = currentOrder.filter(cat => categories.includes(cat));
-        const newCategories = categories.filter(cat => !filteredOrder.includes(cat));
-        const finalOrder = [...filteredOrder, ...newCategories];
-
-        localStorage.setItem('category_order', JSON.stringify(finalOrder));
-        renderCategoryOrder(finalOrder);
-    }
-
-    function renderCategoryOrder(order) {
-        categoryOrderList.innerHTML = '';
-        order.forEach(cat => {
-            const li = document.createElement('li');
-            li.textContent = cat;
-            li.dataset.category = cat;
-            li.draggable = true;
-            categoryOrderList.appendChild(li);
+        // Ensure currentOrder only contains valid categories and adds new ones to the end
+        const newOrder = categories.filter(cat => currentOrder.includes(cat));
+        categories.forEach(cat => {
+            if (!newOrder.includes(cat)) {
+                newOrder.push(cat);
+            }
         });
-        addDragAndDropListeners();
-    }
+        localStorage.setItem('category_order', JSON.stringify(newOrder)); // Save reconciled order
+        currentOrder = newOrder; // Use the reconciled order
 
-    function addDragAndDropListeners() {
-        let draggedItem = null;
+        categoryOrderList.innerHTML = '';
+        if (currentOrder.length === 0) {
+            categoryOrderList.innerHTML = '<p class="empty-list-message">Faites glisser les catégories pour définir leur ordre.</p>';
+            return;
+        }
 
-        categoryOrderList.querySelectorAll('li').forEach(item => {
-            item.addEventListener('dragstart', () => {
-                draggedItem = item;
-                setTimeout(() => item.style.display = 'none', 0);
-            });
-
-            item.addEventListener('dragend', () => {
-                setTimeout(() => {
-                    draggedItem.style.display = 'flex';
-                    draggedItem = null;
-                }, 0);
-            });
-
-            item.addEventListener('dragover', e => e.preventDefault());
-
-            item.addEventListener('dragenter', function(e) {
-                e.preventDefault();
-                this.style.backgroundColor = '#f0f0f0';
-            });
-
-            item.addEventListener('dragleave', function() {
-                this.style.backgroundColor = '';
-            });
-
-            item.addEventListener('drop', function() {
-                this.style.backgroundColor = '';
-                if (draggedItem && draggedItem !== this) {
-                    const thisIndex = Array.from(categoryOrderList.children).indexOf(this);
-                    const draggedIndex = Array.from(categoryOrderList.children).indexOf(draggedItem);
-
-                    if (thisIndex > draggedIndex) {
-                        categoryOrderList.insertBefore(draggedItem, this.nextSibling);
-                    } else {
-                        categoryOrderList.insertBefore(draggedItem, this);
-                    }
-                }
-            });
+        currentOrder.forEach(category => {
+            const li = document.createElement('li');
+            li.textContent = category;
+            li.draggable = true;
+            li.classList.add('category-item'); // Add a class for styling/selection
+            li.innerHTML = `<i class="fas fa-grip-vertical drag-handle"></i><span>${category}</span>`;
+            categoryOrderList.appendChild(li);
         });
     }
 
     function saveCategoryOrder() {
-        const newOrder = Array.from(categoryOrderList.children).map(li => li.dataset.category);
+        const items = Array.from(categoryOrderList.children);
+        const newOrder = items.map(li => li.textContent.trim()); // Trim to remove potential handle text
         localStorage.setItem('category_order', JSON.stringify(newOrder));
-        alert("Ordre des catégories sauvegardé !");
-        loadShoppingList();
+        alert('Ordre des catégories sauvegardé !');
+        loadShoppingList(); // Reload shopping list to apply new order
     }
 
-    // --- Listeners d'événements ---
-    loadShareCodeBtn.addEventListener('click', async () => {
-        const code = shareCodeInput.value.trim();
-        if (code) {
-            await getOrCreateListByShareCode(code);
-            if (currentListId) { // If successfully connected/created
-                showSection('shoppingList'); // Go to My List
-            }
-        } else {
-            alert("Veuillez entrer un code de partage.");
-        }
-    });
-
+    // --- Event Listeners ---
     addItemBtn.addEventListener('click', () => {
-        const name = newItemInput.value.trim();
+        const itemName = newItemInput.value;
         const quantity = parseInt(newQuantityInput.value) || 1;
         const category = newCategorySelect.value;
-        if (name && currentListId) {
-            addItem(name, quantity, category, currentListId);
-        } else if (!name) {
-            alert("Veuillez entrer le nom de l'article.");
-        }
+        addItem(itemName, quantity, category, currentListId);
     });
 
-    // Navigation Buttons Listeners
+    addBuyLaterItemBtn.addEventListener('click', () => {
+        addBuyLaterItem(newBuyLaterItemInput.value);
+    });
+
+    addSuggestionBtn.addEventListener('click', () => {
+        addSuggestion(newSuggestionInput.value, newSuggestionCategorySelect.value);
+    });
+
+    addCategoryBtn.addEventListener('click', () => {
+        addCategory(newCategoryInput.value);
+    });
+
+    saveCategoryOrderBtn.addEventListener('click', saveCategoryOrder);
+
+    // Navigation button event listeners
     navShoppingList.addEventListener('click', () => showSection('shoppingList'));
     navBuyLater.addEventListener('click', () => showSection('buyLater'));
     navSuggestions.addEventListener('click', () => showSection('suggestions'));
     navCategories.addEventListener('click', () => showSection('categories'));
     navSettings.addEventListener('click', () => showSection('settings'));
 
-    // Scroll to form listeners
-    shoppingListTitle.addEventListener('click', () => {
-        addItemForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-
-    suggestionsTitle.addEventListener('click', () => {
-        newSuggestionInput.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-
-    // Buy Later Listeners
-    addBuyLaterItemBtn.addEventListener('click', () => {
-        const name = newBuyLaterItemInput.value.trim();
-        if (name) {
-            addBuyLaterItem(name);
-        } else {
-            alert("Veuillez entrer un article.");
-        }
-    });
-
-    // Suggestions Listeners
-    addSuggestionBtn.addEventListener('click', () => {
-        const name = newSuggestionInput.value.trim();
-        const category = newSuggestionCategorySelect.value; // Récupère la catégorie de la suggestion
-        if (name) {
-            addSuggestion(name, category);
-        } else {
-            alert("Veuillez entrer une suggestion.");
-        }
-    });
-
-    // Filter Suggestions by Category
-    suggestionCategoryFilter.addEventListener('change', () => {
-        loadSuggestions();
-    });
-
-    // Categories Listeners
-    addCategoryBtn.addEventListener('click', addCategory);
-    saveCategoryOrderBtn.addEventListener('click', saveCategoryOrder);
-
-    // Settings Listeners
-    changeShareCodeBtn.addEventListener('click', () => {
-        if (confirm("Voulez-vous vraiment changer de liste ? Cela vous déconnectera de la liste actuelle.")) {
-            localStorage.removeItem('lastShareCode'); // Efface le code mémorisé
-            location.reload(); // Recharge l'application pour redemander un code
-        }
-    });
-
-    // Listener pour le bouton de bascule du menu
+    // Toggle nav button listener
     toggleNavBtn.addEventListener('click', toggleBottomNav);
+
+    // Filter suggestions by category
+    suggestionCategoryFilter.addEventListener('change', loadSuggestions);
+
+    // Share code functionality
+    loadShareCodeBtn.addEventListener('click', async () => {
+        const code = shareCodeInput.value.trim().toUpperCase();
+        if (code) {
+            await getOrCreateListByShareCode(code);
+            if (currentListId) { // If successfully connected/created
+                showSection('shoppingList'); // Go to shopping list
+            }
+        } else {
+            alert("Veuillez entrer un code de partage.");
+        }
+    });
+
+    changeShareCodeBtn.addEventListener('click', () => {
+        if (confirm("Voulez-vous vraiment changer de liste / vous déconnecter ? Cela effacera le code de partage actuel de cet appareil.")) {
+            localStorage.removeItem('lastShareCode');
+            currentListId = null;
+            currentShareCode = null;
+            if (window.supabaseChannel) {
+                supabase.removeChannel(window.supabaseChannel);
+                window.supabaseChannel = null;
+            }
+            if (window.supabaseBuyLaterChannel) {
+                supabase.removeChannel(window.supabaseBuyLaterChannel);
+                window.supabaseBuyLaterChannel = null;
+            }
+            if (window.supabaseSuggestionsChannel) {
+                supabase.removeChannel(window.supabaseSuggestionsChannel);
+                window.supabaseSuggestionsChannel = null;
+            }
+            // Clear current list display
+            shoppingListToBuy.innerHTML = '<p class="empty-list-message">Votre liste est vide pour le moment !</p>';
+            totalRemainingItemsSpan.textContent = '0';
+            buyLaterList.innerHTML = '<p class="empty-list-message">Votre liste "Acheter Plus Tard" est vide !</p>';
+            suggestionList.innerHTML = '<p class="empty-list-message">Aucune suggestion disponible pour le moment.</p>';
+            categoryList.innerHTML = '<p class="empty-list-message">Aucune catégorie définie. Ajoutez-en ci-dessus !</p>';
+            categoryOrderList.innerHTML = '<p class="empty-list-message">Faites glisser les catégories pour définir leur ordre.</p>';
+
+            shareCodeInput.value = generateShareCode(); // Suggest a new code
+            activeShareCodeSpan.textContent = 'N/A';
+            showSection('settings');
+            alert("Vous avez été déconnecté. Veuillez entrer un nouveau code de partage ou en créer un.");
+        }
+    });
+
+    // Drag and Drop for Category Order
+    categoryOrderList.addEventListener('dragstart', (e) => {
+        draggingCategoryElement = e.target;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', draggingCategoryElement.innerHTML);
+        e.target.classList.add('dragging');
+    });
+
+    categoryOrderList.addEventListener('dragover', (e) => {
+        e.preventDefault(); // Necessary to allow dropping
+        e.dataTransfer.dropEffect = 'move';
+        const target = e.target.closest('li.category-item');
+        if (target && target !== draggingCategoryElement) {
+            const rect = target.getBoundingClientRect();
+            const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > .5;
+            categoryOrderList.insertBefore(draggingCategoryElement, next && target.nextSibling || target);
+        }
+    });
+
+    categoryOrderList.addEventListener('dragend', (e) => {
+        e.target.classList.remove('dragging');
+        draggingCategoryElement = null;
+        saveCategoryOrder(); // Save order immediately after drag
+    });
+
 
     // --- Initialization on page load ---
     window.addEventListener('load', async () => {
-      if (!localStorage.getItem('user_categories')) {
-          localStorage.setItem('user_categories', JSON.stringify(initialDefaultCategories));
-      }
-      // Ensure category_order is initialized, and includes all current categories
-      let currentCategoryOrder = JSON.parse(localStorage.getItem('category_order'));
-      const allCategories = getCategories();
-      if (!currentCategoryOrder || !allCategories.every(cat => currentCategoryOrder.includes(cat))) {
-          localStorage.setItem('category_order', JSON.stringify(allCategories));
-      }
-
-      updateAllCategorySelects();
-      updateSuggestionCategoryFilter(); // Initialize suggestion filter
-
       // Initialisation du client Supabase
       if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
           supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -1276,10 +1553,19 @@
 
       if (supabase.rest) {
           console.log("supabase.rest est maintenant prêt !");
-          await handleInitialLoad();
-          updateBodyPadding(); // Met à jour le padding du body au chargement initial
+          // Initialize categories if not present in local storage
+          if (!localStorage.getItem('user_categories')) {
+              localStorage.setItem('user_categories', JSON.stringify(initialDefaultCategories));
+          }
+          await handleInitialLoad(); // This will load data and set currentListId
+          updateAllCategorySelects();
+          updateSuggestionCategoryFilter();
+          updateBodyPadding(); // Update body padding on initial load
+          renderCategories(); // Initial rendering of categories list
+          loadCategoryOrder(); // Initial load of category order list
       } else {
           console.error("Erreur: supabase.rest n'est pas devenu prêt après plusieurs tentatives. Impossible de démarrer l'application.");
+          alert("Erreur de démarrage: Impossible d'initialiser la connexion à la base de données. Vérifiez votre connexion.");
           return;
       }
     });
