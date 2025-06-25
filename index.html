@@ -11,9 +11,12 @@
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0; padding: 1rem;
+      margin: 0;
+      padding: 1rem;
+      padding-bottom: 70px; /* Espace initial pour le menu du bas */
       background: linear-gradient(to bottom right, #FAD0C4, #FFD1DC);
       color: #333;
+      transition: padding-bottom 0.3s ease-out; /* Animation pour le padding */
     }
     h1, h2 {
       text-align: center;
@@ -82,12 +85,44 @@
       border-radius: 0.4rem;
       margin-bottom: 0; /* Override default button margin */
     }
-    .item-actions .remove-btn {
+    /* Styles pour les boutons de suppression en croix dans la liste de courses */
+    .item-actions .remove-btn,
+    #buyLaterList .remove-btn,
+    #categoryList .remove-btn,
+    #suggestionList .remove-btn {
       background-color: #f44336;
+      width: 30px; /* Plus petit */
+      height: 30px; /* Plus petit */
+      padding: 0;
+      font-size: 1.2rem; /* Taille de la croix */
+      border-radius: 50%; /* Rond */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      text-align: center;
+      line-height: 1; /* Pour centrer le 'X' */
     }
-    .item-actions .remove-btn:hover {
+    .item-actions .remove-btn:hover,
+    #buyLaterList .remove-btn:hover,
+    #categoryList .remove-btn:hover,
+    #suggestionList .remove-btn:hover {
       background-color: #d32f2f;
     }
+    /* Masque le texte "Supprimer" pour les croix */
+    .item-actions .remove-btn::before,
+    #buyLaterList .remove-btn::before,
+    #categoryList .remove-btn::before,
+    #suggestionList .remove-btn::before {
+      content: "X";
+    }
+    .item-actions .remove-btn span,
+    #buyLaterList .remove-btn span,
+    #categoryList .remove-btn span,
+    #suggestionList .remove-btn span {
+        display: none; /* Cache le texte original */
+    }
+
     .quantity-control {
         display: flex;
         align-items: center;
@@ -134,6 +169,11 @@
       z-index: 1000;
       border-top-left-radius: 1rem;
       border-top-right-radius: 1rem;
+      transform: translateY(0); /* Position initiale visible */
+      transition: transform 0.3s ease-out; /* Animation douce */
+    }
+    .bottom-nav.hidden-nav {
+      transform: translateY(100%); /* Masque le menu en le déplaçant vers le bas */
     }
     .nav-item {
       color: white;
@@ -152,6 +192,27 @@
     .nav-item.active {
       font-weight: bold;
       color: #FAD0C4;
+    }
+    .toggle-nav-button {
+      position: absolute;
+      top: -20px; /* Positionne la flèche au-dessus du menu */
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #E75480;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+      z-index: 1001; /* Assure qu'il est au-dessus du menu */
+    }
+    .toggle-nav-button i {
+      font-size: 1.2rem;
     }
 
     /* Style pour les sections cachées */
@@ -198,7 +259,7 @@
 <body>
   <div id="shoppingList" class="section-container section">
     <h1 id="shoppingListTitle">Ma Liste de Courses 🛒</h1>
-    
+
     <ul id="shoppingListToBuy" class="item-list"></ul>
     <p class="total-items">Articles restants : <span id="totalRemainingItems">0</span></p>
 
@@ -250,6 +311,8 @@
 
 
   <div class="bottom-nav">
+    <button id="toggleNavBtn" class="toggle-nav-button">
+      <i class="fas fa-chevron-down"></i> </button>
     <div class="nav-item active" id="navShoppingList">
       <i class="fas fa-shopping-basket"></i>
       <span>Ma Liste</span>
@@ -291,9 +354,9 @@
     const newCategorySelect = document.getElementById('newCategorySelect');
     const addItemBtn = document.getElementById('addItemBtn');
     const shoppingListTitle = document.getElementById('shoppingListTitle'); // Added for scroll
-    
+
     // Moved to settings section
-    const shareCodeInput = document.getElementById('shareCodeInput'); 
+    const shareCodeInput = document.getElementById('shareCodeInput');
     const loadShareCodeBtn = document.getElementById('loadShareCodeBtn');
     const addItemForm = document.getElementById('addItemForm');
 
@@ -310,6 +373,7 @@
     const navSuggestions = document.getElementById('navSuggestions');
     const navCategories = document.getElementById('navCategories');
     const navSettings = document.getElementById('navSettings');
+    const bottomNav = document.querySelector('.bottom-nav'); // Référence au menu du bas
 
     // Buy Later section elements
     const newBuyLaterItemInput = document.getElementById('newBuyLaterItemInput');
@@ -333,6 +397,9 @@
     // Settings section elements
     const activeShareCodeSpan = document.getElementById('activeShareCode');
     const changeShareCodeBtn = document.getElementById('changeShareCodeBtn');
+
+    // Nouvelle variable pour le bouton de bascule
+    const toggleNavBtn = document.getElementById('toggleNavBtn');
 
 
     // --- Catégories par défaut ---
@@ -364,7 +431,7 @@
             // If no share code, go to settings for the user to enter one
             showSection('settings');
             // Optionally, pre-fill with a generated code to suggest creation
-            shareCodeInput.value = generateShareCode(); 
+            shareCodeInput.value = generateShareCode();
             alert("Bienvenue ! Veuillez entrer un code de partage ou cliquez sur 'Charger/Créer Liste' pour en générer un nouveau.");
         }
     }
@@ -392,6 +459,33 @@
         } else if (sectionId === 'categories') {
             renderCategories();
             loadCategoryOrder();
+        }
+    }
+
+    // Nouvelle fonction pour basculer le menu du bas
+    function toggleBottomNav() {
+        const bottomNav = document.querySelector('.bottom-nav');
+        const icon = toggleNavBtn.querySelector('i');
+
+        if (bottomNav.classList.contains('hidden-nav')) {
+            bottomNav.classList.remove('hidden-nav');
+            icon.classList.remove('fa-chevron-up');
+            icon.classList.add('fa-chevron-down');
+        } else {
+            bottomNav.classList.add('hidden-nav');
+            icon.classList.remove('fa-chevron-down');
+            icon.classList.add('fa-chevron-up');
+        }
+        updateBodyPadding(); // Met à jour le padding du body après le basculement
+    }
+
+    // Nouvelle fonction pour ajuster le padding-bottom du body
+    function updateBodyPadding() {
+        const bottomNavHeight = bottomNav.offsetHeight;
+        if (bottomNav.classList.contains('hidden-nav')) {
+            document.body.style.paddingBottom = '20px'; // Un petit padding quand le menu est caché
+        } else {
+            document.body.style.paddingBottom = `${bottomNavHeight + 20}px`; // Hauteur du menu + un peu d'espace
         }
     }
 
@@ -434,7 +528,7 @@
 
     async function getOrCreateListByShareCode(code) {
         updateSupabaseHeaders(code);
-        
+
         try {
             const { data: lists, error: selectError } = await supabase
                 .from('lists')
@@ -571,7 +665,7 @@
             alert("Erreur lors de l'ajout/mise à jour de l'article: " + error.message);
         }
     }
-    
+
     async function deleteItem(itemId) {
         if (!currentListId) return;
         try {
@@ -651,7 +745,7 @@
                     groupedItems[category].forEach(item => renderListItem(item, shoppingListToBuy));
                 }
             });
-            
+
             totalRemainingItemsSpan.textContent = remainingItems;
         } catch (error) {
             console.error("Erreur inattendue lors du chargement de la liste de courses:", error);
@@ -694,7 +788,7 @@
         itemActions.classList.add('item-actions');
 
         const removeBtn = document.createElement('button');
-        removeBtn.textContent = 'Supprimer';
+        // removeBtn.textContent = 'Supprimer'; // Ne pas mettre de texte ici, on utilise le pseudo-élément CSS
         removeBtn.classList.add('remove-btn');
         removeBtn.onclick = () => deleteItem(item.id);
         itemActions.appendChild(removeBtn);
@@ -741,7 +835,7 @@
                 }
             })
             .subscribe();
-        
+
       console.log(`Listeners Realtime configurés pour list_id: ${currentListId}`);
     }
 
@@ -813,7 +907,7 @@
                 const li = document.createElement('li');
                 li.textContent = item.name;
                 const removeBtn = document.createElement('button');
-                removeBtn.textContent = 'Supprimer';
+                // removeBtn.textContent = 'Supprimer'; // Utilise le CSS pour l'icône X
                 removeBtn.classList.add('remove-btn');
                 removeBtn.onclick = () => deleteBuyLaterItem(item.id);
                 li.appendChild(removeBtn);
@@ -848,7 +942,7 @@
         }
         const suggestions = getLocalSuggestions(currentListId);
         // Generate a simple unique ID for local items
-        const newSuggestion = { id: Date.now(), name, category }; 
+        const newSuggestion = { id: Date.now(), name, category };
         suggestions.push(newSuggestion);
         saveLocalSuggestions(currentListId, suggestions);
         newSuggestionInput.value = '';
@@ -871,7 +965,7 @@
         const items = getLocalSuggestions(currentListId);
 
         suggestionList.innerHTML = '';
-        
+
         const categories = getCategories();
         const categoryOrder = JSON.parse(localStorage.getItem('category_order')) || categories;
 
@@ -933,7 +1027,7 @@
         suggestionActions.classList.add('suggestion-actions');
 
         const removeBtn = document.createElement('button');
-        removeBtn.textContent = 'Supprimer';
+        // removeBtn.textContent = 'Supprimer'; // Utilise le CSS pour l'icône X
         removeBtn.classList.add('remove-btn');
         removeBtn.onclick = (event) => {
             event.stopPropagation();
@@ -955,7 +1049,7 @@
             li.textContent = cat;
             // All categories are now deletable
             const removeBtn = document.createElement('button');
-            removeBtn.textContent = 'Supprimer';
+            // removeBtn.textContent = 'Supprimer'; // Utilise le CSS pour l'icône X
             removeBtn.classList.add('remove-btn');
             removeBtn.onclick = () => {
                 if (confirm(`Êtes-vous sûr de vouloir supprimer la catégorie "${cat}" ? Les articles existants de cette catégorie ne seront pas supprimés, mais leur catégorie pourrait devenir "Autres".`)) {
@@ -1134,6 +1228,9 @@
         }
     });
 
+    // Listener pour le bouton de bascule du menu
+    toggleNavBtn.addEventListener('click', toggleBottomNav);
+
     // --- Initialization on page load ---
     window.addEventListener('load', async () => {
       if (!localStorage.getItem('user_categories')) {
@@ -1147,7 +1244,7 @@
       }
 
       updateAllCategorySelects();
-      
+
       // Initialisation du client Supabase
       if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
           supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -1171,6 +1268,7 @@
       if (supabase.rest) {
           console.log("supabase.rest est maintenant prêt !");
           await handleInitialLoad();
+          updateBodyPadding(); // Met à jour le padding du body au chargement initial
       } else {
           console.error("Erreur: supabase.rest n'est pas devenu prêt après plusieurs tentatives. Impossible de démarrer l'application.");
           return;
