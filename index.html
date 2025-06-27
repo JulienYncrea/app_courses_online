@@ -245,8 +245,9 @@
     /* Style for suggestion list items (adapting from index copy's .suggestion-item) */
     #suggestionList li {
       position: relative;
-      background: #9370DB; /* From index copy */
-      color: #FFFFFF; /* From index copy */
+      background: #F8F8FF; /* From index copy */
+      border: 1px solid #DDA0DD;
+      color: #6A057F; /* From index copy */
       padding: 0.6rem 1.2rem 0.6rem 0; /* Adjusted padding-left for alignment */
       border-radius: 0.75rem; /* From index copy */
       text-align: left; /* Adjust from center for content */
@@ -264,7 +265,7 @@
       margin-top: 0.7rem; /* Consistent spacing */
     }
     #suggestionList li:hover {
-      background: #8A2BE2; /* From index copy */
+      background: #E6E6FA; /* From index copy */
       transform: translateY(-2px); /* From index copy */
       box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* From index copy */
     }
@@ -285,32 +286,34 @@
     }
     #suggestionList .suggestion-info .name {
         font-weight: bold;
-        color: #FFFFFF; /* Ensure visibility */
+        color: #6A057F; /* Ensure visibility */
+        padding-left: 1.2rem;
     }
     #suggestionList .suggestion-info .category {
         font-size: 0.85em;
-        color: rgba(255, 255, 255, 0.8); /* Lighter color for category */
+        color: #C71585; /* Lighter color for category */
     }
     /* Removed add-to-shopping-list-btn styles as the button is removed from HTML */
     #suggestionList .suggestion-actions .remove-btn {
-      background: none;
-      border: none;
-      color: #FFD700; /* From index copy */
-      font-size: 1.3rem; /* From index copy */
+      background: none; /* Changed from #f44336 */
+      border: 1px solid #FF6347; /* Added border for round button */
+      border-radius: 50%; /* Make it round */
+      color: #FF6347; /* From index copy */
+      font-size: 1.2rem; /* Adjusted for round button */
       cursor: pointer;
-      padding: 0 0.2rem;
+      padding: 0; /* Remove padding for round button */
       margin: 0;
-      width: auto;
-      height: auto;
-      border-radius: 0;
-      transition: color 0.3s ease;
+      width: 30px; /* Fixed width for round button */
+      height: 30px; /* Fixed height for round button */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: color 0.3s ease, background-color 0.3s ease;
       line-height: 1;
-      flex-shrink: 0;
     }
     #suggestionList .suggestion-actions .remove-btn:hover {
-      color: #FF4500; /* From index copy */
-      background: rgba(255, 255, 255, 0.2); /* Light background on hover for the cross */
-      border-radius: 50%; /* Make it round on hover */
+      background-color: #ffe0e0; /* Light red background on hover */
+      color: #DC143C; /* From index copy */
     }
     /* Updated to use <i> tag directly, removing ::before */
     #suggestionList .suggestion-actions .remove-btn i {
