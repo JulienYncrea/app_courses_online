@@ -529,7 +529,7 @@
   <script>
     // --- Configuration Supabase ---
     const SUPABASE_URL = 'https://cepqcretnxfhjbvdukkk.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlcHFjcmV0bnhmaGpidmR1a2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2MTc1NDcsImV4cCI6MjA2NjE5MzU0N30.H56IGRN14PpfHXQVODKsmTbqMEe27_gcCcgGLphEEOU';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlcHFjcmV0bnhmaGpidmR1a2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2MTc1NDcsImV4cCI6MjA2NjE5MzU0N30.H56IGRN14FpfHXQVODKsmTbqMEe27_gcCcgGLphEEOU';
 
     let supabase = null; // Sera initialisé dans window.addEventListener('load')
 
@@ -1004,7 +1004,6 @@
     function renderListItem(item, listElement) {
         const li = document.createElement('li');
         li.dataset.id = item.id;
-        li.dataset.quantity = item.quantity.toString(); // AJOUTÉ : Stocke la quantité dans un attribut de données
 
         // Container pour la quantité et le nom de l'article
         const quantityAndNameContainer = document.createElement('div');
@@ -1020,9 +1019,8 @@
         const minusBtn = document.createElement('button');
         minusBtn.textContent = '-';
         minusBtn.onclick = () => {
-            // MODIFIÉ : Lit la quantité depuis l'attribut data-quantity
-            const currentQuantity = parseInt(li.dataset.quantity); 
-            updateItemQuantity(item.id, currentQuantity - 1);
+            const currentDisplayedQuantity = parseInt(quantitySpan.textContent.replace('x', ''));
+            updateItemQuantity(item.id, currentDisplayedQuantity - 1);
         };
         quantityControl.appendChild(minusBtn);
 
@@ -1033,9 +1031,8 @@
         const plusBtn = document.createElement('button');
         plusBtn.textContent = '+';
         plusBtn.onclick = () => {
-            // MODIFIÉ : Lit la quantité depuis l'attribut data-quantity
-            const currentQuantity = parseInt(li.dataset.quantity); 
-            updateItemQuantity(item.id, currentQuantity + 1);
+            const currentDisplayedQuantity = parseInt(quantitySpan.textContent.replace('x', ''));
+            updateItemQuantity(item.id, currentDisplayedQuantity + 1);
         };
         quantityControl.appendChild(plusBtn);
 
@@ -1090,7 +1087,6 @@
                 const quantitySpan = listItemElement.querySelector('.quantity-control span');
                 if (quantitySpan) {
                     quantitySpan.textContent = `${updatedItem.quantity}x`;
-                    listItemElement.dataset.quantity = updatedItem.quantity.toString(); // MISE À JOUR : Met à jour data-quantity aussi
                 }
             } else {
                 // Fallback: If for some reason the element is not found, reload the whole list
