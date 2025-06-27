@@ -98,6 +98,7 @@
       -ms-user-select: none;
       user-select: none;
       flex-wrap: nowrap; /* Prevent wrapping in main list items */
+      padding-left: 1.2rem; /* Ensure left alignment */
     }
     /* Adapting delete/decrement buttons from index copy */
     .quantity-control {
@@ -137,23 +138,23 @@
 
     .item-actions .remove-btn { /* This will be the main delete button for list items */
       background: none; /* Changed from #f44336 */
-      border: none;
+      border: 1px solid #FF6347; /* Added border for round button */
+      border-radius: 50%; /* Make it round */
       color: #FF6347; /* From index copy */
-      font-size: 1.6rem; /* From index copy */
+      font-size: 1.2rem; /* Adjusted for round button */
       cursor: pointer;
-      padding: 0 0.5rem;
+      padding: 0; /* Remove padding for round button */
       margin: 0;
-      width: auto;
-      height: auto;
-      border-radius: 0;
+      width: 30px; /* Fixed width for round button */
+      height: 30px; /* Fixed height for round button */
       display: flex;
       justify-content: center;
       align-items: center;
-      transition: color 0.3s ease;
+      transition: color 0.3s ease, background-color 0.3s ease;
       line-height: 1;
     }
     .item-actions .remove-btn:hover {
-      background-color: transparent; /* Ensure no background on hover */
+      background-color: #ffe0e0; /* Light red background on hover */
       color: #DC143C; /* From index copy */
     }
     /* Updated to use <i> tag directly, removing ::before */
@@ -240,11 +241,11 @@
       position: relative;
       background: #9370DB; /* From index copy */
       color: #FFFFFF; /* From index copy */
-      padding: 0.6rem 1rem; /* From index copy */
+      padding: 0.6rem 1.2rem; /* Adjusted padding-left for consistency */
       border-radius: 0.75rem; /* From index copy */
       text-align: left; /* Adjust from center for content */
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease; /* Unified transition */
       user-select: none;
       white-space: nowrap;
       overflow: hidden;
@@ -261,6 +262,12 @@
       transform: translateY(-2px); /* From index copy */
       box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* From index copy */
     }
+    /* Only apply hover effect to the item info part for adding to list */
+    #suggestionList li .suggestion-info:hover {
+        background: none; /* Reset background if it was changed */
+        cursor: pointer;
+    }
+
     #suggestionList .suggestion-info {
         flex-grow: 1;
         padding-right: 5px;
@@ -268,6 +275,7 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        padding: 0.6rem 0; /* Add padding to make the clickable area larger */
     }
     #suggestionList .suggestion-info .name {
         font-weight: bold;
@@ -295,6 +303,8 @@
     }
     #suggestionList .suggestion-actions .remove-btn:hover {
       color: #FF4500; /* From index copy */
+      background: rgba(255, 255, 255, 0.2); /* Light background on hover for the cross */
+      border-radius: 50%; /* Make it round on hover */
     }
     /* Updated to use <i> tag directly, removing ::before */
     #suggestionList .suggestion-actions .remove-btn i {
@@ -309,7 +319,7 @@
     #categoryList li, #categoryOrderList li {
         background: #F8F8FF; /* From index copy */
         border: 1px solid #DDA0DD; /* From index copy */
-        padding: 0.75rem 1rem; /* From index copy */
+        padding: 0.75rem 1.2rem; /* Adjusted padding-left for consistency */
         margin-bottom: 0.5rem;
         border-radius: 0.5rem;
         display: flex;
@@ -399,6 +409,7 @@
         padding-bottom: 0.3rem;
         margin-top: 1.5rem;
         margin-bottom: 1rem;
+        padding-left: 0; /* Ensure alignment with list items */
     }
 
     @media (max-width: 640px) {
