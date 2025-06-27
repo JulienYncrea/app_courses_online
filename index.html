@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>My Shopping List 🛒</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icon.png" />
@@ -27,7 +27,7 @@
       -moz-user-select: none;    /* Pour Firefox */
       -ms-user-select: none;     /* Pour Internet Explorer/Edge */
       user-select: none;         /* Standard */
-      cursor: pointer; 
+      cursor: pointer;
     }
     .section-container {
       max-width: 600px;
@@ -93,9 +93,9 @@
     #shoppingListToBuy li, #buyLaterList li { /* ADDED #buyLaterList li here */
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start; /* MODIFIED: Align items to the start for wrapping text */
       background: #FFF0F5; /* From index copy */
-      padding: 0.7rem 1.2rem 0.7rem 0; /* Adjusted padding-left for alignment */
+      padding: 0.7rem 40px 0.7rem 0; /* MODIFIED: Adjusted padding-right to account for delete button */
       margin-top: 0.7rem; /* From index copy */
       border-radius: 0.75rem; /* From index copy */
       font-size: 1.1rem; /* From index copy */
@@ -106,8 +106,17 @@
       -moz-user-select: none;
       -ms-user-select: none;
       user-select: none;
-      flex-wrap: nowrap; /* Prevent wrapping in main list items */
+      flex-wrap: wrap; /* MODIFIED: Allow items to wrap to the next line */
+      position: relative; /* Added for absolute positioning of remove-btn */
     }
+    #shoppingListToBuy li .item-name, #buyLaterList li .item-name { /* NEW RULE for item name span */
+        word-break: break-word; /* Allow long words to break */
+        white-space: normal; /* Allow text to wrap naturally */
+        flex-grow: 1; /* Allow it to take available space */
+        min-width: 0; /* Prevent content from pushing out flex item */
+    }
+
+
     /* Adapting delete/decrement buttons from index copy */
     .quantity-control {
       display: flex;
@@ -144,6 +153,13 @@
         text-align: center;
     }
 
+    .item-actions {
+        position: absolute; /* MODIFIED: Absolute positioning to keep it right */
+        right: 5px; /* MODIFIED: Position from the right edge */
+        top: 50%; /* MODIFIED: Center vertically */
+        transform: translateY(-50%); /* MODIFIED: Adjust for vertical centering */
+        flex-shrink: 0; /* Prevent it from shrinking */
+    }
     .item-actions .remove-btn { /* This will be the main delete button for list items */
       background: none; /* Changed from #f44336 */
       border: 1px solid #FF6347; /* Added border for round button */
@@ -250,21 +266,22 @@
       background: #F8F8FF; /* From index copy */
       border: 1px solid #DDA0DD;
       color: #6A057F; /* From index copy */
-      padding: 0.6rem 1.2rem 0.6rem 0; /* Adjusted padding-left for alignment */
+      padding: 0.6rem 40px 0.6rem 0; /* MODIFIED: Adjusted padding-right for delete button */
       border-radius: 0.75rem; /* From index copy */
       text-align: left; /* Adjust from center for content */
       cursor: pointer;
       transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease; /* Unified transition */
       user-select: none;
-      white-space: nowrap;
+      /* white-space: nowrap; REMOVED to allow wrapping */
       overflow: hidden;
       text-overflow: ellipsis;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-right: 5px; /* From index copy */
+      /* padding-right: 5px; REMOVED, now part of main padding */
       box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* From index copy */
       margin-top: 0.7rem; /* Consistent spacing */
+      flex-wrap: wrap; /* Allow wrapping of suggestion content */
     }
     #suggestionList li:hover {
       background: #E6E6FA; /* From index copy */
@@ -279,23 +296,35 @@
 
     #suggestionList .suggestion-info {
         flex-grow: 1;
-        padding-right: 5px;
+        /* padding-right: 5px; REMOVED */
         font-weight: 500;
         overflow: hidden;
         text-overflow: ellipsis;
-        white-space: nowrap;
+        white-space: normal; /* MODIFIED: Allow text to wrap */
+        word-break: break-word; /* MODIFIED: Allow long words to break */
         padding: 0.6rem 0; /* Add padding to make the clickable area larger */
+        min-width: 0; /* Ensure content doesn't overflow flex container */
     }
     #suggestionList .suggestion-info .name {
         font-weight: bold;
         color: #6A057F; /* Ensure visibility */
         padding-left: 1.2rem;
+        display: block; /* Ensure name takes full width if wrapping */
     }
     #suggestionList .suggestion-info .category {
         font-size: 0.85em;
         color: #C71585; /* Lighter color for category */
+        padding-left: 1.2rem; /* Align with name */
+        display: block; /* Ensure category takes full width if wrapping */
     }
     /* Removed add-to-shopping-list-btn styles as the button is removed from HTML */
+    #suggestionList .suggestion-actions { /* MODIFIED: Positioning for suggestion actions */
+        position: absolute;
+        right: 5px;
+        top: 50%;
+        transform: translateY(-50%);
+        flex-shrink: 0;
+    }
     #suggestionList .suggestion-actions .remove-btn {
       background: none; /* Changed from #f44336 */
       border: 1px solid #FF6347; /* Added border for round button */
@@ -345,6 +374,7 @@
         -moz-user-select: none;
         -ms-user-select: none;
         user-select: none;
+        position: relative; /* Added for absolute positioning of remove-btn */
     }
     #categoryList li:hover, #categoryOrderList li:hover {
         background-color: #E6E6FA; /* From index copy */
@@ -376,6 +406,10 @@
         align-items: center;
         transition: color 0.3s ease, background-color 0.3s ease;
         line-height: 1;
+        position: absolute; /* MODIFIED: Absolute positioning to keep it right */
+        right: 5px; /* MODIFIED: Position from the right edge */
+        top: 50%; /* MODIFIED: Center vertically */
+        transform: translateY(-50%); /* MODIFIED: Adjust for vertical centering */
     }
     #categoryList .remove-btn:hover {
         background-color: #ffe0e0; /* Light red background on hover */
@@ -1054,17 +1088,23 @@
         // Check if it's a shopping list item (has quantity controls) or a buy later item
         const isShoppingListItem = listElement === shoppingListToBuy;
 
-        if (isShoppingListItem) {
-            // Container pour la quantité et le nom de l'article
-            const quantityAndNameContainer = document.createElement('div');
-            quantityAndNameContainer.style.display = 'flex'; // Utiliser flexbox
-            quantityAndNameContainer.style.alignItems = 'center';
-            quantityAndNameContainer.style.flexGrow = '1'; // Permet de prendre l'espace disponible
+        // Create a container for quantity control and item name, allowing item name to wrap
+        const contentWrapper = document.createElement('div');
+        contentWrapper.style.display = 'flex';
+        contentWrapper.style.alignItems = 'center';
+        contentWrapper.style.flexWrap = 'wrap'; /* Allow wrapping within the content */
+        contentWrapper.style.flexGrow = '1'; /* Allow to take available space */
+        contentWrapper.style.paddingLeft = '1.2rem'; /* Add padding to match original li layout */
+        contentWrapper.style.maxWidth = 'calc(100% - 40px)'; /* Ensure space for the delete button */
 
+
+        if (isShoppingListItem) {
             const quantityControl = document.createElement('div');
             quantityControl.classList.add('quantity-control');
-            quantityControl.style.display = 'flex'; // Assurer que les boutons sont en ligne
+            quantityControl.style.display = 'flex';
             quantityControl.style.alignItems = 'center';
+            quantityControl.style.flexShrink = '0'; // Prevent it from shrinking
+            quantityControl.style.marginBottom = '5px'; // Small margin if name wraps below
 
             const minusBtn = document.createElement('button');
             minusBtn.textContent = '-';
@@ -1075,7 +1115,7 @@
             quantityControl.appendChild(minusBtn);
 
             const quantitySpan = document.createElement('span');
-            quantitySpan.textContent = `${item.quantity}x`; // Ajouter 'x' ici
+            quantitySpan.textContent = `${item.quantity}x`;
             quantityControl.appendChild(quantitySpan);
 
             const plusBtn = document.createElement('button');
@@ -1086,23 +1126,32 @@
             };
             quantityControl.appendChild(plusBtn);
 
-            // Ajouter les contrôles de quantité au container
-            quantityAndNameContainer.appendChild(quantityControl);
+            contentWrapper.appendChild(quantityControl);
 
             const itemName = document.createElement('span');
+            itemName.classList.add('item-name'); /* Add class for specific styling if needed */
             itemName.textContent = item.name;
-            itemName.style.marginLeft = '10px'; // Espacement entre la quantité et le nom
-            itemName.style.fontWeight = 'normal'; // Le nom n'est pas en gras comme la quantité
-            itemName.style.color = '#6A057F'; // Couleur du texte de l'article
-            quantityAndNameContainer.appendChild(itemName);
+            itemName.style.marginLeft = '10px';
+            itemName.style.fontWeight = 'normal';
+            itemName.style.color = '#6A057F';
+            itemName.style.wordBreak = 'break-word'; /* Ensure long words break */
+            itemName.style.whiteSpace = 'normal'; /* Allow text to wrap */
+            itemName.style.flexGrow = '1'; /* Allow name to take available space within contentWrapper */
+            itemName.style.minWidth = '0'; /* Prevents overflow if text is very long */
+            contentWrapper.appendChild(itemName);
 
-            li.appendChild(quantityAndNameContainer); // Ajout du container principal
+            li.appendChild(contentWrapper);
         } else { // For buyLaterList
             const itemName = document.createElement('span');
+            itemName.classList.add('item-name'); /* Add class for specific styling if needed */
             itemName.textContent = item.name;
             itemName.style.paddingLeft = '1.2rem'; /* Match li padding-left */
             itemName.style.flexGrow = '1'; /* Allow name to take available space */
-            li.appendChild(itemName);
+            itemName.style.wordBreak = 'break-word'; /* Ensure long words break */
+            itemName.style.whiteSpace = 'normal'; /* Allow text to wrap */
+            itemName.style.minWidth = '0'; /* Prevents overflow if text is very long */
+            contentWrapper.appendChild(itemName);
+            li.appendChild(contentWrapper);
         }
 
 
@@ -1111,7 +1160,6 @@
 
         const removeBtn = document.createElement('button');
         removeBtn.classList.add('remove-btn');
-        // Utilisez l'icône de croix Font Awesome directement
         removeBtn.innerHTML = '<i class="fas fa-times"></i>';
         if (isShoppingListItem) {
             removeBtn.onclick = () => deleteItem(item.id);
