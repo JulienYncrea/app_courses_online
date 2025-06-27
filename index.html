@@ -529,7 +529,7 @@
   <script>
     // --- Configuration Supabase ---
     const SUPABASE_URL = 'https://cepqcretnxfhjbvdukkk.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlcHFjcmV0bnhmaGpidmR1a2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2MTc1NDcsImV4cCI6MjA2NjE5MzU0N30.H56IGRN14FpfHXQVODKsmTbqMEe27_gcCcgGLphEEOU';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlcHFjcmV0bnhmaGpidmR1a2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2MTc1NDcsImV4cCI6MjA2NjE5MzU0N30.H56IGRN14PpfHXQVODKsmTbqMEe27_gcCcgGLphEEOU';
 
     let supabase = null; // Sera initialisé dans window.addEventListener('load')
 
@@ -800,28 +800,31 @@
         }
     }
 
-     async function updateItemQuantity(itemId, newQuantity) {
+    async function updateItemQuantity(itemId, newQuantity) {
         if (!currentListId) return;
 
         const listItemElement = document.querySelector(`#shoppingListToBuy li[data-id="${itemId}"]`);
         const quantitySpan = listItemElement ? listItemElement.querySelector('.quantity-control span') : null;
-        const oldQuantityText = quantitySpan ? quantitySpan.textContent : ''; // Sauvegarde l'ancien texte pour revenir en arrière
 
-        // 1. Mise à jour optimiste de l'interface
+        // Mise à jour de l'attribut data-quantity sur le <li>
+        if (listItemElement) {
+            listItemElement.dataset.quantity = newQuantity.toString(); // Mettez à jour la valeur "source de vérité"
+        }
+
+        // Mise à jour optimiste de l'affichage textuel (peut être ralentie ou ignorée si loadShoppingList est appelée)
         if (quantitySpan) {
             quantitySpan.textContent = `${newQuantity}x`;
         }
 
         if (newQuantity <= 0) {
-            // Supprimer l'élément de l'interface immédiatement pour une suppression optimiste
-            if (listItemElement) listItemElement.remove();
+            if (listItemElement) listItemElement.remove(); // Suppression optimiste de l'UI
             try {
                 await deleteItem(itemId);
-                loadShoppingList(); // Ajoutez ceci: Recharger la liste après suppression réussie
+                loadShoppingList(); // <-- ESSENTIEL : Recharger la liste après suppression
             } catch (error) {
-                console.error("Erreur lors de la suppression optimiste de l'article:", error);
-                // Si la suppression échoue, recharger la liste pour synchroniser
-                loadShoppingList();
+                console.error("Erreur lors de la suppression de l'article:", error);
+                alert("Erreur lors de la suppression de l'article: " + error.message);
+                loadShoppingList(); // Recharger pour assurer la cohérence si erreur
             }
             return;
         }
@@ -832,21 +835,16 @@
                 .update({ quantity: newQuantity })
                 .eq('id', itemId);
             if (error) {
-                console.error("Erreur lors de la mise à jour de la quantité de l'article:", error);
+                console.error("Erreur lors de la mise à jour de la quantité:", error);
                 alert("Erreur lors de la mise à jour de la quantité de l'article: " + error.message);
-                // Revenir en arrière en cas d'erreur de la base de données si le Realtime listener n'a pas pris le relais
-                if (quantitySpan) quantitySpan.textContent = oldQuantityText;
-                loadShoppingList(); // Recharger pour assurer la cohérence si erreur
+                loadShoppingList(); // <-- ESSENTIEL : Recharger la liste en cas d'erreur
             } else {
-                loadShoppingList(); // Ajoutez ceci: Recharger la liste après une mise à jour réussie
+                loadShoppingList(); // <-- ESSENTIEL : Recharger la liste après une mise à jour réussie
             }
-            // Le Realtime listener peut toujours mettre à jour pour les autres utilisateurs, mais ceci assure la cohérence locale
         } catch (error) {
             console.error("Erreur inattendue lors de la mise à jour de la quantité:", error);
             alert("Une erreur inattendue est survenue: " + error.message);
-            // Revenir en arrière en cas d'erreur inattendue
-            if (quantitySpan) quantitySpan.textContent = oldQuantityText;
-            loadShoppingList(); // Recharger pour assurer la cohérence
+            loadShoppingList(); // Recharger la liste en cas d'erreur inattendue
         }
     }
 
@@ -1006,6 +1004,7 @@
     function renderListItem(item, listElement) {
         const li = document.createElement('li');
         li.dataset.id = item.id;
+        li.dataset.quantity = item.quantity.toString(); // AJOUTÉ : Stocke la quantité dans un attribut de données
 
         // Container pour la quantité et le nom de l'article
         const quantityAndNameContainer = document.createElement('div');
@@ -1021,8 +1020,9 @@
         const minusBtn = document.createElement('button');
         minusBtn.textContent = '-';
         minusBtn.onclick = () => {
-            const currentDisplayedQuantity = parseInt(quantitySpan.textContent.replace('x', ''));
-            updateItemQuantity(item.id, currentDisplayedQuantity - 1);
+            // MODIFIÉ : Lit la quantité depuis l'attribut data-quantity
+            const currentQuantity = parseInt(li.dataset.quantity); 
+            updateItemQuantity(item.id, currentQuantity - 1);
         };
         quantityControl.appendChild(minusBtn);
 
@@ -1033,8 +1033,9 @@
         const plusBtn = document.createElement('button');
         plusBtn.textContent = '+';
         plusBtn.onclick = () => {
-            const currentDisplayedQuantity = parseInt(quantitySpan.textContent.replace('x', ''));
-            updateItemQuantity(item.id, currentDisplayedQuantity + 1);
+            // MODIFIÉ : Lit la quantité depuis l'attribut data-quantity
+            const currentQuantity = parseInt(li.dataset.quantity); 
+            updateItemQuantity(item.id, currentQuantity + 1);
         };
         quantityControl.appendChild(plusBtn);
 
@@ -1089,6 +1090,7 @@
                 const quantitySpan = listItemElement.querySelector('.quantity-control span');
                 if (quantitySpan) {
                     quantitySpan.textContent = `${updatedItem.quantity}x`;
+                    listItemElement.dataset.quantity = updatedItem.quantity.toString(); // MISE À JOUR : Met à jour data-quantity aussi
                 }
             } else {
                 // Fallback: If for some reason the element is not found, reload the whole list
