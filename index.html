@@ -94,7 +94,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #fce3e3; /* From index copy */
+      background: #FFF0F5; /* From index copy */
       padding: 0.7rem 1.2rem 0.7rem 0; /* Adjusted padding-left for alignment */
       margin-top: 0.7rem; /* From index copy */
       border-radius: 0.75rem; /* From index copy */
@@ -1582,10 +1582,14 @@
 
     // Scroll to form when title is clicked
     shoppingListTitle.addEventListener('click', () => {
+        event.preventDefault(); // Empêche le comportement par défaut du navigateur (ex: sélection de texte)
+        event.stopPropagation(); // Arrête la propagation de l'événement pour éviter d'autres actions
         document.body.scrollIntoView({ behavior: 'smooth', block: 'end' });
     });
 
     suggestionsTitle.addEventListener('click', () => {
+        event.preventDefault(); // Empêche le comportement par défaut du navigateur (ex: sélection de texte)
+        event.stopPropagation(); // Arrête la propagation de l'événement pour éviter d'autres actions
         document.body.scrollIntoView({ behavior: 'smooth', block: 'end' });
     });
 
