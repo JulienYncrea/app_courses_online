@@ -1452,8 +1452,9 @@
                 <span>${category}</span>
                 <button class="remove-btn" data-category="${category}"><i class="fas fa-times"></i></button>
             `;
+            // FIX: Use closest('.remove-btn') to get the button element that has the data-category attribute
             li.querySelector('.remove-btn').addEventListener('click', (e) => {
-                deleteCategory(e.target.dataset.category);
+                deleteCategory(e.target.closest('.remove-btn').dataset.category);
             });
             categoryList.appendChild(li);
         });
