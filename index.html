@@ -817,6 +817,7 @@
             if (listItemElement) listItemElement.remove();
             try {
                 await deleteItem(itemId);
+                loadShoppingList(); // Ajoutez ceci: Recharger la liste après suppression
             } catch (error) {
                 console.error("Erreur lors de la suppression optimiste de l'article:", error);
                 // Si la suppression échoue, recharger la liste pour synchroniser
@@ -833,9 +834,11 @@
             if (error) {
                 console.error("Erreur lors de la mise à jour de la quantité de l'article:", error);
                 alert("Erreur lors de la mise à jour de la quantité de l'article: " + error.message);
-                // Rollback en cas d'erreur de la DB si le Realtime listener n'a pas pris le relais
+                // Rollback en cas d'erreur de la DB
                 if (quantitySpan) quantitySpan.textContent = oldQuantityText;
-                loadShoppingList(); // Recharger pour assurer la cohérence si rollback nécessaire
+                loadShoppingList(); // Ajoutez ceci: Recharger pour assurer la cohérence si erreur
+            } else {
+                loadShoppingList(); // Ajoutez ceci: Recharger la liste après une mise à jour réussie
             }
             // La liste sera rechargée par le listener Realtime pour les autres utilisateurs ou pour la confirmation
             // (qui est maintenant plus granulaire pour les updates)
@@ -844,7 +847,7 @@
             alert("Une erreur inattendue est survenue: " + error.message);
             // Rollback en cas d'erreur inattendue
             if (quantitySpan) quantitySpan.textContent = oldQuantityText;
-            loadShoppingList(); // Recharger pour assurer la cohérence
+            loadShoppingList(); // Ajoutez ceci: Recharger pour assurer la cohérence
         }
     }
 
