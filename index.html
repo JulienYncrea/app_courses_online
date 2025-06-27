@@ -579,7 +579,7 @@
 
     // Categories section elements
     const newCategoryInput = document.getElementById('newCategoryInput');
-    const addCategoryBtn = document.getElementById('addCategoryBtn');
+    const addCategoryBtn = document('addCategoryBtn');
     const categoryList = document.getElementById('categoryList');
     const categoryOrderList = document.getElementById('categoryOrderList');
     // const saveCategoryOrderBtn = document.getElementById('saveCategoryOrderBtn'); // REMOVED
@@ -835,13 +835,16 @@
                 alert("Erreur lors de la mise à jour de la quantité de l'article: " + error.message);
                 // Rollback en cas d'erreur de la DB si le Realtime listener n'a pas pris le relais
                 if (quantitySpan) quantitySpan.textContent = oldQuantityText;
+                loadShoppingList(); // Recharger pour assurer la cohérence si rollback nécessaire
             }
             // La liste sera rechargée par le listener Realtime pour les autres utilisateurs ou pour la confirmation
+            // (qui est maintenant plus granulaire pour les updates)
         } catch (error) {
             console.error("Erreur inattendue lors de la mise à jour de la quantité:", error);
             alert("Une erreur inattendue est survenue: " + error.message);
             // Rollback en cas d'erreur inattendue
             if (quantitySpan) quantitySpan.textContent = oldQuantityText;
+            loadShoppingList(); // Recharger pour assurer la cohérence
         }
     }
 
@@ -1015,7 +1018,10 @@
 
         const minusBtn = document.createElement('button');
         minusBtn.textContent = '-';
-        minusBtn.onclick = () => updateItemQuantity(item.id, item.quantity - 1);
+        minusBtn.onclick = () => {
+            const currentDisplayedQuantity = parseInt(quantitySpan.textContent.replace('x', ''));
+            updateItemQuantity(item.id, currentDisplayedQuantity - 1);
+        };
         quantityControl.appendChild(minusBtn);
 
         const quantitySpan = document.createElement('span');
@@ -1024,7 +1030,10 @@
 
         const plusBtn = document.createElement('button');
         plusBtn.textContent = '+';
-        plusBtn.onclick = () => updateItemQuantity(item.id, item.quantity + 1);
+        plusBtn.onclick = () => {
+            const currentDisplayedQuantity = parseInt(quantitySpan.textContent.replace('x', ''));
+            updateItemQuantity(item.id, currentDisplayedQuantity + 1);
+        };
         quantityControl.appendChild(plusBtn);
 
         // Ajouter les contrôles de quantité au container
