@@ -21,9 +21,9 @@
       color: #E75480;
       text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
       cursor: pointer; /* Indicate clickable titles for scrolling */
-      -webkit-user-select: none; /* Pour les navigateurs WebKit (Chrome, Safari) */
-      -moz-user-select: none;    /* Pour Firefox */
-      -ms-user-select: none;     /* Pour Internet Explorer/Edge */
+      -webkit-user-select: none; /* For WebKit browsers (Chrome, Safari) */
+      -moz-user-select: none;    /* For Firefox */
+      -ms-user-select: none;     /* For Internet Explorer/Edge */
       user-select: none;         /* Standard */
       cursor: pointer; 
     }
@@ -453,12 +453,12 @@
 
     @media (max-width: 640px) {
         body {
-            /* Essayez de réduire le padding horizontal (0.5rem ici) */
-            padding: 0.2rem 0.2rem; /* Par exemple, très peu de padding latéral */
+            /* Try to reduce horizontal padding (0.5rem here) */
+            padding: 0.2rem 0.2rem; /* For example, very little side padding */
         }
         .section-container {
-            /* Idem pour le conteneur de section (0.75rem ici) */
-            padding: 0.2rem 0.3rem; /* Par exemple, très peu de padding latéral */
+            /* Same for the section container (0.75rem here) */
+            padding: 0.2rem 0.3rem; /* For example, very little side padding */
         }
         .bottom-nav {
             padding: 0.5rem 0;
@@ -493,24 +493,24 @@
 </head>
 <body>
   <div id="shoppingList" class="section-container section">
-    <h1 id="shoppingListTitle">Ma Liste de Courses 🛒</h1>
+    <h1 id="shoppingListTitle">My Shopping List 🛒</h1>
 
     <ul id="shoppingListToBuy" class="item-list"></ul>
     <div id="addItemForm" class="add-form">
-        <h3>Ajouter un article</h3>
-        <input type="text" id="newItemInput" placeholder="Ajouter un article" />
-        <input type="number" id="newQuantityInput" placeholder="Quantité (optionnel)" value="1" min="1" />
+        <h3>Add an item</h3>
+        <input type="text" id="newItemInput" placeholder="Add an item" />
+        <input type="number" id="newQuantityInput" placeholder="Quantity (optional)" value="1" min="1" />
         <select id="newCategorySelect"></select>
-        <button id="addItemBtn">Ajouter à la liste</button>
+        <button id="addItemBtn">Add to list</button>
     </div>
   </div>
 
   <div id="buyLater" class="section-container section hidden">
-    <h2>Acheter Plus Tard 🛒</h2>
+    <h2>Buy Later 🛒</h2>
     <div id="addBuyLaterItemForm" class="add-form">
-        <label for="newBuyLaterItemInput">Ajouter article à acheter plus tard:</label>
-        <input type="text" id="newBuyLaterItemInput" placeholder="Article à acheter plus tard" />
-        <button id="addBuyLaterItemBtn">Ajouter</button>
+        <label for="newBuyLaterItemInput">Add item to buy later:</label>
+        <input type="text" id="newBuyLaterItemInput" placeholder="Item to buy later" />
+        <button id="addBuyLaterItemBtn">Add</button>
     </div>
     <ul id="buyLaterList"></ul>
   </div>
@@ -518,42 +518,42 @@
   <div id="suggestions" class="section-container section hidden">
     <h2 id="suggestionsTitle">Suggestions 💡</h2>
     <div class="filter-controls">
-        <label for="suggestionCategoryFilter">Filtrer par catégorie:</label>
+        <label for="suggestionCategoryFilter">Filter by category:</label>
         <select id="suggestionCategoryFilter"></select>
     </div>
     <ul id="suggestionList"></ul>
     <div id="addSuggestionForm" class="add-form">
-        <label for="newSuggestionInput">Ajouter une suggestion:</label>
-        <input type="text" id="newSuggestionInput" placeholder="Suggérer un article" />
-        <label for="newSuggestionCategorySelect">Catégorie:</label>
+        <label for="newSuggestionInput">Add a suggestion:</label>
+        <input type="text" id="newSuggestionInput" placeholder="Suggest an item" />
+        <label for="newSuggestionCategorySelect">Category:</label>
         <select id="newSuggestionCategorySelect"></select>
-        <button id="addSuggestionBtn">Ajouter Suggestion</button>
+        <button id="addSuggestionBtn">Add Suggestion</button>
     </div>
   </div>
 
   <div id="categories" class="section-container section hidden">
-    <h2>Gérer les Catégories 📂</h2>
+    <h2>Manage Categories 📂</h2>
     <div id="addCategoryForm" class="add-form">
-        <label for="newCategoryInput">Ajouter nouvelle catégorie:</label>
-        <input type="text" id="newCategoryInput" placeholder="Nouvelle catégorie" />
-        <button id="addCategoryBtn">Ajouter Catégorie</button>
+        <label for="newCategoryInput">Add new category:</label>
+        <input type="text" id="newCategoryInput" placeholder="New category" />
+        <button id="addCategoryBtn">Add Category</button>
     </div>
-    <h3>Vos Catégories</h3>
+    <h3>Your Categories</h3>
     <ul id="categoryList"></ul>
-    <h3>Ordre des Catégories</h3>
-    <p class="empty-list-message">Faites glisser les catégories pour définir leur ordre.</p>
+    <h3>Category Order</h3>
+    <p class="empty-list-message">Drag categories to set their order.</p>
     <ul id="categoryOrderList" class="sortable-list"></ul>
     </div>
 
   <div id="settings" class="section-container section hidden">
-    <h2>Paramètres ⚙️</h2>
-    <p>Code de la liste active : <strong id="activeShareCode">N/A</strong></p>
+    <h2>Settings ⚙️</h2>
+    <p>Active list code: <strong id="activeShareCode">N/A</strong></p>
     <hr>
-    <h3>Charger / Créer une liste</h3>
-    <input type="text" id="shareCodeInput" placeholder="Entrez un code de partage" />
-    <button id="loadShareCodeBtn">Charger/Créer Liste</button>
+    <h3>Load / Create a List</h3>
+    <input type="text" id="shareCodeInput" placeholder="Enter a share code" />
+    <button id="loadShareCodeBtn">Load/Create List</button>
     <hr>
-    <button id="changeShareCodeBtn">Changer de liste / Déconnecter</button>
+    <button id="changeShareCodeBtn">Change List / Disconnect</button>
   </div>
 
 
@@ -562,11 +562,11 @@
       <i class="fas fa-chevron-down"></i> </button>
     <div class="nav-item active" id="navShoppingList">
       <i class="fas fa-shopping-basket"></i>
-      <span>Ma Liste</span>
+      <span>My List</span>
     </div>
     <div class="nav-item" id="navBuyLater">
       <i class="fas fa-clock"></i>
-      <span>Plus Tard</span>
+      <span>Later</span>
     </div>
     <div class="nav-item" id="navSuggestions">
       <i class="fas fa-lightbulb"></i>
@@ -574,28 +574,27 @@
     </div>
     <div class="nav-item" id="navCategories">
       <i class="fas fa-folder"></i>
-      <span>Catégories</span>
+      <span>Categories</span>
     </div>
     <div class="nav-item" id="navSettings">
       <i class="fas fa-cog"></i>
-      <span>Paramètres</span>
+      <span>Settings</span>
     </div>
   </div>
 
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // --- Configuration Supabase ---
+    // --- Supabase Configuration ---
     const SUPABASE_URL = 'https://cepqcretnxfhjbvdukkk.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlcHFjcmV0bnhmaGpidmR1a2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2MTc1NDcsImV4cCI6MjA2NjE5MzU0N30.H56IGRN14FpfHXQVODKsmTbqMEe27_gcCcgGLphEEOU';
 
-    let supabase = null; // Sera initialisé dans window.addEventListener('load')
+    let supabase = null; // Will be initialized in window.addEventListener('load')
 
-    // --- Variables Globales ---
+    // --- Global Variables ---
     let currentShareCode = null;
     let currentListId = null;
     const shoppingListToBuy = document.getElementById('shoppingListToBuy');
-    // const totalRemainingItemsSpan = document.getElementById('totalRemainingItems'); // REMOVED
     const newItemInput = document.getElementById('newItemInput');
     const newQuantityInput = document.getElementById('newQuantityInput');
     const newCategorySelect = document.getElementById('newCategorySelect');
@@ -620,7 +619,7 @@
     const navSuggestions = document.getElementById('navSuggestions');
     const navCategories = document.getElementById('navCategories');
     const navSettings = document.getElementById('navSettings');
-    const bottomNav = document.querySelector('.bottom-nav'); // Référence au menu du bas
+    const bottomNav = document.querySelector('.bottom-nav'); // Reference to the bottom menu
 
     // Buy Later section elements
     const newBuyLaterItemInput = document.getElementById('newBuyLaterItemInput');
@@ -629,7 +628,7 @@
 
     // Suggestions section elements
     const suggestionsTitle = document.getElementById('suggestionsTitle'); // Added for scroll
-    const suggestionCategoryFilter = document.getElementById('suggestionCategoryFilter'); // Nouveau filtre de catégorie
+    const suggestionCategoryFilter = document.getElementById('suggestionCategoryFilter'); // New category filter
     const newSuggestionInput = document.getElementById('newSuggestionInput');
     const newSuggestionCategorySelect = document.getElementById('newSuggestionCategorySelect');
     const addSuggestionBtn = document.getElementById('addSuggestionBtn');
@@ -640,17 +639,16 @@
     const addCategoryBtn = document.getElementById('addCategoryBtn');
     const categoryList = document.getElementById('categoryList');
     const categoryOrderList = document.getElementById('categoryOrderList');
-    // const saveCategoryOrderBtn = document.getElementById('saveCategoryOrderBtn'); // REMOVED
 
     // Settings section elements
     const activeShareCodeSpan = document.getElementById('activeShareCode');
     const changeShareCodeBtn = document.getElementById('changeShareCodeBtn');
 
-    // Nouvelle variable pour le bouton de bascule
+    // New variable for the toggle button
     const toggleNavBtn = document.getElementById('toggleNavBtn');
 
 
-    // --- Catégories par défaut ---
+    // --- Default Categories ---
     const initialDefaultCategories = [
         "Fruits et Légumes",
         "Produits Laitiers",
@@ -664,7 +662,7 @@
         "Autres"
     ];
 
-    // --- Fonctions utilitaires ---
+    // --- Utility Functions ---
     function generateShareCode() {
         return Math.random().toString(36).substring(2, 8).toUpperCase();
     }
@@ -680,7 +678,7 @@
             showSection('settings');
             // Optionally, pre-fill with a generated code to suggest creation
             shareCodeInput.value = generateShareCode();
-            alert("Bienvenue ! Veuillez entrer un code de partage ou cliquez sur 'Charger/Créer Liste' pour en générer un nouveau.");
+            alert("Welcome! Please enter a share code or click 'Load/Create List' to generate a new one.");
         }
     }
 
@@ -695,23 +693,23 @@
         });
         document.getElementById('nav' + sectionId.charAt(0).toUpperCase() + sectionId.slice(1)).classList.add('active');
 
-        // Spécifique pour la section settings
+        // Specific for the settings section
         if (sectionId === 'settings') {
             activeShareCodeSpan.textContent = currentShareCode || 'N/A';
         }
-        // Charger les données spécifiques à la section si nécessaire
+        // Load section-specific data if necessary
         if (sectionId === 'buyLater') {
             loadBuyLaterList();
         } else if (sectionId === 'suggestions') {
-            updateSuggestionCategoryFilter(); // Mettre à jour le filtre de catégories
-            loadSuggestions(); // Charger les suggestions après la mise à jour du filtre
+            updateSuggestionCategoryFilter(); // Update category filter
+            loadSuggestions(); // Load suggestions after filter update
         } else if (sectionId === 'categories') {
             renderCategories();
             loadCategoryOrder();
         }
     }
 
-    // Nouvelle fonction pour basculer le menu du bas
+    // New function to toggle the bottom navigation
     function toggleBottomNav() {
         const bottomNav = document.querySelector('.bottom-nav');
         const icon = toggleNavBtn.querySelector('i');
@@ -725,10 +723,10 @@
             icon.classList.remove('fa-chevron-down');
             icon.classList.add('fa-chevron-up');
         }
-        updateBodyPadding(); // Met à jour le padding du body après le basculement
+        updateBodyPadding(); // Update body padding after toggle
     }
 
-    // Nouvelle fonction pour ajuster le padding-bottom du body
+    // New function to adjust body padding-bottom
     function updateBodyPadding() {
         const bottomNavHeight = bottomNav.offsetHeight;
         // The toggle button is outside the bottom-nav for fixed positioning.
@@ -746,7 +744,7 @@
             supabase.rest.headers['X-Share-Code'] = shareCode;
             console.log(`Supabase headers updated with X-Share-Code: ${shareCode}`);
         } else {
-            console.warn("Supabase client non initialisé ou rest client non prêt, impossible de mettre à jour les headers.");
+            console.warn("Supabase client not initialized or rest client not ready, cannot update headers.");
         }
     }
 
@@ -780,10 +778,10 @@
         const categories = getCategories();
         suggestionCategoryFilter.innerHTML = '';
 
-        // Add "Toutes les catégories" option
+        // Add "All categories" option
         const allOption = document.createElement('option');
         allOption.value = 'all';
-        allOption.textContent = 'Toutes les catégories';
+        allOption.textContent = 'All categories';
         suggestionCategoryFilter.appendChild(allOption);
 
         categories.forEach(category => {
@@ -795,7 +793,7 @@
         suggestionCategoryFilter.value = 'all'; // Default to "All Categories"
     }
 
-    // --- Fonctions Supabase ---
+    // --- Supabase Functions ---
 
     async function getOrCreateListByShareCode(code) {
         updateSupabaseHeaders(code);
@@ -814,20 +812,19 @@
             }
 
             if (lists && lists.length > 0) {
-                console.log(`Liste trouvée pour le code ${code}:`, lists[0]);
+                console.log(`List found for code ${code}:`, lists[0]);
                 currentListId = lists[0].id;
                 console.log(currentListId)
                 currentShareCode = code;
                 localStorage.setItem('lastShareCode', shareCodeInput.value); // Save on successful load
-                // addItemForm.classList.remove('hidden'); // No longer hidden by default for shoppingList section
                 setupRealtimeListener(currentListId);
                 loadShoppingList();
-                activeShareCodeSpan.textContent = currentShareCode; // Met à jour l'affichage dans les paramètres
+                activeShareCodeSpan.textContent = currentShareCode; // Update display in settings
                 return lists[0];
             } else {
-                console.log(`Aucune liste trouvée pour le code ${code}. Création d'une nouvelle liste.`);
+                console.log(`No list found for code ${code}. Creating a new list.`);
                 const newList = {
-                    name: `Liste ${code}`,
+                    name: `List ${code}`,
                     share_code: code
                 };
                 const { data: createdList, error: insertError } = await supabase
@@ -836,24 +833,23 @@
                     .select('id, name');
 
                 if (insertError) {
-                    console.error("Erreur lors de la création de la liste:", insertError);
-                    alert("Erreur lors de la création de la liste: " + insertError.message);
+                    console.error("Error creating list:", insertError);
+                    alert("Error creating list: " + insertError.message);
                     return null;
                 } else {
-                    console.log("Nouvelle liste créée:", createdList[0]);
+                    console.log("New list created:", createdList[0]);
                     currentListId = createdList[0].id;
                     currentShareCode = code;
                     localStorage.setItem('lastShareCode', shareCodeInput.value); // Save on successful creation
-                    // addItemForm.classList.remove('hidden'); // No longer hidden by default for shoppingList section
                     setupRealtimeListener(currentListId);
                     loadShoppingList();
-                    activeShareCodeSpan.textContent = currentShareCode; // Met à jour l'affichage dans les paramètres
+                    activeShareCodeSpan.textContent = currentShareCode; // Update display in settings
                     return createdList[0];
                 }
             }
         } catch (error) {
-            console.error("Erreur inattendue dans getOrCreateListByShareCode:", error);
-            alert("Une erreur inattendue est survenue: " + error.message);
+            console.error("Unexpected error in getOrCreateListByShareCode:", error);
+            alert("An unexpected error occurred: " + error.message);
             return null;
         }
     }
@@ -864,12 +860,12 @@
         const listItemElement = document.querySelector(`#shoppingListToBuy li[data-id="${itemId}"]`);
         const quantitySpan = listItemElement ? listItemElement.querySelector('.quantity-control span') : null;
 
-        // Mise à jour de l'attribut data-quantity sur le <li>
+        // Update the data-quantity attribute on the <li>
         if (listItemElement) {
-            listItemElement.dataset.quantity = newQuantity.toString(); // Mettez à jour la valeur "source de vérité"
+            listItemElement.dataset.quantity = newQuantity.toString(); // Update the "source of truth" value
         }
 
-        // Mise à jour optimiste de l'affichage textuel (peut être ralentie ou ignorée si loadShoppingList est appelée)
+        // Optimistically update the textual display (can be slower or ignored if loadShoppingList is called)
         if (quantitySpan) {
             quantitySpan.textContent = `${newQuantity}x`;
         }
@@ -878,9 +874,9 @@
             try {
                 await deleteItem(itemId);
             } catch (error) {
-                console.error("Erreur lors de la suppression de l'article:", error);
-                alert("Erreur lors de la suppression de l'article: " + error.message);
-                loadShoppingList(); // Recharger pour assurer la cohérence si erreur
+                console.error("Error deleting item:", error);
+                alert("Error deleting item: " + error.message);
+                loadShoppingList(); // Reload to ensure consistency if error
             }
             return;
         }
@@ -891,22 +887,22 @@
                 .update({ quantity: newQuantity })
                 .eq('id', itemId);
             if (error) {
-                console.error("Erreur lors de la mise à jour de la quantité:", error);
-                alert("Erreur lors de la mise à jour de la quantité de l'article: " + error.message);
-                loadShoppingList(); // <-- ESSENTIEL : Recharger la liste en cas d'erreur
+                console.error("Error updating quantity:", error);
+                alert("Error updating item quantity: " + error.message);
+                loadShoppingList(); // <-- ESSENTIAL: Reload list in case of error
             } else {
                 // loadShoppingList(); // Realtime listener handles this
             }
         } catch (error) {
-            console.error("Erreur inattendue lors de la mise à jour de la quantité:", error);
-            alert("Une erreur inattendue est survenue: " + error.message);
-            loadShoppingList(); // Recharger la liste en cas d'erreur inattendue
+            console.error("Unexpected error updating quantity:", error);
+            alert("An unexpected error occurred: " + error.message);
+            loadShoppingList(); // Reload list in case of unexpected error
         }
     }
 
     async function addItem(name, quantity, category, listId) {
         if (!listId) {
-            alert("Veuillez charger ou créer une liste d'abord.");
+            alert("Please load or create a list first.");
             return;
         }
         try {
@@ -929,14 +925,14 @@
                     .update({ quantity: newQuantity })
                     .eq('id', existingItem.id);
                 if (updateError) throw updateError;
-                console.log(`Quantité de l'article '${name}' mise à jour à ${newQuantity}.`);
+                console.log(`Quantity of item '${name}' updated to ${newQuantity}.`);
             } else {
                 // Item does not exist, insert new
                 const { data, error: insertError } = await supabase
                     .from('list_items')
                     .insert([{ name, quantity, category, list_id: listId }]);
                 if (insertError) throw insertError;
-                console.log(`Article '${name}' ajouté à la liste.`);
+                console.log(`Item '${name}' added to list.`);
             }
 
             // Add category to local storage if it doesn't exist
@@ -947,7 +943,7 @@
                     saveCategories(currentCategories);
                     updateAllCategorySelects(); // Update category dropdowns
                     updateSuggestionCategoryFilter(); // Update filter dropdown
-                    renderCategories(); // Re-render category list in 'Gérer les Catégories'
+                    renderCategories(); // Re-render category list in 'Manage Categories'
                     loadCategoryOrder(); // Update category order list
                 }
             }
@@ -955,8 +951,8 @@
             newItemInput.value = '';
             newQuantityInput.value = '1';
         } catch (error) {
-            console.error("Erreur lors de l'ajout/mise à jour de l'article:", error);
-            alert("Erreur lors de l'ajout/mise à jour de l'article: " + error.message);
+            console.error("Error adding/updating item:", error);
+            alert("Error adding/updating item: " + error.message);
         }
     }
 
@@ -975,25 +971,24 @@
                 .delete()
                 .eq('id', itemId);
             if (error) {
-                console.error("Erreur lors de la suppression de l'article:", error);
-                alert("Erreur lors de la suppression de l'article: " + error.message);
+                console.error("Error deleting item:", error);
+                alert("Error deleting item: " + error.message);
                 loadShoppingList(); // If there's an error, reload the list to re-add the item if deletion failed on backend
             } else {
-                console.log(`Article avec l'ID ${itemId} supprimé.`);
+                console.log(`Item with ID ${itemId} deleted.`);
                 // No need to call loadShoppingList() here, as the Realtime listener for 'DELETE' will handle updates for other clients.
                 // For the current client, the item is already optimistically removed.
             }
         } catch (error) {
-            console.error("Erreur inattendue lors de la suppression:", error);
-            alert("Une erreur inattendue est survenue: " + error.message);
+            console.error("Unexpected error during deletion:", error);
+            alert("An unexpected error occurred: " + error.message);
             loadShoppingList(); // Reload in case of unexpected JS error
         }
     }
 
     async function loadShoppingList() {
         if (!currentListId) {
-            shoppingListToBuy.innerHTML = '<p class="empty-list-message">Votre liste est vide pour le moment !</p>';
-            // totalRemainingItemsSpan.textContent = '0'; // REMOVED
+            shoppingListToBuy.innerHTML = '<p class="empty-list-message">Your list is empty for now!</p>';
             return;
         }
         updateSupabaseHeaders(currentShareCode);
@@ -1006,17 +1001,15 @@
                 .order('id', { ascending: true });
 
             if (error) {
-                console.error("Erreur lors du chargement de la liste de courses:", error);
-                alert("Erreur lors du chargement de la liste: " + error.message);
+                console.error("Error loading shopping list:", error);
+                alert("Error loading list: " + error.message);
                 return;
             }
 
             shoppingListToBuy.innerHTML = '';
-            // let remainingItems = 0; // REMOVED
 
             if (items.length === 0) {
-                shoppingListToBuy.innerHTML = '<p class="empty-list-message">Votre liste est vide pour le moment !</p>';
-                // totalRemainingItemsSpan.textContent = '0'; // REMOVED
+                shoppingListToBuy.innerHTML = '<p class="empty-list-message">Your list is empty for now!</p>';
                 return;
             }
 
@@ -1028,16 +1021,15 @@
             categoryOrder.forEach(cat => groupedItems[cat] = []);
             // Add any existing categories from items that might not be in the current user_categories
             items.forEach(item => {
-                const category = item.category || 'Autres';
+                const category = item.category || 'Autres'; // Default to "Others" if category is null/empty
                 if (!groupedItems[category]) {
                     groupedItems[category] = [];
                 }
             });
 
             items.forEach(item => {
-                const category = item.category || 'Autres';
+                const category = item.category || 'Autres'; // Default to "Others"
                 groupedItems[category].push(item);
-                // remainingItems++; // REMOVED
             });
 
             // Render items for each category
@@ -1057,16 +1049,15 @@
                     const categoryHeader = document.createElement('h3');
                     categoryHeader.textContent = category;
                     shoppingListToBuy.appendChild(categoryHeader);
-                    // Sort items alphabetically within 'Autres' category
+                    // Sort items alphabetically within this category
                     groupedItems[category].sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
                     groupedItems[category].forEach(item => renderListItem(item, shoppingListToBuy));
                 }
             });
 
-            // totalRemainingItemsSpan.textContent = remainingItems; // REMOVED
         } catch (error) {
-            console.error("Erreur inattendue lors du chargement de la liste de courses:", error);
-            alert("Une erreur inattendue est survenue: " + error.message);
+            console.error("Unexpected error loading shopping list:", error);
+            alert("An unexpected error occurred: " + error.message);
         }
     }
 
@@ -1078,15 +1069,15 @@
         const isShoppingListItem = listElement === shoppingListToBuy;
 
         if (isShoppingListItem) {
-            // Container pour la quantité et le nom de l'article
+            // Container for quantity and item name
             const quantityAndNameContainer = document.createElement('div');
-            quantityAndNameContainer.style.display = 'flex'; // Utiliser flexbox
+            quantityAndNameContainer.style.display = 'flex'; // Use flexbox
             quantityAndNameContainer.style.alignItems = 'center';
-            quantityAndNameContainer.style.flexGrow = '1'; // Permet de prendre l'espace disponible
+            quantityAndNameContainer.style.flexGrow = '1'; // Allow it to take available space
 
             const quantityControl = document.createElement('div');
             quantityControl.classList.add('quantity-control');
-            quantityControl.style.display = 'flex'; // Assurer que les boutons sont en ligne
+            quantityControl.style.display = 'flex'; // Ensure buttons are inline
             quantityControl.style.alignItems = 'center';
 
             const minusBtn = document.createElement('button');
@@ -1098,7 +1089,7 @@
             quantityControl.appendChild(minusBtn);
 
             const quantitySpan = document.createElement('span');
-            quantitySpan.textContent = `${item.quantity}x`; // Ajouter 'x' ici
+            quantitySpan.textContent = `${item.quantity}x`; // Add 'x' here
             quantityControl.appendChild(quantitySpan);
 
             const plusBtn = document.createElement('button');
@@ -1109,7 +1100,7 @@
             };
             quantityControl.appendChild(plusBtn);
 
-            // Ajouter les contrôles de quantité au container
+            // Add quantity controls to the container
             quantityAndNameContainer.appendChild(quantityControl);
 
             // Create a span for the item name, applying the new CSS class
@@ -1118,7 +1109,7 @@
             itemName.textContent = item.name;
             quantityAndNameContainer.appendChild(itemName);
 
-            li.appendChild(quantityAndNameContainer); // Ajout du container principal
+            li.appendChild(quantityAndNameContainer); // Add the main container
         } else { // For buyLaterList
             const itemName = document.createElement('span');
             itemName.classList.add('item-name'); /* Add this class for consistency */
@@ -1134,7 +1125,7 @@
 
         const removeBtn = document.createElement('button');
         removeBtn.classList.add('remove-btn');
-        // Utilisez l'icône de croix Font Awesome directement
+        // Use Font Awesome cross icon directly
         removeBtn.innerHTML = '<i class="fas fa-times"></i>';
         if (isShoppingListItem) {
             removeBtn.onclick = () => deleteItem(item.id);
@@ -1155,18 +1146,18 @@
       }
 
       if (!currentListId) {
-          console.warn("Pas de currentListId défini, impossible de configurer le listener Realtime.");
+          console.warn("No currentListId defined, cannot set up Realtime listener.");
           return;
       }
 
       window.supabaseChannel = supabase.channel(`list_items_changes:${currentListId}`)
         .on('postgres_changes', {
-            event: 'UPDATE', // Écouter spécifiquement les UPDATE
+            event: 'UPDATE', // Listen specifically for UPDATEs
             schema: 'public',
             table: 'list_items',
             filter: `list_id=eq.${currentListId}`
         }, (payload) => {
-            console.log('Changement Realtime UPDATE détecté:', payload);
+            console.log('Realtime UPDATE detected:', payload);
             const updatedItem = payload.new;
             const listItemElement = document.querySelector(`#shoppingListToBuy li[data-id="${updatedItem.id}"]`);
             if (listItemElement) {
@@ -1180,28 +1171,28 @@
             }
         })
         .on('postgres_changes', {
-            event: 'INSERT', // Écouter spécifiquement les INSERT
+            event: 'INSERT', // Listen specifically for INSERTs
             schema: 'public',
             table: 'list_items',
             filter: `list_id=eq.${currentListId}`
         }, (payload) => {
-            console.log('Changement Realtime INSERT détecté:', payload);
-            loadShoppingList(); // Recharger toute la liste pour gérer l'ajout dans la bonne catégorie/ordre
+            console.log('Realtime INSERT detected:', payload);
+            loadShoppingList(); // Reload entire list to handle adding in the correct category/order
         })
         .on('postgres_changes', {
-            event: 'DELETE', // Écouter spécifiquement les DELETE
+            event: 'DELETE', // Listen specifically for DELETEs
             schema: 'public',
             table: 'list_items',
             filter: `list_id=eq.${currentListId}`
         }, (payload) => {
-            console.log('Changement Realtime DELETE détecté:', payload);
+            console.log('Realtime DELETE detected:', payload);
             // The optimistic UI update for delete is handled in deleteItem() itself.
             // This reload is a fallback for other clients or robustness.
-            loadShoppingList(); // Recharger la liste pour re-évaluer le message vide et les catégories
+            loadShoppingList(); // Reload list to re-evaluate empty message and categories
         })
         .subscribe();
 
-        // Listener pour les changements sur buy_later_items
+        // Listener for changes on buy_later_items
         window.supabaseBuyLaterChannel = supabase.channel(`buy_later_items_changes:${currentListId}`)
             .on('postgres_changes', {
                 event: '*',
@@ -1209,37 +1200,20 @@
                 table: 'buy_later_items',
                 filter: `list_id=eq.${currentListId}`
             }, (payload) => {
-                console.log('Changement Buy Later Realtime détecté:', payload);
-                // Toujours recharger si un changement est détecté, peu importe si la section est visible
+                console.log('Buy Later Realtime change detected:', payload);
+                // Always reload if a change is detected, regardless of section visibility
                 loadBuyLaterList();
             })
             .subscribe();
 
-        // Listener pour les changements sur list_suggestions - REMOVED FOR LOCAL STORAGE
-        // window.supabaseSuggestionsChannel = supabase.channel(`list_suggestions_changes:${currentListId}`)
-        //     .on('postgres_changes', {
-        //         event: '*',
-        //         schema: 'public',
-        //         table: 'list_suggestions',
-        //         filter: `list_id=eq.${currentListId}`
-        //     }, (payload) => {
-        //         console.log('Changement Suggestions Realtime détecté:', payload);
-        //         if (document.getElementById('suggestions').classList.contains('hidden')) {
-        //             // Ne recharger que si la section est active
-        //         } else {
-        //             loadSuggestions();
-        //         }
-        //     })
-        //     .subscribe();
-
-      console.log(`Listeners Realtime configurés pour list_id: ${currentListId}`);
+      console.log(`Realtime listeners configured for list_id: ${currentListId}`);
     }
 
 
-    // --- Fonctions Buy Later ---
+    // --- Buy Later Functions ---
     async function addBuyLaterItem(name) {
         if (!currentListId) {
-            alert("Veuillez charger ou créer une liste d'abord.");
+            alert("Please load or create a list first.");
             return;
         }
         try {
@@ -1247,15 +1221,15 @@
                 .from('buy_later_items')
                 .insert([{ name, list_id: currentListId }]);
             if (error) {
-                console.error("Erreur lors de l'ajout de l'article 'Acheter Plus Tard':", error);
-                alert("Erreur lors de l'ajout de l'article 'Acheter Plus Tard': " + error.message);
+                console.error("Error adding 'Buy Later' item:", error);
+                alert("Error adding 'Buy Later' item: " + error.message);
             } else {
                 newBuyLaterItemInput.value = '';
-                // loadBuyLaterList est géré par le listener Realtime
+                // loadBuyLaterList is handled by the Realtime listener
             }
         } catch (error) {
-            console.error("Erreur inattendue lors de l'ajout de l'article 'Acheter Plus Tard':", error);
-            alert("Une erreur inattendue est survenue: " + error.message);
+            console.error("Unexpected error adding 'Buy Later' item:", error);
+            alert("An unexpected error occurred: " + error.message);
         }
     }
 
@@ -1274,22 +1248,22 @@
                 .delete()
                 .eq('id', itemId);
             if (error) {
-                console.error("Erreur lors de la suppression de l'article 'Acheter Plus Tard':", error);
-                alert("Erreur lors de la suppression de l'article 'Acheter Plus Tard': " + error.message);
+                console.error("Error deleting 'Buy Later' item:", error);
+                alert("Error deleting 'Buy Later' item: " + error.message);
                 loadBuyLaterList(); // Reload if there's an error
             } else {
-                // loadBuyLaterList est géré par le listener Realtime
+                // loadBuyLaterList is handled by the Realtime listener
             }
         } catch (error) {
-            console.error("Erreur inattendue lors de la suppression d'article 'Acheter Plus Tard':", error);
-            alert("Une erreur inattendue est survenue: " + error.message);
+            console.error("Unexpected error deleting 'Buy Later' item:", error);
+            alert("An unexpected error occurred: " + error.message);
             loadBuyLaterList(); // Reload in case of unexpected JS error
         }
     }
 
     async function loadBuyLaterList() {
         if (!currentListId) {
-            buyLaterList.innerHTML = '<p class="empty-list-message">Votre liste "Acheter Plus Tard" est vide !</p>';
+            buyLaterList.innerHTML = '<p class="empty-list-message">Your "Buy Later" list is empty!</p>';
             return;
         }
         updateSupabaseHeaders(currentShareCode);
@@ -1302,14 +1276,14 @@
                 .order('id', { ascending: true });
 
             if (error) {
-                console.error("Erreur lors du chargement de la liste 'Acheter Plus Tard':", error);
-                alert("Erreur lors du chargement de la liste 'Acheter Plus Tard': " + error.message);
+                console.error("Error loading 'Buy Later' list:", error);
+                alert("Error loading 'Buy Later' list: " + error.message);
                 return;
             }
 
             buyLaterList.innerHTML = '';
             if (items.length === 0) {
-                buyLaterList.innerHTML = '<p class="empty-list-message">Votre liste "Acheter Plus Tard" est vide !</p>';
+                buyLaterList.innerHTML = '<p class="empty-list-message">Your "Buy Later" list is empty!</p>';
                 return;
             }
             // Sort buy later items alphabetically
@@ -1320,12 +1294,12 @@
                 renderListItem(item, buyLaterList);
             });
         } catch (error) {
-            console.error("Erreur inattendue lors du chargement de la liste 'Acheter Plus Tard':", error);
-            alert("Une erreur inattendue est survenue: " + error.message);
+            console.error("Unexpected error loading 'Buy Later' list:", error);
+            alert("An unexpected error occurred: " + error.message);
         }
     }
 
-    // --- Fonctions Suggestions (LOCAL STORAGE) ---
+    // --- Suggestions Functions (LOCAL STORAGE) ---
     function getSuggestions() {
         return JSON.parse(localStorage.getItem('shopping_suggestions') || '[]');
     }
@@ -1336,13 +1310,13 @@
 
     async function addSuggestion(name, category) {
         if (!name.trim() || !category) {
-            alert("Veuillez entrer un nom et choisir une catégorie pour la suggestion.");
+            alert("Please enter a name and choose a category for the suggestion.");
             return;
         }
         const suggestions = getSuggestions();
         // Check for existing suggestion
         if (suggestions.some(sug => sug.name.toLowerCase() === name.trim().toLowerCase() && sug.category.toLowerCase() === category.toLowerCase())) {
-            alert(`"${name.trim()}" est déjà une suggestion dans la catégorie "${category}" !`);
+            alert(`"${name.trim()}" is already a suggestion in category "${category}"!`);
             return;
         }
 
@@ -1381,7 +1355,7 @@
             : suggestions.filter(sug => sug.category === selectedCategory);
 
         if (filteredSuggestions.length === 0) {
-            suggestionList.innerHTML = '<p class="empty-list-message">Aucune suggestion pour cette catégorie. Ajoutez-en ci-dessous !</p>';
+            suggestionList.innerHTML = '<p class="empty-list-message">No suggestions for this category. Add some below!</p>';
             return;
         }
 
@@ -1407,7 +1381,7 @@
             // Add event listener for the "✖" button
             li.querySelector('.remove-btn').addEventListener('click', (e) => {
                 e.stopPropagation(); // Prevent li click from firing
-                if (confirm(`Supprimer la suggestion "${suggestion.name}" (${suggestion.category})?`)) {
+                if (confirm(`Delete suggestion "${suggestion.name}" (${suggestion.category})?`)) {
                     deleteSuggestion(suggestion.id);
                 }
             });
@@ -1415,15 +1389,15 @@
         });
     }
 
-    // --- Fonctions Catégories ---
+    // --- Category Functions ---
     async function addCategory(categoryName) {
         if (!categoryName.trim()) {
-            alert('Veuillez entrer un nom de catégorie.');
+            alert('Please enter a category name.');
             return;
         }
         let categories = getCategories();
         if (categories.some(cat => cat.toLowerCase() === categoryName.trim().toLowerCase())) {
-            alert(`La catégorie "${categoryName.trim()}" existe déjà !`);
+            alert(`Category "${categoryName.trim()}" already exists!`);
             return;
         }
         categories.push(categoryName.trim());
@@ -1436,7 +1410,7 @@
     }
 
     function deleteCategory(categoryName) {
-        if (!confirm(`Êtes-vous sûr de vouloir supprimer la catégorie "${categoryName}" ? Cela supprimera également toutes les suggestions liées à celle-ci.`)) {
+        if (!confirm(`Are you sure you want to delete category "${categoryName}"? This will also delete all linked suggestions.`)) {
             return;
         }
         let categories = getCategories();
@@ -1465,10 +1439,10 @@
         const categories = getCategories();
         categoryList.innerHTML = '';
         if (categories.length === 0) {
-            categoryList.innerHTML = '<p class="empty-list-message">Aucune catégorie définie. Ajoutez-en ci-dessus !</p>';
+            categoryList.innerHTML = '<p class="empty-list-message">No categories defined. Add some above!</p>';
             return;
         }
-        // Sort categories alphabetically for "Vos Catégories" list
+        // Sort categories alphabetically for "Your Categories" list
         const sortedCategories = [...categories].sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
 
         sortedCategories.forEach(category => {
@@ -1503,7 +1477,7 @@
 
         categoryOrderList.innerHTML = '';
         if (currentOrder.length === 0) {
-            categoryOrderList.innerHTML = '<p class="empty-list-message">Faites glisser les catégories pour définir leur ordre.</p>';
+            categoryOrderList.innerHTML = '<p class="empty-list-message">Drag categories to set their order.</p>';
             return;
         }
 
@@ -1521,7 +1495,7 @@
         const items = Array.from(categoryOrderList.children);
         const newOrder = items.map(li => li.querySelector('span').textContent.trim()); // Get text from span
         localStorage.setItem('category_order', JSON.stringify(newOrder));
-        console.log('Ordre des catégories sauvegardé !'); // Log instead of alert
+        console.log('Category order saved!'); // Log instead of alert
         loadShoppingList(); // Reload shopping list to apply new order
     }
 
@@ -1545,8 +1519,6 @@
         addCategory(newCategoryInput.value);
     });
 
-    // saveCategoryOrderBtn.addEventListener('click', saveCategoryOrder); // REMOVED
-
     // Navigation button event listeners
     navShoppingList.addEventListener('click', () => showSection('shoppingList'));
     navBuyLater.addEventListener('click', () => showSection('buyLater'));
@@ -1569,12 +1541,12 @@
                 showSection('shoppingList'); // Go to shopping list
             }
         } else {
-            alert("Veuillez entrer un code de partage.");
+            alert("Please enter a share code.");
         }
     });
 
     changeShareCodeBtn.addEventListener('click', () => {
-        if (confirm("Voulez-vous vraiment changer de liste / vous déconnecter ? Cela effacera le code de partage actuel de cet appareil.")) {
+        if (confirm("Are you sure you want to change lists / disconnect? This will clear the current share code from this device.")) {
             localStorage.removeItem('lastShareCode');
             currentListId = null;
             currentShareCode = null;
@@ -1586,33 +1558,31 @@
                 supabase.removeChannel(window.supabaseBuyLaterChannel);
                 window.supabaseBuyLaterChannel = null;
             }
-            // Removed supabaseSuggestionsChannel cleanup as it's now local
 
             // Clear current list display
-            shoppingListToBuy.innerHTML = '<p class="empty-list-message">Votre liste est vide pour le moment !</p>';
-            // totalRemainingItemsSpan.textContent = '0'; // REMOVED
-            buyLaterList.innerHTML = '<p class="empty-list-message">Votre liste "Acheter Plus Tard" est vide !</p>';
-            suggestionList.innerHTML = '<p class="empty-list-message">Aucune suggestion disponible pour le moment.</p>';
-            categoryList.innerHTML = '<p class="empty-list-message">Aucune catégorie définie. Ajoutez-en ci-dessus !</p>';
-            categoryOrderList.innerHTML = '<p class="empty-list-message">Faites glisser les catégories pour définir leur ordre.</p>';
+            shoppingListToBuy.innerHTML = '<p class="empty-list-message">Your list is empty for now!</p>';
+            buyLaterList.innerHTML = '<p class="empty-list-message">Your "Buy Later" list is empty!</p>';
+            suggestionList.innerHTML = '<p class="empty-list-message">No suggestions available at the moment.</p>';
+            categoryList.innerHTML = '<p class="empty-list-message">No categories defined. Add some above!</p>';
+            categoryOrderList.innerHTML = '<p class="empty-list-message">Drag categories to set their order.</p>';
 
             shareCodeInput.value = generateShareCode(); // Suggest a new code
             activeShareCodeSpan.textContent = 'N/A';
             showSection('settings');
-            alert("Vous avez été déconnecté. Veuillez entrer un nouveau code de partage ou en créer un.");
+            alert("You have been disconnected. Please enter a new share code or create one.");
         }
     });
 
     // Scroll to form when title is clicked
     shoppingListTitle.addEventListener('click', () => {
-        event.preventDefault(); // Empêche le comportement par défaut du navigateur (ex: sélection de texte)
-        event.stopPropagation(); // Arrête la propagation de l'événement pour éviter d'autres actions
+        event.preventDefault(); // Prevent default browser behavior (e.g., text selection)
+        event.stopPropagation(); // Stop event propagation to avoid other actions
         document.body.scrollIntoView({ behavior: 'smooth', block: 'end' });
     });
 
     suggestionsTitle.addEventListener('click', () => {
-        event.preventDefault(); // Empêche le comportement par défaut du navigateur (ex: sélection de texte)
-        event.stopPropagation(); // Arrête la propagation de l'événement pour éviter d'autres actions
+        event.preventDefault(); // Prevent default browser behavior (e.g., text selection)
+        event.stopPropagation(); // Stop event propagation to avoid other actions
         document.body.scrollIntoView({ behavior: 'smooth', block: 'end' });
     });
 
@@ -1645,13 +1615,13 @@
 
     // --- Initialization on page load ---
     window.addEventListener('load', async () => {
-      // Initialisation du client Supabase
+      // Initialize Supabase client
       if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
           supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
           console.log("Supabase client initialized successfully.");
       } else {
-          console.error("Erreur: La fonction 'createClient' de Supabase n'est pas définie ou la bibliothèque Supabase n'est pas chargée correctement.");
-          alert("Erreur de chargement: La bibliothèque Supabase n'a pas pu être initialisée. Vérifiez votre connexion internet ou la configuration.");
+          console.error("Error: Supabase 'createClient' function is not defined or the Supabase library is not loaded correctly.");
+          alert("Loading error: Supabase library could not be initialized. Check your internet connection or configuration.");
           return;
       }
 
@@ -1660,13 +1630,13 @@
       const delayMs = 50;
 
       while (!supabase.rest && attempts < maxAttempts) {
-          console.log(`Attente de supabase.rest (tentative ${attempts + 1}/${maxAttempts})...`);
+          console.log(`Waiting for supabase.rest (attempt ${attempts + 1}/${maxAttempts})...`);
           await new Promise(resolve => setTimeout(resolve, delayMs));
           attempts++;
       }
 
       if (supabase.rest) {
-          console.log("supabase.rest est maintenant prêt !");
+          console.log("supabase.rest is now ready!");
           // Initialize categories if not present in local storage
           if (!localStorage.getItem('user_categories')) {
               localStorage.setItem('user_categories', JSON.stringify(initialDefaultCategories));
@@ -1678,8 +1648,8 @@
           renderCategories(); // Initial rendering of categories list
           loadCategoryOrder(); // Initial load of category order list
       } else {
-          console.error("Erreur: supabase.rest n'est pas devenu prêt après plusieurs tentatives. Impossible de démarrer l'application.");
-          alert("Erreur de démarrage: Impossible d'initialiser la connexion à la base de données. Vérifiez votre connexion.");
+          console.error("Error: supabase.rest did not become ready after multiple attempts. Cannot start application.");
+          alert("Startup error: Could not initialize database connection. Check your connection.");
           return;
       }
     });
