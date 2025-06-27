@@ -283,17 +283,40 @@
         font-weight: 500;
         overflow: hidden;
         text-overflow: ellipsis;
-        white-space: nowrap;
+        white-space: nowrap; /* Ensure text stays on one line */
         padding: 0.6rem 0; /* Add padding to make the clickable area larger */
+        /* Updated for combined name and category on one line with ellipsis */
+        display: flex; /* Use flex to align name and category */
+        gap: 5px; /* Small gap between name and category */
     }
     #suggestionList .suggestion-info .name {
         font-weight: bold;
         color: #6A057F; /* Ensure visibility */
         padding-left: 1.2rem;
+        white-space: nowrap; /* Prevent name from wrapping */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        flex-shrink: 1; /* Allow name to shrink if needed */
+        min-width: 0; /* Important for flex items with overflow */
     }
     #suggestionList .suggestion-info .category {
         font-size: 0.85em;
         color: #C71585; /* Lighter color for category */
+        white-space: nowrap; /* Prevent category from wrapping */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        flex-shrink: 0; /* Prevent category from shrinking much initially */
+    }
+    /* Adjusted styles for the item name within #shoppingListToBuy and #buyLaterList */
+    #shoppingListToBuy li .item-name, #buyLaterList li .item-name {
+        flex-grow: 1; /* Allow the name to take up available space */
+        padding-left: 10px; /* Space between quantity controls and name */
+        white-space: normal; /* Allow text to wrap naturally if there are spaces */
+        overflow-wrap: break-word; /* Break long words if necessary */
+        word-break: break-word; /* Fallback for older browsers */
+        min-width: 0; /* Ensure it can shrink in flex container */
+        color: #6A057F; /* Set explicit color */
+        font-weight: normal; /* Ensure it's not bold */
     }
     /* Removed add-to-shopping-list-btn styles as the button is removed from HTML */
     #suggestionList .suggestion-actions .remove-btn {
@@ -1089,16 +1112,16 @@
             // Ajouter les contrôles de quantité au container
             quantityAndNameContainer.appendChild(quantityControl);
 
+            // Create a span for the item name, applying the new CSS class
             const itemName = document.createElement('span');
+            itemName.classList.add('item-name'); /* Add this class */
             itemName.textContent = item.name;
-            itemName.style.marginLeft = '10px'; // Espacement entre la quantité et le nom
-            itemName.style.fontWeight = 'normal'; // Le nom n'est pas en gras comme la quantité
-            itemName.style.color = '#6A057F'; // Couleur du texte de l'article
             quantityAndNameContainer.appendChild(itemName);
 
             li.appendChild(quantityAndNameContainer); // Ajout du container principal
         } else { // For buyLaterList
             const itemName = document.createElement('span');
+            itemName.classList.add('item-name'); /* Add this class for consistency */
             itemName.textContent = item.name;
             itemName.style.paddingLeft = '1.2rem'; /* Match li padding-left */
             itemName.style.flexGrow = '1'; /* Allow name to take available space */
@@ -1318,7 +1341,7 @@
         }
         const suggestions = getSuggestions();
         // Check for existing suggestion
-        if (suggestions.some(sug => sug.name.toLowerCase() === name.trim().toLowerCase() && sug.category === category)) {
+        if (suggestions.some(sug => sug.name.toLowerCase() === name.trim().toLowerCase() && sug.category.toLowerCase() === category.toLowerCase())) {
             alert(`"${name.trim()}" est déjà une suggestion dans la catégorie "${category}" !`);
             return;
         }
