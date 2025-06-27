@@ -426,6 +426,14 @@
     }
 
     @media (max-width: 640px) {
+        body {
+            /* Essayez de réduire le padding horizontal (0.5rem ici) */
+            padding: 1rem 0.2rem; /* Par exemple, très peu de padding latéral */
+        }
+        .section-container {
+            /* Idem pour le conteneur de section (0.75rem ici) */
+            padding: 1rem 0.3rem; /* Par exemple, très peu de padding latéral */
+        }
         .bottom-nav {
             padding: 0.5rem 0;
         }
@@ -1571,11 +1579,11 @@
 
     // Scroll to form when title is clicked
     shoppingListTitle.addEventListener('click', () => {
-        document.getElementById('addItemForm').scrollIntoView({ behavior: 'smooth', block: 'end' });
+        document.body.scrollIntoView({ behavior: 'smooth', block: 'end' });
     });
 
     suggestionsTitle.addEventListener('click', () => {
-        document.getElementById('addSuggestionForm').scrollIntoView({ behavior: 'smooth', block: 'end' });
+        document.body.scrollIntoView({ behavior: 'smooth', block: 'end' });
     });
 
 
