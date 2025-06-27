@@ -80,13 +80,20 @@
         padding-right: 2.5em;
     }
 
+    /* Reset UL padding for left alignment */
+    #shoppingListToBuy, #buyLaterList, #suggestionList, #categoryList, #categoryOrderList {
+      list-style: none; /* Remove default bullet points */
+      padding-left: 0; /* Remove default browser padding */
+      margin-left: 0; /* Ensure no margin is pushing it */
+    }
+
     /* Styles for the shopping list items (adapting from index copy's .shopping-list-item) */
     #shoppingListToBuy li, #buyLaterList li {
       display: flex;
       justify-content: space-between;
       align-items: center;
       background: #FFF0F5; /* From index copy */
-      padding: 0.7rem 1.2rem; /* From index copy */
+      padding: 0.7rem 1.2rem 0.7rem 0; /* Adjusted padding-left for alignment */
       margin-top: 0.7rem; /* From index copy */
       border-radius: 0.75rem; /* From index copy */
       font-size: 1.1rem; /* From index copy */
@@ -98,7 +105,6 @@
       -ms-user-select: none;
       user-select: none;
       flex-wrap: nowrap; /* Prevent wrapping in main list items */
-      padding-left: 1.2rem; /* Ensure left alignment */
     }
     /* Adapting delete/decrement buttons from index copy */
     .quantity-control {
@@ -241,7 +247,7 @@
       position: relative;
       background: #9370DB; /* From index copy */
       color: #FFFFFF; /* From index copy */
-      padding: 0.6rem 1.2rem; /* Adjusted padding-left for consistency */
+      padding: 0.6rem 1rem 0.6rem 0; /* Adjusted padding-left for alignment */
       border-radius: 0.75rem; /* From index copy */
       text-align: left; /* Adjust from center for content */
       cursor: pointer;
@@ -319,7 +325,7 @@
     #categoryList li, #categoryOrderList li {
         background: #F8F8FF; /* From index copy */
         border: 1px solid #DDA0DD; /* From index copy */
-        padding: 0.75rem 1.2rem; /* Adjusted padding-left for consistency */
+        padding: 0.75rem 1rem 0.75rem 0; /* Adjusted padding-left for alignment */
         margin-bottom: 0.5rem;
         border-radius: 0.5rem;
         display: flex;
@@ -350,19 +356,23 @@
     }
     #categoryList .remove-btn { /* Adapting delete button for categories */
         background: none;
-        border: none;
+        border: 1px solid #FF6347; /* Added border for round button */
+        border-radius: 50%; /* Make it round */
         color: #FF6347; /* From index copy */
-        font-size: 1.2rem; /* From index copy */
+        font-size: 1.2rem; /* Adjusted for round button */
         cursor: pointer;
-        padding: 0 0.2rem;
-        margin-left: 10px;
-        transition: color 0.3s ease;
-        width: auto;
-        height: auto;
-        border-radius: 0;
+        padding: 0; /* Remove padding for round button */
+        margin: 0;
+        width: 30px; /* Fixed width for round button */
+        height: 30px; /* Fixed height for round button */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: color 0.3s ease, background-color 0.3s ease;
+        line-height: 1;
     }
     #categoryList .remove-btn:hover {
-        background-color: transparent;
+        background-color: #ffe0e0; /* Light red background on hover */
         color: #DC143C; /* From index copy */
     }
     /* Updated to use <i> tag directly, removing ::before */
@@ -828,10 +838,10 @@
         }
 
         if (newQuantity <= 0) {
-            if (listItemElement) listItemElement.remove(); // Suppression optimiste de l'UI
+            // listItemElement.remove(); // Removed, handled by deleteItem
             try {
                 await deleteItem(itemId);
-                loadShoppingList(); // <-- ESSENTIEL : Recharger la liste après suppression
+                // loadShoppingList(); // <-- Handled by deleteItem
             } catch (error) {
                 console.error("Erreur lors de la suppression de l'article:", error);
                 alert("Erreur lors de la suppression de l'article: " + error.message);
@@ -917,6 +927,13 @@
 
     async function deleteItem(itemId) {
         if (!currentListId) return;
+
+        // Optimistic UI update: Remove the item from the DOM immediately
+        const listItemElement = document.querySelector(`#shoppingListToBuy li[data-id="${itemId}"]`);
+        if (listItemElement) {
+            listItemElement.remove();
+        }
+
         try {
             const { data, error } = await supabase
                 .from('list_items')
@@ -925,10 +942,15 @@
             if (error) {
                 console.error("Erreur lors de la suppression de l'article:", error);
                 alert("Erreur lors de la suppression de l'article: " + error.message);
+                loadShoppingList(); // If there's an error, reload the list to re-add the item if deletion failed on backend
+            } else {
+                console.log(`Article avec l'ID ${itemId} supprimé.`);
+                loadShoppingList(); // Reload to ensure UI is consistent with DB
             }
         } catch (error) {
             console.error("Erreur inattendue lors de la suppression:", error);
             alert("Une erreur inattendue est survenue: " + error.message);
+            loadShoppingList(); // Reload in case of unexpected JS error
         }
     }
 
@@ -1120,11 +1142,8 @@
             filter: `list_id=eq.${currentListId}`
         }, (payload) => {
             console.log('Changement Realtime DELETE détecté:', payload);
-            const deletedItemId = payload.old.id;
-            const listItemElement = document.querySelector(`#shoppingListToBuy li[data-id="${deletedItemId}"]`);
-            if (listItemElement) {
-                listItemElement.remove();
-            }
+            // The optimistic UI update for delete is handled in deleteItem() itself.
+            // This reload is a fallback for other clients or robustness.
             loadShoppingList(); // Recharger la liste pour re-évaluer le message vide et les catégories
         })
         .subscribe();
