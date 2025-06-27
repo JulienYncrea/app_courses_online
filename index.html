@@ -841,10 +841,8 @@
         }
 
         if (newQuantity <= 0) {
-            // listItemElement.remove(); // Removed, handled by deleteItem
             try {
                 await deleteItem(itemId);
-                // loadShoppingList(); // <-- Handled by deleteItem
             } catch (error) {
                 console.error("Erreur lors de la suppression de l'article:", error);
                 alert("Erreur lors de la suppression de l'article: " + error.message);
@@ -863,7 +861,7 @@
                 alert("Erreur lors de la mise à jour de la quantité de l'article: " + error.message);
                 loadShoppingList(); // <-- ESSENTIEL : Recharger la liste en cas d'erreur
             } else {
-                loadShoppingList(); // <-- ESSENTIEL : Recharger la liste après une mise à jour réussie
+                // loadShoppingList(); // Realtime listener handles this
             }
         } catch (error) {
             console.error("Erreur inattendue lors de la mise à jour de la quantité:", error);
@@ -948,7 +946,8 @@
                 loadShoppingList(); // If there's an error, reload the list to re-add the item if deletion failed on backend
             } else {
                 console.log(`Article avec l'ID ${itemId} supprimé.`);
-                loadShoppingList(); // Reload to ensure UI is consistent with DB
+                // No need to call loadShoppingList() here, as the Realtime listener for 'DELETE' will handle updates for other clients.
+                // For the current client, the item is already optimistically removed.
             }
         } catch (error) {
             console.error("Erreur inattendue lors de la suppression:", error);
@@ -1228,6 +1227,13 @@
 
     async function deleteBuyLaterItem(itemId) {
         if (!currentListId) return;
+
+        // Optimistic UI update: Remove the item from the DOM immediately
+        const listItemElement = document.querySelector(`#buyLaterList li[data-id="${itemId}"]`);
+        if (listItemElement) {
+            listItemElement.remove();
+        }
+
         try {
             const { data, error } = await supabase
                 .from('buy_later_items')
@@ -1236,12 +1242,14 @@
             if (error) {
                 console.error("Erreur lors de la suppression de l'article 'Acheter Plus Tard':", error);
                 alert("Erreur lors de la suppression de l'article 'Acheter Plus Tard': " + error.message);
+                loadBuyLaterList(); // Reload if there's an error
             } else {
                 // loadBuyLaterList est géré par le listener Realtime
             }
         } catch (error) {
             console.error("Erreur inattendue lors de la suppression d'article 'Acheter Plus Tard':", error);
             alert("Une erreur inattendue est survenue: " + error.message);
+            loadBuyLaterList(); // Reload in case of unexpected JS error
         }
     }
 
@@ -1316,10 +1324,17 @@
     }
 
     async function deleteSuggestion(suggestionId) {
+        // Optimistic UI update: Remove the item from the DOM immediately
+        const listItemElement = document.querySelector(`#suggestionList li[data-id="${suggestionId}"]`);
+        if (listItemElement) {
+            listItemElement.remove();
+        }
+
         let suggestions = getSuggestions();
         suggestions = suggestions.filter(sug => sug.id !== suggestionId);
         saveSuggestions(suggestions);
-        loadSuggestions(); // Refresh the list
+        // No need to call loadSuggestions() here, as the item is optimistically removed.
+        // If there's an error (which is less likely with local storage), it would need manual refresh.
     }
 
     async function loadSuggestions() {
@@ -1553,6 +1568,16 @@
             alert("Vous avez été déconnecté. Veuillez entrer un nouveau code de partage ou en créer un.");
         }
     });
+
+    // Scroll to form when title is clicked
+    shoppingListTitle.addEventListener('click', () => {
+        document.getElementById('addItemForm').scrollIntoView({ behavior: 'smooth', block: 'end' });
+    });
+
+    suggestionsTitle.addEventListener('click', () => {
+        document.getElementById('addSuggestionForm').scrollIntoView({ behavior: 'smooth', block: 'end' });
+    });
+
 
     // Drag and Drop for Category Order
     categoryOrderList.addEventListener('dragstart', (e) => {
