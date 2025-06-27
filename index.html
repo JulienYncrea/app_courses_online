@@ -92,8 +92,9 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding-left: 1.2rem;
       background: #FFF0F5; /* From index copy */
-      padding: 0.7rem 1.2rem; /* Adjusted padding, now symmetric for left/right */
+      padding: 0.7rem 1.2rem 0.7rem 0; /* Adjusted padding-left for alignment */
       margin-top: 0.7rem; /* From index copy */
       border-radius: 0.75rem; /* From index copy */
       font-size: 1.1rem; /* From index copy */
@@ -105,7 +106,6 @@
       -ms-user-select: none;
       user-select: none;
       flex-wrap: nowrap; /* Prevent wrapping in main list items */
-      padding-left: 1.2rem; /* Added left padding for aesthetics */
     }
     /* Adapting delete/decrement buttons from index copy */
     .quantity-control {
@@ -213,7 +213,7 @@
     }
     .toggle-nav-button {
       position: absolute;
-      top: -45px; /* Adjusted to be higher, 40px (button height) + 5px gap */
+      top: -45px;
       right: 20px;
       background-color: #9370DB; /* From index copy's toggle button */
       color: white;
@@ -246,9 +246,10 @@
     /* Style for suggestion list items (adapting from index copy's .suggestion-item) */
     #suggestionList li {
       position: relative;
+      padding-left: 1.2rem;
       background: #9370DB; /* From index copy */
       color: #FFFFFF; /* From index copy */
-      padding: 0.6rem 1rem; /* Adjusted padding, now symmetric for left/right */
+      padding: 0.6rem 1rem 0.6rem 0; /* Adjusted padding-left for alignment */
       border-radius: 0.75rem; /* From index copy */
       text-align: left; /* Adjust from center for content */
       cursor: pointer;
@@ -263,7 +264,6 @@
       padding-right: 5px; /* From index copy */
       box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* From index copy */
       margin-top: 0.7rem; /* Consistent spacing */
-      padding-left: 1.2rem; /* Added left padding for aesthetics */
     }
     #suggestionList li:hover {
       background: #8A2BE2; /* From index copy */
@@ -327,9 +327,10 @@
     #categoryList li, #categoryOrderList li {
         background: #F8F8FF; /* From index copy */
         border: 1px solid #DDA0DD; /* From index copy */
-        padding: 0.75rem 1rem; /* Adjusted padding, now symmetric for left/right */
+        padding: 0.75rem 1rem 0.75rem 0; /* Adjusted padding-left for alignment */
         margin-bottom: 0.5rem;
         border-radius: 0.5rem;
+        padding-left: 1.2rem;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -341,7 +342,6 @@
         -moz-user-select: none;
         -ms-user-select: none;
         user-select: none;
-        padding-left: 1.2rem; /* Added left padding for aesthetics */
     }
     #categoryList li:hover, #categoryOrderList li:hover {
         background-color: #E6E6FA; /* From index copy */
@@ -359,15 +359,15 @@
     }
     #categoryList .remove-btn { /* Adapting delete button for categories */
         background: none;
-        border: 1.2px solid #FF6347; /* Added border for round button */
+        border: 1px solid #FF6347; /* Added border for round button */
         border-radius: 50%; /* Make it round */
         color: #FF6347; /* From index copy */
-        font-size: 1rem; /* Adjusted for round button */
+        font-size: 1.2rem; /* Adjusted for round button */
         cursor: pointer;
         padding: 0; /* Remove padding for round button */
         margin: 0;
-        width: 28px; /* Fixed width for round button */
-        height: 28px; /* Fixed height for round button */
+        width: 30px; /* Fixed width for round button */
+        height: 30px; /* Fixed height for round button */
         display: flex;
         justify-content: center;
         align-items: center;
@@ -439,7 +439,7 @@
         .toggle-nav-button {
             width: 35px;
             height: 35px;
-            top: -40px; /* Adjusted for smaller screens too */
+            top: -40px;
             right: 15px;
         }
         .toggle-nav-button i {
@@ -553,7 +553,7 @@
   <script>
     // --- Configuration Supabase ---
     const SUPABASE_URL = 'https://cepqcretnxfhjbvdukkk.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlcHFjcmV0bnhmaGbidmR1a2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2MTc1NDcsImV4cCI6MjA2NjE5MzU0N30.H56IGRN14FpfHXQVODKsmTbqMEe27_gcCcgGLphEEOU';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlcHFjcmV0bnhmaGpidmR1a2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2MTc1NDcsImV4cCI6MjA2NjE5MzU0N30.H56IGRN14FpfHXQVODKsmTbqMEe27_gcCcgGLphEEOU';
 
     let supabase = null; // Sera initialisé dans window.addEventListener('load')
 
@@ -697,30 +697,13 @@
     // Nouvelle fonction pour ajuster le padding-bottom du body
     function updateBodyPadding() {
         const bottomNavHeight = bottomNav.offsetHeight;
-        const toggleButtonHeight = toggleNavBtn.offsetHeight; // Get the actual height of the toggle button
-        const gap = 5; // The desired gap between the button and the nav
+        // The toggle button is outside the bottom-nav for fixed positioning.
+        // We need to account for both the nav and the toggle button's height
+        // to avoid content being hidden. Assuming toggle button is 40px height + 20px top margin from nav.
+        const effectiveNavHeight = bottomNav.classList.contains('hidden-nav') ? 0 : bottomNavHeight;
+        const toggleButtonHeight = bottomNav.classList.contains('hidden-nav') ? 40 : 0; // Only visible when nav is hidden
 
-        // Calculate effective padding based on nav visibility
-        let effectivePadding = 0;
-        if (bottomNav.classList.contains('hidden-nav')) {
-            // If nav is hidden, only the button is visible, so padding should account for button's height + a bit of margin
-            effectivePadding = toggleButtonHeight + 20; // 20px for general body padding that was already there
-        } else {
-            // If nav is visible, padding should account for nav height
-            effectivePadding = bottomNavHeight; // The toggle button is conceptually "on top" of the nav
-        }
-
-        // Adjust the top position of the toggle button based on visibility
-        if (bottomNav.classList.contains('hidden-nav')) {
-            // When nav is hidden, the button is at the bottom, so position it relative to bottom
-            toggleNavBtn.style.top = `-${toggleButtonHeight + 5}px`; // button height + small gap
-        } else {
-            // When nav is visible, the button is on top of it
-            toggleNavBtn.style.top = `-${toggleButtonHeight + gap}px`; // Button height + desired gap
-        }
-
-
-        document.body.style.paddingBottom = `${effectivePadding + 20}px`; // 20px is existing body padding
+        document.body.style.paddingBottom = `${effectiveNavHeight + toggleButtonHeight + 20}px`;
     }
 
 
