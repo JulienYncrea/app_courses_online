@@ -182,6 +182,7 @@
       width: 100%;
       background-color: #EE82EE; /* From index copy's navigation buttons */
       display: flex;
+      white-space: nowrap;
       justify-content: space-around;
       padding: 0.5rem 0;
       box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
@@ -457,21 +458,33 @@
     @media (max-width: 640px) {
         body {
             /* Try to reduce horizontal padding (0.5rem here) */
-            padding: 0.2rem 0.2rem; /* For example, very little side padding */
+            padding: 0.2rem 0.2rem; /* For example, very little lateral padding */
         }
         .section-container {
             /* Same for the section container (0.75rem here) */
-            padding: 0.2rem 0.3rem; /* For example, very little side padding */
+            padding: 0.2rem 0.3rem; /* For example, very little lateral padding */
+        }
+        h1, h2 {
+            /* Ajustez cette valeur négative pour remonter les titres. */
+            /* Commencez avec une petite valeur comme -1rem et augmentez si nécessaire. */
+            margin-top: -1.5rem; /* Exemple: remonte le titre de 1.5rem */
+            /* Vous pouvez aussi ajuster les paddings si les précédents ajustements ne suffisent pas */
+            padding-top: 0; /* Assurez-vous qu'il n'y a pas de padding supérieur indésirable sur les titres eux-mêmes */
+            /* Conservez vos autres styles de titres pour mobile */
+            padding-bottom: 0.8rem;
+            margin-bottom: 0.8rem;
+            line-height: 1.5;
+            font-size: 1.8rem;
         }
         .bottom-nav {
             padding: 0.5rem 0;
         }
         .nav-item {
-            font-size: 0.7rem;
-            padding: 0.3rem;
+            font-size: 0.9rem;
+            padding: 0.5rem;
         }
         .nav-item i {
-            font-size: 1.2rem;
+            font-size: 2rem;
         }
         .toggle-nav-button {
             width: 35px;
@@ -1466,30 +1479,40 @@
     let draggingCategoryElement = null;
 
     function loadCategoryOrder() {
-        let categories = getCategories();
-        let currentOrder = JSON.parse(localStorage.getItem('category_order')) || [];
+        let categories = getCategories(); // Toutes les catégories actuelles
+        let savedOrder = getFromLocalStorage('category_order', []); // Ordre sauvegardé
 
-        // Ensure currentOrder only contains valid categories and adds new ones to the end
-        const newOrder = categories.filter(cat => currentOrder.includes(cat));
+        // Crée un ensemble de catégories actuellement dans l'ordre sauvegardé pour une recherche rapide
+        const savedOrderSet = new Set(savedOrder);
+
+        // Filtre toutes les catégories de savedOrder qui n'existent plus dans getCategories()
+        // Et assure que les nouvelles catégories de getCategories() sont ajoutées à la fin de l'ordre
+        let newOrder = savedOrder.filter(cat => categories.includes(cat));
+
         categories.forEach(cat => {
             if (!newOrder.includes(cat)) {
-                newOrder.push(cat);
+                newOrder.push(cat); // Ajoute toutes les nouvelles catégories à la fin
             }
         });
-        localStorage.setItem('category_order', JSON.stringify(newOrder)); // Save reconciled order
-        currentOrder = newOrder; // Use the reconciled order
 
-        categoryOrderList.innerHTML = '';
+        // Si après réconciliation, l'ordre a changé, sauvegarde-le
+        if (JSON.stringify(savedOrder) !== JSON.stringify(newOrder)) {
+            saveToLocalStorage('category_order', newOrder); // Sauvegarde l'ordre réconcilié
+        }
+        currentOrder = newOrder; // Utilise l'ordre réconcilié et sauvegardé
+
+        categoryOrderList.innerHTML = ''; // Efface d'abord la liste
+
         if (currentOrder.length === 0) {
-            categoryOrderList.innerHTML = '<p class="empty-list-message">Drag categories to set their order.</p>';
+            categoryOrderList.innerHTML = '<p class="empty-list-message">Faites glisser les catégories pour définir leur ordre.</p>';
             return;
         }
 
         currentOrder.forEach(category => {
             const li = document.createElement('li');
-            li.textContent = category;
+            li.textContent = category; // Ce n'est pas réellement affiché, le span ci-dessous l'est
             li.draggable = true;
-            li.classList.add('category-item'); // Add a class for styling/selection
+            li.classList.add('category-item'); // Ajoute une classe pour le style/la sélection
             li.innerHTML = `<i class="fas fa-grip-vertical drag-handle"></i><span>${category}</span>`;
             categoryOrderList.appendChild(li);
         });
