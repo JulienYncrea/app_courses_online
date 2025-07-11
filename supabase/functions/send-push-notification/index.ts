@@ -1,88 +1,116 @@
-// supabase/functions/send-push-notification/index.ts
-import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import webpush from 'https://esm.sh/web-push@3.6.7'; // Utilisez une version stable
-
-// Remplacez par vos clés VAPID
-const VAPID_PUBLIC_KEY = Deno.env.get('BC-_2wv1Kjqb8G575LuS7iuvgBSPrUqE7MIo-8aY8ro9CqMBVMMvJU0na3CAyO-EjJEnNG4nAiBxphlNcik_YYo');
-const VAPID_PRIVATE_KEY = Deno.env.get('a3avPuBdV1kAGIbYL4MSivoAbrvyEAbVD9s_dxpDm3w');
-const VAPID_SUBJECT = 'mailto: <julien.minviel@gmail.com>'; // Remplacez par votre email
-
-webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 serve(async (req) => {
-    const supabaseClient = createClient(
-        Deno.env.get('SUPABASE_URL') ?? '',
-        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '' // Utilisez la clé de rôle de service
-    );
+  // Gérer les requêtes OPTIONS (pré-vérification CORS)
+  if (req.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204, // No Content
+      headers: {
+        'Access-Control-Allow-Origin': 'https://julienyncrea.github.io', // Ou '*' pour toutes les origines (moins sécurisé)
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+        'Access-Control-Max-Age': '86400', // Cache le résultat de la pré-vérification pendant 24 heures
+      },
+    })
+  }
 
-    if (req.method !== 'POST') {
-        return new Response(JSON.stringify({ error: 'Method Not Allowed' }), {
-            status: 405,
-            headers: { 'Content-Type': 'application/json' },
-        });
-    }
+  // En-têtes CORS pour les réponses réussies
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': 'https://julienyncrea.github.io', // Ou '*'
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  }
 
-    const { list_id, message } = await req.json();
+  try {
+    const { listId, message } = await req.json()
 
-    if (!list_id || !message) {
-        return new Response(JSON.stringify({ error: 'Missing list_id or message' }), {
-            status: 400,
-            headers: { 'Content-Type': 'application/json' },
-        });
-    }
-
-    try {
-        // Récupérer toutes les souscriptions pour cette list_id
-        const { data: subscriptions, error } = await supabaseClient
-            .from('push_subscriptions')
-            .select('endpoint, p256dh, auth')
-            .eq('list_id', list_id);
-
-        if (error) {
-            console.error('Error fetching subscriptions:', error);
-            return new Response(JSON.stringify({ error: 'Failed to fetch subscriptions' }), {
-                status: 500,
-                headers: { 'Content-Type': 'application/json' },
-            });
+    if (!listId || !message) {
+      return new Response(
+        JSON.stringify({ error: 'Missing listId or message in request body' }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
         }
-
-        const payload = JSON.stringify({
-            title: 'Nouveau message pour votre liste de courses',
-            body: message,
-            url: `${req.headers.get('origin')}` // Ou l'URL de votre PWA
-        });
-
-        const sendPromises = subscriptions.map(sub => {
-            const pushSubscription = {
-                endpoint: sub.endpoint,
-                keys: {
-                    p256dh: sub.p256dh,
-                    auth: sub.auth,
-                },
-            };
-            return webpush.sendNotification(pushSubscription, payload)
-                .catch(e => {
-                    console.error('Failed to send push notification to subscription:', sub.endpoint, e);
-                    // Gérer les abonnements expirés (ex: les supprimer de la DB)
-                    if (e.statusCode === 410 || e.statusCode === 404) { // Gone or Not Found
-                        console.log('Subscription expired, deleting from DB:', sub.endpoint);
-                        return supabaseClient.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
-                    }
-                    return Promise.resolve(); // Ne pas bloquer si une seule notif échoue
-                });
-        });
-
-        await Promise.allSettled(sendPromises); // Attendre que toutes les notifications soient tentées
-
-        return new Response(JSON.stringify({ success: true, sentTo: subscriptions.length }), {
-            headers: { 'Content-Type': 'application/json' },
-        });
-    } catch (error) {
-        console.error('Unexpected error:', error);
-        return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-        });
+      )
     }
-});
+
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      {
+        auth: {
+          persistSession: false,
+        },
+      },
+    )
+
+    // Récupérer toutes les souscriptions de notifications pour cette listId
+    const { data: subscriptions, error: subscriptionsError } = await supabaseClient
+      .from('push_subscriptions')
+      .select('subscription_json')
+      .eq('list_id', listId)
+
+    if (subscriptionsError) {
+      console.error('Error fetching subscriptions:', subscriptionsError)
+      return new Response(JSON.stringify({ error: 'Error fetching subscriptions' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      })
+    }
+
+    if (!subscriptions || subscriptions.length === 0) {
+      console.log(`No subscriptions found for list: ${listId}`)
+      return new Response(JSON.stringify({ message: 'No subscriptions found for this list.' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      })
+    }
+
+    // Préparer les données pour la notification
+    const notificationPayload = {
+      title: 'Shopping List Update',
+      body: message, // Utilisation du message générique
+      url: `https://julienyncrea.github.io/app_courses_online/`, // URL vers votre app
+    }
+
+    // Envoyer les notifications
+    const webPush = await import('https://esm.sh/web-push@3.6.7')
+    webPush.setVapidDetails(
+      'mailto: <julien.minviel@gmail.com>', // Remplacez par votre email
+      Deno.env.get('BC-_2wv1Kjqb8G575LuS7iuvgBSPrUqE7MIo-8aY8ro9CqMBVMMvJU0na3CAyO-EjJEnNG4nAiBxphlNcik_YYo'),
+      Deno.env.get('a3avPuBdV1kAGIbYL4MSivoAbrvyEAbVD9s_dxpDm3w'),
+    )
+
+    let successCount = 0
+    let failureCount = 0
+
+    for (const sub of subscriptions) {
+      try {
+        const subscription = JSON.parse(sub.subscription_json)
+        await webPush.sendNotification(subscription, JSON.stringify(notificationPayload))
+        successCount++
+      } catch (e) {
+        console.error('Error sending push notification to a subscriber:', e)
+        failureCount++
+        // Si l'abonnement n'est plus valide, vous pouvez envisager de le supprimer de la base de données ici
+      }
+    }
+
+    return new Response(
+      JSON.stringify({
+        message: `Notifications sent: ${successCount} successful, ${failureCount} failed.`,
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      },
+    )
+  } catch (error) {
+    console.error('Unhandled error in Edge Function:', error.message)
+    return new Response(JSON.stringify({ error: error.message }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 400,
+    })
+  }
+})
