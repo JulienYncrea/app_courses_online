@@ -79,7 +79,7 @@ serve(async (req) => {
     // --- DÉBUT DES CORRECTIONS POUR LES CLÉS VAPID ---
 
     // Récupérer les clés VAPID depuis les variables d'environnement par leurs NOMS
-    const VAPID_SUBJECT_ENV = 'mailto:julien.minviel@gmail.com'; // Votre sujet VAPID (peut aussi être une variable d'environnement)
+    const VAPID_SUBJECT_ENV = 'mailto: <julien.minviel@gmail.com>'; // Votre sujet VAPID (peut aussi être une variable d'environnement)
     const VAPID_PUBLIC_KEY_ENV = Deno.env.get('VAPID_PUBLIC_KEY');
     const VAPID_PRIVATE_KEY_ENV = Deno.env.get('VAPID_PRIVATE_KEY');
 
