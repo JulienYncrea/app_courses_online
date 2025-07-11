@@ -47,7 +47,7 @@ serve(async (req) => {
 
     // Récupérer toutes les souscriptions de notifications pour cette listId
     const { data: subscriptions, error: subscriptionsError } = await supabaseClient
-      .from('push_subscriptions')
+      .from('subscriptions')
       .select('subscription_json')
       .eq('list_id', listId)
 
