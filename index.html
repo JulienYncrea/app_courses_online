@@ -828,13 +828,7 @@
     ];
     async function subscribeUserToPush() {
         if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-            console.warn('Push messaging is not supported.');
-            alert('Les notifications push ne sont pas prises en charge par ce navigateur.');
-            return;
-        }
-
-        if (Notification.permission === 'denied') {
-            alert('Les notifications sont bloquées. Veuillez les autoriser dans les paramètres de votre navigateur.');
+            alert('Les notifications push ne sont pas supportées par votre navigateur.');
             return;
         }
 
@@ -844,23 +838,19 @@
 
             if (existingSubscription) {
                 console.log('Existing push subscription found:', existingSubscription);
-                // Si l'abonnement existe déjà, vérifiez s'il est dans la BDD.
-                // Pour simplifier, nous allons juste le sauvegarder à nouveau pour s'assurer
-                // qu'il est associé à la bonne list_id actuelle.
-                // Dans une vraie app, vous pourriez d'abord vérifier sa présence avant de réinsérer.
-                await saveSubscriptionToDatabase(existingSubscription);
                 alert('Vous êtes déjà abonné aux notifications pour cette liste.');
-                return;
+                // Si un abonnement existe déjà dans le navigateur,
+                // nous n'essayons PAS de le sauvegarder à nouveau.
+                // Cependant, nous pourrions vouloir vérifier s'il existe dans la BDD,
+                // et s'il n'y est pas, le sauvegarder. Pour l'instant, on se contente de l'alerte.
+                // Ou si vous voulez mettre à jour ses données dans la BDD :
+                // await saveSubscriptionToDatabase(existingSubscription);
+                return; // Sortez de la fonction car l'utilisateur est déjà abonné.
             }
 
-            // Récupérez votre clé publique VAPID depuis les variables d'environnement de votre fonction Edge
-            // ou insérez-la directement si vous la hardcodez.
-            // Il est fortement recommandé de la charger depuis une source sécurisée.
-            // Pour l'exemple, nous l'insérons directement. REMPLACEZ PAR VOTRE VAPID_PUBLIC_KEY !
-            const VAPID_PUBLIC_KEY = 'BC-_2wv1Kjqb8G575LuS7iuvgBSPrUqE7MIo-8aY8ro9CqMBVMMvJU0na3CAyO-EjJEnNG4nAiBxphlNcik_YYo'; // <-- REMPLACEZ CECI
-
             const convertedVapidKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
-            
+
+            console.log('Attempting to subscribe user...');
             const subscription = await registration.pushManager.subscribe({
                 userVisibleOnly: true,
                 applicationServerKey: convertedVapidKey
@@ -870,9 +860,13 @@
             await saveSubscriptionToDatabase(subscription);
             alert('Abonnement aux notifications réussi !');
 
-        } catch (err) {
-            console.error('Failed to subscribe the user:', err);
-            alert('Échec de l\'abonnement aux notifications.');
+        } catch (error) {
+            console.error('Failed to subscribe the user:', error);
+            if (error.name === 'NotAllowedError') {
+                alert('L\'autorisation de notification a été refusée par l\'utilisateur. Veuillez l\'activer dans les paramètres de votre navigateur.');
+            } else {
+                alert('Erreur lors de l\'enregistrement de l\'abonnement : ' + (error.message || error.name));
+            }
         }
     }
 
