@@ -1,3 +1,29 @@
+self.addEventListener('push', (event) => {
+    const data = event.data.json();
+    console.log('Push event received:', data);
+
+    const title = data.title || 'Nouvelle notification de la liste de courses';
+    const options = {
+        body: data.body,
+        icon: 'icon.png', // Assurez-vous que l'icône existe
+        badge: 'badge.png', // Optionnel, petite icône sur Android
+        data: {
+            url: data.url || self.location.origin // URL à ouvrir lors du clic sur la notification
+        }
+    };
+
+    event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close(); // Ferme la notification après le clic
+
+    event.waitUntil(
+        clients.openWindow(event.notification.data.url) // Ouvre l'URL spécifiée
+    );
+});
+
+
 const CACHE_NAME = 'shopping-list-cache-v2';
 const urlsToCache = [
   '/app_courses_online/',        // Référence à la racine de ton projet
