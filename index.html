@@ -910,7 +910,7 @@
         const auth = arrayBufferToBase64(subscription.getKey('auth'));
 
         const { data, error } = await supabase
-            .from('subscriptions')
+            .from('push.subscriptions')
             .insert([
                 {
                     list_id: currentListId,
