@@ -712,10 +712,10 @@
     </div>
   </div>
 
+
   <div class="bottom-nav">
     <button id="toggleNavBtn" class="toggle-nav-button">
-      <i class="fas fa-chevron-down"></i>
-    </button>
+      <i class="fas fa-chevron-down"></i> </button>
     <div class="nav-item active" id="navShoppingList">
       <i class="fas fa-shopping-basket"></i>
       <span>My List</span>
@@ -738,18 +738,17 @@
     </div>
   </div>
 
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     // --- Supabase Configuration ---
     const SUPABASE_URL = 'https://cepqcretnxfhjbvdukkk.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlcHFjcmV0bnhmaGpidmR1a2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2MTc1NDcsImV4cCI6MjA2NjE5MzU0N30.H56IGRN14FpfHXQVODKsmTbqMEe27_gcCcgGLphEEOU'; // Replace with your actual anon key
-
     let supabase = null; // Will be initialized in window.addEventListener('load')
 
     // --- Global Variables ---
     let currentShareCode = null;
     let currentListId = null;
-
     const shoppingListToBuy = document.getElementById('shoppingListToBuy');
     const newItemInput = document.getElementById('newItemInput');
     const newQuantityInput = document.getElementById('newQuantityInput');
@@ -813,855 +812,1233 @@
     const savedMessagesList = document.getElementById('savedMessagesList');
     const emptySavedMessages = document.getElementById('emptySavedMessages');
 
+
     // --- Default Categories ---
     const initialDefaultCategories = [
-      "Fruits et Légumes",
-      "Produits Laitiers",
-      "Viandes et Poissons",
-      "Produits d'Épicerie",
-      "Boulangerie",
-      "Boissons",
-      "Surgelés",
-      "Entretien",
-      "Hygiène",
-      "Autres"
+        "Fruits et Légumes",
+        "Produits Laitiers",
+        "Viandes et Poissons",
+        "Produits d'Épicerie",
+        "Boulangerie",
+        "Boissons",
+        "Surgelés",
+        "Entretien",
+        "Hygiène",
+        "Autres"
     ];
-
-    // --- Utility Functions ---
-    function generateShareCode() {
-      return Math.random().toString(36).substring(2, 8).toUpperCase();
-    }
-
-    async function handleInitialLoad() {
-      let shareCode = localStorage.getItem('lastShareCode');
-      if (shareCode) {
-        shareCodeInput.value = shareCode; // Set the input in settings
-        await getOrCreateListByShareCode(shareCode);
-        showSection('shoppingList'); // Show shopping list if connected
-      } else {
-        // If no share code, go to settings for the user to enter one
-        showSection('settings'); // Optionally, pre-fill with a generated code to suggest creation
-        shareCodeInput.value = generateShareCode();
-        alert("Welcome! Please enter a share code or click 'Load/Create List' to generate a new one.");
-      }
-    }
-
-    function showSection(sectionId) {
-      document.querySelectorAll('.section').forEach(section => {
-        section.classList.add('hidden');
-      });
-      document.getElementById(sectionId).classList.remove('hidden');
-
-      document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.remove('active');
-      });
-      document.getElementById('nav' + sectionId.charAt(0).toUpperCase() + sectionId.slice(1)).classList.add('active');
-
-      // Specific for the settings section
-      if (sectionId === 'settings') {
-        activeShareCodeSpan.textContent = currentShareCode || 'N/A';
-      }
-
-      // Load section-specific data if necessary
-      if (sectionId === 'buyLater') {
-        loadBuyLaterList();
-      } else if (sectionId === 'suggestions') {
-        updateSuggestionCategoryFilter(); // Update category filter
-        loadSuggestions(); // Load suggestions after filter update
-      } else if (sectionId === 'categories') {
-        renderCategories();
-        loadCategoryOrder();
-      }
-    }
-
-    // New function to toggle the bottom navigation
-    function toggleBottomNav() {
-      const bottomNav = document.querySelector('.bottom-nav');
-      const icon = toggleNavBtn.querySelector('i');
-
-      if (bottomNav.classList.contains('hidden-nav')) {
-        bottomNav.classList.remove('hidden-nav');
-        icon.classList.remove('fa-chevron-up');
-        icon.classList.add('fa-chevron-down');
-      } else {
-        bottomNav.classList.add('hidden-nav');
-        icon.classList.remove('fa-chevron-down');
-        icon.classList.add('fa-chevron-up');
-      }
-      updateBodyPadding(); // Update body padding after toggle
-    }
-
-    // New function to adjust body padding-bottom
-    function updateBodyPadding() {
-      const bottomNavHeight = bottomNav.offsetHeight;
-      // The toggle button is outside the bottom-nav for fixed positioning.
-      // We need to account for both the nav and the toggle button's height
-      // to avoid content being hidden. Assuming toggle button is 40px height + 20px top margin from nav.
-      const effectiveNavHeight = bottomNav.classList.contains('hidden-nav') ? 0 : bottomNavHeight;
-      const toggleButtonHeight = bottomNav.classList.contains('hidden-nav') ? 40 : 0; // Only visible when nav is hidden
-      document.body.style.paddingBottom = `${effectiveNavHeight + toggleButtonHeight + 20}px`;
-    }
-
-    function updateSupabaseHeaders(shareCode) {
-      if (supabase && supabase.rest) {
-        supabase.rest.headers['X-Share-Code'] = shareCode;
-        console.log(`Supabase headers updated with X-Share-Code: ${shareCode}`);
-      } else {
-        console.warn("Supabase client not initialized or rest client not ready, cannot update headers.");
-      }
-    }
-
-    function getCategories() {
-      return JSON.parse(localStorage.getItem('user_categories')) || initialDefaultCategories;
-    }
-
-    function saveCategories(categories) {
-      localStorage.setItem('user_categories', JSON.stringify(categories));
-    }
-
-    function updateAllCategorySelects() {
-      const categories = getCategories();
-      const selects = document.querySelectorAll('select#newCategorySelect, select#newSuggestionCategorySelect');
-      selects.forEach(select => {
-        select.innerHTML = '';
-        categories.forEach(category => {
-          const option = document.createElement('option');
-          option.value = category;
-          option.textContent = category;
-          select.appendChild(option);
-        });
-      });
-      if (categories.length > 0) {
-        newCategorySelect.value = categories[0];
-        newSuggestionCategorySelect.value = categories[0];
-      }
-    }
-
-    function updateSuggestionCategoryFilter() {
-      const categories = getCategories();
-      suggestionCategoryFilter.innerHTML = '';
-
-      // Add "All" option
-      const allOption = document.createElement('option');
-      allOption.value = 'All';
-      allOption.textContent = 'All Categories';
-      suggestionCategoryFilter.appendChild(allOption);
-
-      categories.forEach(category => {
-        const option = document.createElement('option');
-        option.value = category;
-        option.textContent = category;
-        suggestionCategoryFilter.appendChild(option);
-      });
-      loadSuggestions(); // Reload suggestions after filter update
-    }
-
-    // --- Data Interaction Functions ---
-    async function getOrCreateListByShareCode(shareCode) {
-      if (!supabase) {
-          console.error('Supabase client not initialized.');
-          return null;
-      }
-      try {
-        // First, try to get the list using the share code
-        let { data: list, error } = await supabase
-          .from('lists')
-          .select('id')
-          .eq('share_code', shareCode)
-          .single();
-
-        if (error && error.code === 'PGRST116') { // No rows found
-          console.log(`List with share code ${shareCode} not found, creating a new one.`);
-          const { data: newlist, error: createError } = await supabase
-            .from('lists')
-            .insert({ share_code: shareCode })
-            .select('id')
-            .single();
-
-          if (createError) throw createError;
-          list = newlist;
-          alert(`New list created with code: ${shareCode}`);
-        } else if (error) {
-          throw error;
-        }
-
-        currentListId = list.id;
-        currentShareCode = shareCode; // Store the share code
-        localStorage.setItem('lastShareCode', shareCode);
-        activeShareCodeSpan.textContent = currentShareCode; // Update settings display
-        updateSupabaseHeaders(shareCode); // Update headers for RLS
-
-        console.log(`Using list ID: ${currentListId} with share code: ${currentShareCode}`);
-        await loadShoppingList(); // Load items for the newly set list
-
-        return list.id;
-
-      } catch (error) {
-        console.error('Error getting or creating list:', error.message);
-        alert('Error loading or creating list. Please try again.');
-        currentListId = null;
-        currentShareCode = null;
-        activeShareCodeSpan.textContent = 'N/A';
-        localStorage.removeItem('lastShareCode');
-        return null;
-      }
-    }
-
-    async function loadShoppingList() {
-      if (!currentListId) {
-        shoppingListToBuy.innerHTML = '<p class="empty-list-message">Please load or create a list in settings.</p>';
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from('shopping_list_items')
-        .select('*')
-        .eq('list_id', currentListId)
-        .order('category_order', { ascending: true }) // Order by category first
-        .order('name', { ascending: true }); // Then by name
-
-      if (error) {
-        console.error('Error loading shopping list:', error.message);
-        shoppingListToBuy.innerHTML = `<p class="empty-list-message">Error loading list: ${error.message}</p>`;
-      } else {
-        renderShoppingList(data);
-      }
-    }
-
-    async function addItemToList(name, quantity, category) {
-      if (!currentListId) {
-        alert('Please load or create a list in settings first.');
-        return;
-      }
-      if (!name) {
-        alert('Item name cannot be empty.');
-        return;
-      }
-      const { data, error } = await supabase
-        .from('shopping_list_items')
-        .insert([{ name, quantity, category, list_id: currentListId }])
-        .select();
-
-      if (error) {
-        console.error('Error adding item:', error.message);
-        alert('Error adding item: ' + error.message);
-      } else {
-        newItemInput.value = '';
-        newQuantityInput.value = '1'; // Reset quantity to 1
-        loadShoppingList(); // Reload list to show new item
-      }
-    }
-
-    async function updateItemQuantity(itemId, newQuantity) {
-      if (!currentListId) return; // Should not happen if UI is correct
-
-      if (newQuantity <= 0) {
-        await removeItemFromList(itemId); // Remove if quantity is 0 or less
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from('shopping_list_items')
-        .update({ quantity: newQuantity })
-        .eq('id', itemId)
-        .eq('list_id', currentListId); // Ensure RLS is applied
-
-      if (error) {
-        console.error('Error updating quantity:', error.message);
-        alert('Error updating quantity: ' + error.message);
-      } else {
-        loadShoppingList();
-      }
-    }
-
-    async function removeItemFromList(itemId) {
-      if (!currentListId) return;
-
-      const { error } = await supabase
-        .from('shopping_list_items')
-        .delete()
-        .eq('id', itemId)
-        .eq('list_id', currentListId); // Ensure RLS is applied
-
-      if (error) {
-        console.error('Error removing item:', error.message);
-        alert('Error removing item: ' + error.message);
-      } else {
-        loadShoppingList();
-      }
-    }
-
-    async function loadBuyLaterList() {
-        if (!currentListId) {
-            buyLaterList.innerHTML = '<p class="empty-list-message">Please load or create a list in settings.</p>';
+    async function subscribeUserToPush() {
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+            console.warn('Push messaging is not supported.');
+            alert('Les notifications push ne sont pas prises en charge par ce navigateur.');
             return;
         }
 
-        const { data, error } = await supabase
-            .from('buy_later_items')
-            .select('*')
-            .eq('list_id', currentListId)
-            .order('created_at', { ascending: true }); // Order by creation time
-
-        if (error) {
-            console.error('Error loading buy later list:', error.message);
-            buyLaterList.innerHTML = `<p class="empty-list-message">Error loading list: ${error.message}</p>`;
-        } else {
-            renderBuyLaterList(data);
-        }
-    }
-
-    async function addBuyLaterItem(name) {
-        if (!currentListId) {
-            alert('Please load or create a list in settings first.');
-            return;
-        }
-        if (!name) {
-            alert('Item name cannot be empty.');
-            return;
-        }
-
-        const { data, error } = await supabase
-            .from('buy_later_items')
-            .insert([{ name, list_id: currentListId }])
-            .select();
-
-        if (error) {
-            console.error('Error adding buy later item:', error.message);
-            alert('Error adding item to buy later: ' + error.message);
-        } else {
-            newBuyLaterItemInput.value = '';
-            loadBuyLaterList();
-        }
-    }
-
-    async function removeBuyLaterItem(itemId) {
-        if (!currentListId) return;
-
-        const { error } = await supabase
-            .from('buy_later_items')
-            .delete()
-            .eq('id', itemId)
-            .eq('list_id', currentListId);
-
-        if (error) {
-            console.error('Error removing buy later item:', error.message);
-            alert('Error removing item from buy later: ' + error.message);
-        } else {
-            loadBuyLaterList();
-        }
-    }
-
-    async function loadSuggestions() {
-        if (!currentListId) {
-            suggestionList.innerHTML = '<p class="empty-list-message">Please load or create a list in settings.</p>';
-            return;
-        }
-
-        let query = supabase
-            .from('suggestions')
-            .select('*')
-            .eq('list_id', currentListId)
-            .order('name', { ascending: true });
-
-        const selectedCategory = suggestionCategoryFilter.value;
-        if (selectedCategory !== 'All') {
-            query = query.eq('category', selectedCategory);
-        }
-
-        const { data, error } = await query;
-
-        if (error) {
-            console.error('Error loading suggestions:', error.message);
-            suggestionList.innerHTML = `<p class="empty-list-message">Error loading suggestions: ${error.message}</p>`;
-        } else {
-            renderSuggestions(data);
-        }
-    }
-
-    async function addSuggestion(name, category) {
-        if (!currentListId) {
-            alert('Please load or create a list in settings first.');
-            return;
-        }
-        if (!name) {
-            alert('Suggestion name cannot be empty.');
-            return;
-        }
-
-        const { data, error } = await supabase
-            .from('suggestions')
-            .insert([{ name, category, list_id: currentListId }])
-            .select();
-
-        if (error) {
-            console.error('Error adding suggestion:', error.message);
-            alert('Error adding suggestion: ' + error.message);
-        } else {
-            newSuggestionInput.value = '';
-            // Reset category select to the first category if desired, or 'All'
-            newSuggestionCategorySelect.value = getCategories()[0];
-            loadSuggestions(); // Reload suggestions after adding
-        }
-    }
-
-    async function removeSuggestion(suggestionId) {
-        if (!currentListId) return;
-
-        const { error } = await supabase
-            .from('suggestions')
-            .delete()
-            .eq('id', suggestionId)
-            .eq('list_id', currentListId);
-
-        if (error) {
-            console.error('Error removing suggestion:', error.message);
-            alert('Error removing suggestion: ' + error.message);
-        } else {
-            loadSuggestions();
-        }
-    }
-
-    async function addCategory(name) {
-        if (!name) {
-            alert('Category name cannot be empty.');
-            return;
-        }
-
-        let categories = getCategories();
-        if (categories.includes(name)) {
-            alert('Category already exists!');
-            return;
-        }
-
-        categories.push(name);
-        saveCategories(categories);
-        updateAllCategorySelects();
-        renderCategories();
-        // Add to order list as well at the end
-        const categoryOrder = JSON.parse(localStorage.getItem('category_order')) || [];
-        categoryOrder.push(name);
-        localStorage.setItem('category_order', JSON.stringify(categoryOrder));
-        loadCategoryOrder();
-        newCategoryInput.value = '';
-    }
-
-    function removeCategory(name) {
-        if (!confirm(`Are you sure you want to delete the category "${name}"? This will not delete items, but their category field will be blank.`)) {
-            return;
-        }
-        let categories = getCategories().filter(cat => cat !== name);
-        saveCategories(categories);
-        updateAllCategorySelects();
-        renderCategories();
-        // Also remove from category order
-        let categoryOrder = JSON.parse(localStorage.getItem('category_order')) || [];
-        categoryOrder = categoryOrder.filter(cat => cat !== name);
-        localStorage.setItem('category_order', JSON.stringify(categoryOrder));
-        loadCategoryOrder();
-    }
-
-    function saveCategoryOrder(order) {
-        localStorage.setItem('category_order', JSON.stringify(order));
-        loadShoppingList(); // Reload shopping list to apply new order
-    }
-
-    async function saveMessage(message) {
-        if (!message) {
-            alert('Message cannot be empty.');
-            return;
-        }
-        if (!currentListId) {
-            alert('Please load or create a list in settings first.');
-            return;
-        }
-
-        const { data, error } = await supabase
-            .from('saved_messages')
-            .insert([{ message_text: message, list_id: currentListId }])
-            .select();
-
-        if (error) {
-            console.error('Error saving message:', error.message);
-            alert('Error saving message: ' + error.message);
-        } else {
-            notificationMessageInput.value = '';
-            loadSavedMessages();
-        }
-    }
-
-    async function loadSavedMessages() {
-        if (!currentListId) {
-            emptySavedMessages.style.display = 'block';
-            savedMessagesList.innerHTML = '';
-            return;
-        }
-
-        const { data, error } = await supabase
-            .from('saved_messages')
-            .select('*')
-            .eq('list_id', currentListId)
-            .order('created_at', { ascending: false });
-
-        if (error) {
-            console.error('Error loading saved messages:', error.message);
-            emptySavedMessages.style.display = 'block';
-            savedMessagesList.innerHTML = '';
-        } else {
-            renderSavedMessages(data);
-        }
-    }
-
-    async function removeSavedMessage(messageId) {
-        if (!currentListId) return;
-
-        const { error } = await supabase
-            .from('saved_messages')
-            .delete()
-            .eq('id', messageId)
-            .eq('list_id', currentListId);
-
-        if (error) {
-            console.error('Error removing saved message:', error.message);
-            alert('Error removing saved message: ' + error.message);
-        } else {
-            loadSavedMessages();
-        }
-    }
-
-    async function sendPushNotification(message) {
-        if (!currentListId) {
-            alert('Please load or create a list in settings first to send notifications.');
-            return;
-        }
-        if (!message) {
-            alert('Notification message cannot be empty.');
+        if (Notification.permission === 'denied') {
+            alert('Les notifications sont bloquées. Veuillez les autoriser dans les paramètres de votre navigateur.');
             return;
         }
 
         try {
-            const { data, error } = await supabase.functions.invoke('send-push-notification', {
-                body: { 
-                    list_id: currentListId, 
-                    title: "Shopping List Update 🛒", 
-                    body: message 
-                },
+            const registration = await navigator.serviceWorker.ready;
+            const existingSubscription = await registration.pushManager.getSubscription();
+
+            if (existingSubscription) {
+                console.log('Existing push subscription found:', existingSubscription);
+                // Si l'abonnement existe déjà, vérifiez s'il est dans la BDD.
+                // Pour simplifier, nous allons juste le sauvegarder à nouveau pour s'assurer
+                // qu'il est associé à la bonne list_id actuelle.
+                // Dans une vraie app, vous pourriez d'abord vérifier sa présence avant de réinsérer.
+                await saveSubscriptionToDatabase(existingSubscription);
+                alert('Vous êtes déjà abonné aux notifications pour cette liste.');
+                return;
+            }
+
+            // Récupérez votre clé publique VAPID depuis les variables d'environnement de votre fonction Edge
+            // ou insérez-la directement si vous la hardcodez.
+            // Il est fortement recommandé de la charger depuis une source sécurisée.
+            // Pour l'exemple, nous l'insérons directement. REMPLACEZ PAR VOTRE VAPID_PUBLIC_KEY !
+            const VAPID_PUBLIC_KEY = 'VOTRE_CLE_PUBLIQUE_VAPID_ICI'; // <-- REMPLACEZ CECI
+
+            const convertedVapidKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+            
+            const subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: convertedVapidKey
             });
 
-            if (error) {
-                console.error('Error invoking Edge Function:', error);
-                alert('Error sending notification: ' + error.message);
+            console.log('New push subscription:', subscription);
+            await saveSubscriptionToDatabase(subscription);
+            alert('Abonnement aux notifications réussi !');
+
+        } catch (err) {
+            console.error('Failed to subscribe the user:', err);
+            alert('Échec de l\'abonnement aux notifications.');
+        }
+    }
+
+    // Fonction utilitaire pour convertir la clé VAPID
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding)
+            .replace(/\-/g, '+')
+            .replace(/_/g, '/');
+
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+
+        for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
+    }
+
+    // Fonction pour sauvegarder l'abonnement dans la base de données Supabase
+    async function saveSubscriptionToDatabase(subscription) {
+        if (!currentListId) {
+            console.error('No currentListId defined. Cannot save subscription.');
+            alert('Erreur : Aucune liste active sélectionnée. Impossible de sauvegarder l\'abonnement.');
+            return;
+        }
+
+        const { endpoint, expirationTime, keys } = subscription;
+        const { p256dh, auth } = keys;
+
+        const subscriptionData = {
+            list_id: currentListId,
+            endpoint: endpoint,
+            p256dh: p256dh,
+            auth: auth,
+            // Stockez l'objet d'abonnement complet en JSON pour faciliter la réutilisation
+            subscription_json: subscription.toJSON() 
+        };
+
+        const { data, error } = await supabase
+            .from('push_subscriptions')
+            .upsert([subscriptionData], { onConflict: 'endpoint' }); // Utilise upsert pour mettre à jour si l'endpoint existe déjà
+
+        if (error) {
+            console.error('Error saving subscription to DB:', error);
+            throw new Error('Could not save push subscription to database.');
+        } else {
+            console.log('Push subscription saved/updated in DB:', data);
+        }
+    }
+
+    // --- Écouteur d'événements pour la cloche de notification ---
+    notificationBell.addEventListener('click', async () => {
+        // Appeler la fonction d'abonnement ici
+        await subscribeUserToPush();
+        // Optionnellement, vous pouvez ensuite ouvrir le modal d'envoi si l'abonnement est réussi
+        // openNotificationModal(); 
+    });
+    // --- Utility Functions ---
+    function generateShareCode() {
+        return Math.random().toString(36).substring(2, 8).toUpperCase();
+    }
+
+    async function handleInitialLoad() {
+        let shareCode = localStorage.getItem('lastShareCode');
+        if (shareCode) {
+            shareCodeInput.value = shareCode; // Set the input in settings
+            await getOrCreateListByShareCode(shareCode);
+            showSection('shoppingList'); // Show shopping list if connected
+        } else {
+            // If no share code, go to settings for the user to enter one
+            showSection('settings');
+            // Optionally, pre-fill with a generated code to suggest creation
+            shareCodeInput.value = generateShareCode();
+            alert("Welcome! Please enter a share code or click 'Load/Create List' to generate a new one.");
+        }
+    }
+
+    function showSection(sectionId) {
+        document.querySelectorAll('.section').forEach(section => {
+            section.classList.add('hidden');
+        });
+        document.getElementById(sectionId).classList.remove('hidden');
+
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        document.getElementById('nav' + sectionId.charAt(0).toUpperCase() + sectionId.slice(1)).classList.add('active');
+
+        // Specific for the settings section
+        if (sectionId === 'settings') {
+            activeShareCodeSpan.textContent = currentShareCode || 'N/A';
+        }
+        // Load section-specific data if necessary
+        if (sectionId === 'buyLater') {
+            loadBuyLaterList();
+        } else if (sectionId === 'suggestions') {
+            updateSuggestionCategoryFilter(); // Update category filter
+            loadSuggestions(); // Load suggestions after filter update
+        } else if (sectionId === 'categories') {
+            renderCategories();
+            loadCategoryOrder();
+        }
+    }
+
+    // New function to toggle the bottom navigation
+    function toggleBottomNav() {
+        const bottomNav = document.querySelector('.bottom-nav');
+        const icon = toggleNavBtn.querySelector('i');
+
+        if (bottomNav.classList.contains('hidden-nav')) {
+            bottomNav.classList.remove('hidden-nav');
+            icon.classList.remove('fa-chevron-up');
+            icon.classList.add('fa-chevron-down');
+        } else {
+            bottomNav.classList.add('hidden-nav');
+            icon.classList.remove('fa-chevron-down');
+            icon.classList.add('fa-chevron-up');
+        }
+        updateBodyPadding(); // Update body padding after toggle
+    }
+
+    // New function to adjust body padding-bottom
+    function updateBodyPadding() {
+        const bottomNavHeight = bottomNav.offsetHeight;
+        // The toggle button is outside the bottom-nav for fixed positioning.
+        // We need to account for both the nav and the toggle button's height
+        // to avoid content being hidden. Assuming toggle button is 40px height + 20px top margin from nav.
+        const effectiveNavHeight = bottomNav.classList.contains('hidden-nav') ? 0 : bottomNavHeight;
+        const toggleButtonHeight = bottomNav.classList.contains('hidden-nav') ? 40 : 0; // Only visible when nav is hidden
+
+        document.body.style.paddingBottom = `${effectiveNavHeight + toggleButtonHeight + 20}px`;
+    }
+
+
+    function updateSupabaseHeaders(shareCode) {
+        if (supabase && supabase.rest) {
+            supabase.rest.headers['X-Share-Code'] = shareCode;
+            console.log(`Supabase headers updated with X-Share-Code: ${shareCode}`);
+        } else {
+            console.warn("Supabase client not initialized or rest client not ready, cannot update headers.");
+        }
+    }
+
+    function getCategories() {
+        return JSON.parse(localStorage.getItem('user_categories')) || initialDefaultCategories;
+    }
+
+    function saveCategories(categories) {
+        localStorage.setItem('user_categories', JSON.stringify(categories));
+    }
+
+    function updateAllCategorySelects() {
+        const categories = getCategories();
+        const selects = document.querySelectorAll('select#newCategorySelect, select#newSuggestionCategorySelect');
+        selects.forEach(select => {
+            select.innerHTML = '';
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                select.appendChild(option);
+            });
+        });
+        if (categories.length > 0) {
+            newCategorySelect.value = categories[0];
+            newSuggestionCategorySelect.value = categories[0];
+        }
+    }
+
+    function updateSuggestionCategoryFilter() {
+        const categories = getCategories();
+        suggestionCategoryFilter.innerHTML = '';
+
+        // Add "All categories" option
+        const allOption = document.createElement('option');
+        allOption.value = 'all';
+        allOption.textContent = 'All categories';
+        suggestionCategoryFilter.appendChild(allOption);
+
+        categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            suggestionCategoryFilter.appendChild(option);
+        });
+        suggestionCategoryFilter.value = 'all'; // Default to "All Categories"
+    }
+
+    // --- Supabase Functions ---
+
+    async function getOrCreateListByShareCode(code) {
+        updateSupabaseHeaders(code);
+
+        try {
+            const { data: lists, error: selectError } = await supabase
+                .from('lists')
+                .select('id, name')
+                .eq('share_code', code);
+
+            if (selectError && selectError.code !== '406') {
+                if (selectError.code === 'PGRST400' && selectError.message.includes('406')) {
+                } else {
+                  throw selectError;
+                }
+            }
+
+            if (lists && lists.length > 0) {
+                console.log(`List found for code ${code}:`, lists[0]);
+                currentListId = lists[0].id;
+                console.log(currentListId)
+                currentShareCode = code;
+                localStorage.setItem('lastShareCode', shareCodeInput.value); // Save on successful load
+                setupRealtimeListener(currentListId);
+                loadShoppingList();
+                activeShareCodeSpan.textContent = currentShareCode; // Update display in settings
+                return lists[0];
             } else {
-                console.log('Push notification Edge Function invoked successfully:', data);
-                alert('Notification sent (if subscribers exist for this list)!');
+                console.log(`No list found for code ${code}. Creating a new list.`);
+                const newList = {
+                    name: `List ${code}`,
+                    share_code: code
+                };
+                const { data: createdList, error: insertError } = await supabase
+                    .from('lists')
+                    .insert([newList])
+                    .select('id, name');
+
+                if (insertError) {
+                    console.error("Error creating list:", insertError);
+                    alert("Error creating list: " + insertError.message);
+                    return null;
+                } else {
+                    console.log("New list created:", createdList[0]);
+                    currentListId = createdList[0].id;
+                    currentShareCode = code;
+                    localStorage.setItem('lastShareCode', shareCodeInput.value); // Save on successful creation
+                    setupRealtimeListener(currentListId);
+                    loadShoppingList();
+                    activeShareCodeSpan.textContent = currentShareCode; // Update display in settings
+                    return createdList[0];
+                }
             }
         } catch (error) {
-            console.error('Network or other error invoking Edge Function:', error);
-            alert('Could not send notification. Network error or function issue.');
+            console.error("Unexpected error in getOrCreateListByShareCode:", error);
+            alert("An unexpected error occurred: " + error.message);
+            return null;
         }
     }
 
+    async function updateItemQuantity(itemId, newQuantity) {
+        if (!currentListId) return;
 
-    // --- Rendering Functions ---
-    function renderShoppingList(items) {
-      shoppingListToBuy.innerHTML = '';
-      if (items.length === 0) {
-        shoppingListToBuy.innerHTML = '<p class="empty-list-message">Your shopping list is empty. Add some items!</p>';
-        return;
-      }
+        const listItemElement = document.querySelector(`#shoppingListToBuy li[data-id="${itemId}"]`);
+        const quantitySpan = listItemElement ? listItemElement.querySelector('.quantity-control span') : null;
 
-      // Group items by category and then sort by category order
-      const categoriesOrder = JSON.parse(localStorage.getItem('category_order')) || [];
-      const categorizedItems = {};
-
-      items.forEach(item => {
-        const category = item.category || 'Uncategorized';
-        if (!categorizedItems[category]) {
-          categorizedItems[category] = [];
+        // Update the data-quantity attribute on the <li>
+        if (listItemElement) {
+            listItemElement.dataset.quantity = newQuantity.toString(); // Update the "source of truth" value
         }
-        categorizedItems[category].push(item);
-      });
 
-      // Sort categories based on saved order, then add uncategorized
-      const sortedCategories = [...categoriesOrder, ...Object.keys(categorizedItems).filter(cat => !categoriesOrder.includes(cat))];
-      // Move 'Uncategorized' to the end if it exists
-      const uncategorizedIndex = sortedCategories.indexOf('Uncategorized');
-      if (uncategorizedIndex > -1) {
-          const uncategorized = sortedCategories.splice(uncategorizedIndex, 1)[0];
-          sortedCategories.push(uncategorized);
-      }
-
-      sortedCategories.forEach(category => {
-        if (categorizedItems[category] && categorizedItems[category].length > 0) {
-          const categoryHeader = document.createElement('h3');
-          categoryHeader.textContent = category;
-          shoppingListToBuy.appendChild(categoryHeader);
-
-          categorizedItems[category].forEach(item => {
-            const li = document.createElement('li');
-            li.setAttribute('data-id', item.id);
-            li.setAttribute('data-category', item.category); // Add data-category attribute
-
-            const itemNameSpan = document.createElement('span');
-            itemNameSpan.className = 'item-name';
-            itemNameSpan.textContent = item.name;
-
-            const quantityControlDiv = document.createElement('div');
-            quantityControlDiv.className = 'quantity-control';
-
-            const decrementBtn = document.createElement('button');
-            decrementBtn.innerHTML = '<i class="fas fa-minus"></i>';
-            decrementBtn.addEventListener('click', () => updateItemQuantity(item.id, item.quantity - 1));
-
-            const quantitySpan = document.createElement('span');
-            quantitySpan.textContent = item.quantity;
-
-            const incrementBtn = document.createElement('button');
-            incrementBtn.innerHTML = '<i class="fas fa-plus"></i>';
-            incrementBtn.addEventListener('click', () => updateItemQuantity(item.id, item.quantity + 1));
-
-            quantityControlDiv.appendChild(decrementBtn);
-            quantityControlDiv.appendChild(quantitySpan);
-            quantityControlDiv.appendChild(incrementBtn);
-
-            const itemActionsDiv = document.createElement('div');
-            itemActionsDiv.className = 'item-actions';
-
-            const removeBtn = document.createElement('button');
-            removeBtn.className = 'remove-btn';
-            removeBtn.innerHTML = '<i class="fas fa-times"></i>'; // Font Awesome X icon
-            removeBtn.addEventListener('click', () => removeItemFromList(item.id));
-
-            itemActionsDiv.appendChild(removeBtn);
-
-            li.appendChild(quantityControlDiv);
-            li.appendChild(itemNameSpan);
-            li.appendChild(itemActionsDiv);
-            shoppingListToBuy.appendChild(li);
-          });
+        // Optimistically update the textual display (can be slower or ignored if loadShoppingList is called)
+        if (quantitySpan) {
+            quantitySpan.textContent = `${newQuantity}x`;
         }
-      });
-    }
 
-    function renderBuyLaterList(items) {
-        buyLaterList.innerHTML = '';
-        if (items.length === 0) {
-            buyLaterList.innerHTML = '<p class="empty-list-message">Your "Buy Later" list is empty.</p>';
+        if (newQuantity <= 0) {
+            try {
+                await deleteItem(itemId);
+            } catch (error) {
+                console.error("Error deleting item:", error);
+                alert("Error deleting item: " + error.message);
+                loadShoppingList(); // Reload to ensure consistency if error
+            }
             return;
         }
 
-        items.forEach(item => {
-            const li = document.createElement('li');
-            li.setAttribute('data-id', item.id);
-
-            const itemNameSpan = document.createElement('span');
-            itemNameSpan.className = 'item-name';
-            itemNameSpan.textContent = item.name;
-
-            const itemActionsDiv = document.createElement('div');
-            itemActionsDiv.className = 'item-actions';
-
-            const removeBtn = document.createElement('button');
-            removeBtn.className = 'remove-btn';
-            removeBtn.innerHTML = '<i class="fas fa-times"></i>';
-            removeBtn.addEventListener('click', () => removeBuyLaterItem(item.id));
-
-            itemActionsDiv.appendChild(removeBtn);
-
-            li.appendChild(itemNameSpan);
-            li.appendChild(itemActionsDiv);
-            buyLaterList.appendChild(li);
-        });
+        try {
+            const { data, error } = await supabase
+                .from('list_items')
+                .update({ quantity: newQuantity })
+                .eq('id', itemId);
+            if (error) {
+                console.error("Error updating quantity:", error);
+                alert("Error updating item quantity: " + error.message);
+                loadShoppingList(); // <-- ESSENTIAL: Reload list in case of error
+            } else {
+                // loadShoppingList(); // Realtime listener handles this
+            }
+        } catch (error) {
+            console.error("Unexpected error updating quantity:", error);
+            alert("An unexpected error occurred: " + error.message);
+            loadShoppingList(); // Reload list in case of unexpected error
+        }
     }
 
-    function renderSuggestions(suggestions) {
-        suggestionList.innerHTML = '';
-        if (suggestions.length === 0) {
-            suggestionList.innerHTML = '<p class="empty-list-message">No suggestions yet. Add some!</p>';
+    async function addItem(name, quantity, category, listId) {
+        if (!listId) {
+            alert("Please load or create a list first.");
             return;
         }
+        try {
+            const { data: existingItems, error: selectError } = await supabase
+                .from('list_items')
+                .select('id, quantity')
+                .eq('list_id', listId)
+                .eq('name', name)
+                .eq('category', category); // Include category in check
 
-        suggestions.forEach(suggestion => {
-            const li = document.createElement('li');
-            li.setAttribute('data-id', suggestion.id);
-            li.setAttribute('data-name', suggestion.name);
-            li.setAttribute('data-category', suggestion.category);
+            if (selectError) throw selectError;
 
-            // Item info part (name + category)
-            const suggestionInfoDiv = document.createElement('div');
-            suggestionInfoDiv.className = 'suggestion-info';
-            suggestionInfoDiv.addEventListener('click', () => {
-                // Add to main shopping list on click
-                addItemToList(suggestion.name, 1, suggestion.category);
+            if (existingItems && existingItems.length > 0) {
+                // Item exists, update its quantity
+                const existingItem = existingItems[0];
+                const newQuantity = existingItem.quantity + quantity;
+                const { data, error: updateError } = await supabase
+                    .from('list_items')
+                    .update({ quantity: newQuantity })
+                    .eq('id', existingItem.id);
+                if (updateError) throw updateError;
+                console.log(`Quantity of item '${name}' updated to ${newQuantity}.`);
+            } else {
+                // Item does not exist, insert new
+                const { data, error: insertError } = await supabase
+                    .from('list_items')
+                    .insert([{ name, quantity, category, list_id: listId }]);
+                if (insertError) throw insertError;
+                console.log(`Item '${name}' added to list.`);
+            }
+
+            // Add category to local storage if it doesn't exist
+            if (category) {
+                const currentCategories = getCategories();
+                if (!currentCategories.includes(category)) {
+                    currentCategories.push(category);
+                    saveCategories(currentCategories);
+                    updateAllCategorySelects(); // Update category dropdowns
+                    updateSuggestionCategoryFilter(); // Update filter dropdown
+                    renderCategories(); // Re-render category list in 'Manage Categories'
+                    loadCategoryOrder(); // Update category order list
+                }
+            }
+
+            newItemInput.value = '';
+            newQuantityInput.value = '1';
+        } catch (error) {
+            console.error("Error adding/updating item:", error);
+            alert("Error adding/updating item: " + error.message);
+        }
+    }
+
+    async function deleteItem(itemId) {
+        if (!currentListId) return;
+
+        // Optimistic UI update: Remove the item from the DOM immediately
+        const listItemElement = document.querySelector(`#shoppingListToBuy li[data-id="${itemId}"]`);
+        if (listItemElement) {
+            listItemElement.remove();
+        }
+
+        try {
+            const { data, error } = await supabase
+                .from('list_items')
+                .delete()
+                .eq('id', itemId);
+            if (error) {
+                console.error("Error deleting item:", error);
+                alert("Error deleting item: " + error.message);
+                loadShoppingList(); // If there's an error, reload the list to re-add the item if deletion failed on backend
+            } else {
+                console.log(`Item with ID ${itemId} deleted.`);
+                // No need to call loadShoppingList() here, as the Realtime listener for 'DELETE' will handle updates for other clients.
+                // For the current client, the item is already optimistically removed.
+            }
+        } catch (error) {
+            console.error("Unexpected error during deletion:", error);
+            alert("An unexpected error occurred: " + error.message);
+            loadShoppingList(); // Reload in case of unexpected JS error
+        }
+    }
+
+    async function loadShoppingList() {
+        if (!currentListId) {
+            shoppingListToBuy.innerHTML = '<p class="empty-list-message">Your list is empty for now!</p>';
+            return;
+        }
+        updateSupabaseHeaders(currentShareCode);
+
+        try {
+            const { data: items, error } = await supabase
+                .from('list_items')
+                .select('*')
+                .eq('list_id', currentListId)
+                .order('id', { ascending: true });
+
+            if (error) {
+                console.error("Error loading shopping list:", error);
+                alert("Error loading list: " + error.message);
+                return;
+            }
+
+            shoppingListToBuy.innerHTML = '';
+
+            if (items.length === 0) {
+                shoppingListToBuy.innerHTML = '<p class="empty-list-message">Your list is empty for now!</p>';
+                return;
+            }
+
+            const categories = getCategories();
+            const categoryOrder = JSON.parse(localStorage.getItem('category_order')) || categories;
+
+            const groupedItems = {};
+            // Initialize groupedItems with all known categories in order
+            categoryOrder.forEach(cat => groupedItems[cat] = []);
+            // Add any existing categories from items that might not be in the current user_categories
+            items.forEach(item => {
+                const category = item.category || 'Autres'; // Default to "Others" if category is null/empty
+                if (!groupedItems[category]) {
+                    groupedItems[category] = [];
+                }
             });
 
-            const suggestionNameSpan = document.createElement('span');
-            suggestionNameSpan.className = 'name';
-            suggestionNameSpan.textContent = suggestion.name;
-            suggestionInfoDiv.appendChild(suggestionNameSpan);
+            items.forEach(item => {
+                const category = item.category || 'Autres'; // Default to "Others"
+                groupedItems[category].push(item);
+            });
 
-            if (suggestion.category) {
-                const suggestionCategorySpan = document.createElement('span');
-                suggestionCategorySpan.className = 'category';
-                suggestionCategorySpan.textContent = `(${suggestion.category})`;
-                suggestionInfoDiv.appendChild(suggestionCategorySpan);
+            // Render items for each category
+            categoryOrder.forEach(category => {
+                if (groupedItems[category] && groupedItems[category].length > 0) {
+                    const categoryHeader = document.createElement('h3');
+                    categoryHeader.textContent = category;
+                    shoppingListToBuy.appendChild(categoryHeader);
+                    // Sort items alphabetically within each category
+                    groupedItems[category].sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
+                    groupedItems[category].forEach(item => renderListItem(item, shoppingListToBuy));
+                }
+            });
+            // Handle items with categories not in the current category order (e.g., deleted categories)
+            Object.keys(groupedItems).filter(cat => !categoryOrder.includes(cat)).forEach(category => {
+                if (groupedItems[category].length > 0) {
+                    const categoryHeader = document.createElement('h3');
+                    categoryHeader.textContent = category;
+                    shoppingListToBuy.appendChild(categoryHeader);
+                    // Sort items alphabetically within this category
+                    groupedItems[category].sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
+                    groupedItems[category].forEach(item => renderListItem(item, shoppingListToBuy));
+                }
+            });
+
+        } catch (error) {
+            console.error("Unexpected error loading shopping list:", error);
+            alert("An unexpected error occurred: " + error.message);
+        }
+    }
+
+    function renderListItem(item, listElement) {
+        const li = document.createElement('li');
+        li.dataset.id = item.id;
+
+        // Check if it's a shopping list item (has quantity controls) or a buy later item
+        const isShoppingListItem = listElement === shoppingListToBuy;
+
+        if (isShoppingListItem) {
+            // Container for quantity and item name
+            const quantityAndNameContainer = document.createElement('div');
+            quantityAndNameContainer.style.display = 'flex'; // Use flexbox
+            quantityAndNameContainer.style.alignItems = 'center';
+            quantityAndNameContainer.style.flexGrow = '1'; // Allow it to take available space
+
+            const quantityControl = document.createElement('div');
+            quantityControl.classList.add('quantity-control');
+            quantityControl.style.display = 'flex'; // Ensure buttons are inline
+            quantityControl.style.alignItems = 'center';
+
+            const minusBtn = document.createElement('button');
+            minusBtn.textContent = '-';
+            minusBtn.onclick = () => {
+                const currentDisplayedQuantity = parseInt(quantitySpan.textContent.replace('x', ''));
+                updateItemQuantity(item.id, currentDisplayedQuantity - 1);
+            };
+            quantityControl.appendChild(minusBtn);
+
+            const quantitySpan = document.createElement('span');
+            quantitySpan.textContent = `${item.quantity}x`; // Add 'x' here
+            quantityControl.appendChild(quantitySpan);
+
+            const plusBtn = document.createElement('button');
+            plusBtn.textContent = '+';
+            plusBtn.onclick = () => {
+                const currentDisplayedQuantity = parseInt(quantitySpan.textContent.replace('x', ''));
+                updateItemQuantity(item.id, currentDisplayedQuantity + 1);
+            };
+            quantityControl.appendChild(plusBtn);
+
+            // Add quantity controls to the container
+            quantityAndNameContainer.appendChild(quantityControl);
+
+            // Create a span for the item name, applying the new CSS class
+            const itemName = document.createElement('span');
+            itemName.classList.add('item-name'); /* Add this class */
+            itemName.textContent = item.name;
+            quantityAndNameContainer.appendChild(itemName);
+
+            li.appendChild(quantityAndNameContainer); // Add the main container
+        } else { // For buyLaterList
+            const itemName = document.createElement('span');
+            itemName.classList.add('item-name'); /* Add this class for consistency */
+            itemName.textContent = item.name;
+            itemName.style.paddingLeft = '1.2rem'; /* Match li padding-left */
+            itemName.style.flexGrow = '1'; /* Allow name to take available space */
+            li.appendChild(itemName);
+        }
+
+
+        const itemActions = document.createElement('div');
+        itemActions.classList.add('item-actions');
+
+        const removeBtn = document.createElement('button');
+        removeBtn.classList.add('remove-btn');
+        // Use Font Awesome cross icon directly
+        removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+        if (isShoppingListItem) {
+            removeBtn.onclick = () => deleteItem(item.id);
+        } else { // For buyLaterList
+            removeBtn.onclick = () => deleteBuyLaterItem(item.id);
+        }
+
+        itemActions.appendChild(removeBtn);
+
+        li.appendChild(itemActions);
+        listElement.appendChild(li);
+    }
+
+
+    function setupRealtimeListener() {
+      if (window.supabaseChannel) {
+          supabase.removeChannel(window.supabaseChannel);
+      }
+
+      if (!currentListId) {
+          console.warn("No currentListId defined, cannot set up Realtime listener.");
+          return;
+      }
+
+      window.supabaseChannel = supabase.channel(`list_items_changes:${currentListId}`)
+        .on('postgres_changes', {
+            event: 'UPDATE', // Listen specifically for UPDATEs
+            schema: 'public',
+            table: 'list_items',
+            filter: `list_id=eq.${currentListId}`
+        }, (payload) => {
+            console.log('Realtime UPDATE detected:', payload);
+            const updatedItem = payload.new;
+            const listItemElement = document.querySelector(`#shoppingListToBuy li[data-id="${updatedItem.id}"]`);
+            if (listItemElement) {
+                const quantitySpan = listItemElement.querySelector('.quantity-control span');
+                if (quantitySpan) {
+                    quantitySpan.textContent = `${updatedItem.quantity}x`;
+                }
+            } else {
+                // Fallback: If for some reason the element is not found, reload the whole list
+                loadShoppingList();
             }
-            li.appendChild(suggestionInfoDiv);
+        })
+        .on('postgres_changes', {
+            event: 'INSERT', // Listen specifically for INSERTs
+            schema: 'public',
+            table: 'list_items',
+            filter: `list_id=eq.${currentListId}`
+        }, (payload) => {
+            console.log('Realtime INSERT detected:', payload);
+            loadShoppingList(); // Reload entire list to handle adding in the correct category/order
+        })
+        .on('postgres_changes', {
+            event: 'DELETE', // Listen specifically for DELETEs
+            schema: 'public',
+            table: 'list_items',
+            filter: `list_id=eq.${currentListId}`
+        }, (payload) => {
+            console.log('Realtime DELETE detected:', payload);
+            // The optimistic UI update for delete is handled in deleteItem() itself.
+            // This reload is a fallback for other clients or robustness.
+            loadShoppingList(); // Reload list to re-evaluate empty message and categories
+        })
+        .subscribe();
 
-            // Actions part (delete button)
-            const suggestionActionsDiv = document.createElement('div');
-            suggestionActionsDiv.className = 'suggestion-actions';
+        // Listener for changes on buy_later_items
+        window.supabaseBuyLaterChannel = supabase.channel(`buy_later_items_changes:${currentListId}`)
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'buy_later_items',
+                filter: `list_id=eq.${currentListId}`
+            }, (payload) => {
+                console.log('Buy Later Realtime change detected:', payload);
+                // Always reload if a change is detected, regardless of section visibility
+                loadBuyLaterList();
+            })
+            .subscribe();
 
-            const removeBtn = document.createElement('button');
-            removeBtn.className = 'remove-btn';
-            removeBtn.innerHTML = '<i class="fas fa-times"></i>';
-            removeBtn.addEventListener('click', () => removeSuggestion(suggestion.id));
-            suggestionActionsDiv.appendChild(removeBtn);
+      console.log(`Realtime listeners configured for list_id: ${currentListId}`);
+    }
 
-            li.appendChild(suggestionActionsDiv);
+
+    // --- Buy Later Functions ---
+    async function addBuyLaterItem(name) {
+        if (!currentListId) {
+            alert("Please load or create a list first.");
+            return;
+        }
+        try {
+            const { data, error } = await supabase
+                .from('buy_later_items')
+                .insert([{ name, list_id: currentListId }]);
+            if (error) {
+                console.error("Error adding 'Buy Later' item:", error);
+                alert("Error adding 'Buy Later' item: " + error.message);
+            } else {
+                newBuyLaterItemInput.value = '';
+                // loadBuyLaterList is handled by the Realtime listener
+            }
+        } catch (error) {
+            console.error("Unexpected error adding 'Buy Later' item:", error);
+            alert("An unexpected error occurred: " + error.message);
+        }
+    }
+
+    async function deleteBuyLaterItem(itemId) {
+        if (!currentListId) return;
+
+        // Optimistic UI update: Remove the item from the DOM immediately
+        const listItemElement = document.querySelector(`#buyLaterList li[data-id="${itemId}"]`);
+        if (listItemElement) {
+            listItemElement.remove();
+        }
+
+        try {
+            const { data, error } = await supabase
+                .from('buy_later_items')
+                .delete()
+                .eq('id', itemId);
+            if (error) {
+                console.error("Error deleting 'Buy Later' item:", error);
+                alert("Error deleting 'Buy Later' item: " + error.message);
+                loadBuyLaterList(); // Reload if there's an error
+            } else {
+                // loadBuyLaterList is handled by the Realtime listener
+            }
+        } catch (error) {
+            console.error("Unexpected error deleting 'Buy Later' item:", error);
+            alert("An unexpected error occurred: " + error.message);
+            loadBuyLaterList(); // Reload in case of unexpected JS error
+        }
+    }
+
+    async function loadBuyLaterList() {
+        if (!currentListId) {
+            buyLaterList.innerHTML = '<p class="empty-list-message">Your "Buy Later" list is empty!</p>';
+            return;
+        }
+        updateSupabaseHeaders(currentShareCode);
+
+        try {
+            const { data: items, error } = await supabase
+                .from('buy_later_items')
+                .select('*')
+                .eq('list_id', currentListId)
+                .order('id', { ascending: true });
+
+            if (error) {
+                console.error("Error loading 'Buy Later' list:", error);
+                alert("Error loading 'Buy Later' list: " + error.message);
+                return;
+            }
+
+            buyLaterList.innerHTML = '';
+            if (items.length === 0) {
+                buyLaterList.innerHTML = '<p class="empty-list-message">Your "Buy Later" list is empty!</p>';
+                return;
+            }
+            // Sort buy later items alphabetically
+            items.sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
+
+            items.forEach(item => {
+                // Use the shared renderListItem function
+                renderListItem(item, buyLaterList);
+            });
+        } catch (error) {
+            console.error("Unexpected error loading 'Buy Later' list:", error);
+            alert("An unexpected error occurred: " + error.message);
+        }
+    }
+
+    // --- Suggestions Functions (LOCAL STORAGE) ---
+    function getSuggestions() {
+        return JSON.parse(localStorage.getItem('shopping_suggestions') || '[]');
+    }
+
+    function saveSuggestions(suggestions) {
+        localStorage.setItem('shopping_suggestions', JSON.stringify(suggestions));
+    }
+
+    async function addSuggestion(name, category) {
+        if (!name.trim() || !category) {
+            alert("Please enter a name and choose a category for the suggestion.");
+            return;
+        }
+        const suggestions = getSuggestions();
+        // Check for existing suggestion
+        if (suggestions.some(sug => sug.name.toLowerCase() === name.trim().toLowerCase() && sug.category.toLowerCase() === category.toLowerCase())) {
+            alert(`"${name.trim()}" is already a suggestion in category "${category}"!`);
+            return;
+        }
+
+        const newSuggestion = {
+            id: Date.now(), // Simple unique ID
+            name: name.trim(),
+            category: category
+        };
+        suggestions.push(newSuggestion);
+        saveSuggestions(suggestions);
+        newSuggestionInput.value = '';
+        loadSuggestions(); // Refresh the list
+    }
+
+    async function deleteSuggestion(suggestionId) {
+        // Optimistic UI update: Remove the item from the DOM immediately
+        const listItemElement = document.querySelector(`#suggestionList li[data-id="${suggestionId}"]`);
+        if (listItemElement) {
+            listItemElement.remove();
+        }
+
+        let suggestions = getSuggestions();
+        suggestions = suggestions.filter(sug => sug.id !== suggestionId);
+        saveSuggestions(suggestions);
+        // No need to call loadSuggestions() here, as the item is optimistically removed.
+        // If there's an error (which is less likely with local storage), it would need manual refresh.
+    }
+
+    async function loadSuggestions() {
+        let suggestions = getSuggestions();
+        suggestionList.innerHTML = '';
+
+        const selectedCategory = suggestionCategoryFilter.value;
+        let filteredSuggestions = selectedCategory === 'all'
+            ? suggestions
+            : suggestions.filter(sug => sug.category === selectedCategory);
+
+        if (filteredSuggestions.length === 0) {
+            suggestionList.innerHTML = '<p class="empty-list-message">No suggestions for this category. Add some below!</p>';
+            return;
+        }
+
+        // Sort suggestions alphabetically by name
+        filteredSuggestions.sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
+
+        filteredSuggestions.forEach(suggestion => {
+            const li = document.createElement('li');
+            li.dataset.id = suggestion.id; // Store ID for deletion
+            li.innerHTML = `
+                <div class="suggestion-info">
+                    <span class="name">${suggestion.name}</span>
+                    <span class="category">${suggestion.category}</span>
+                </div>
+                <div class="suggestion-actions">
+                    <button class="remove-btn" data-id="${suggestion.id}"><i class="fas fa-times"></i></button>
+                </div>
+            `;
+            // Add event listener to add to shopping list when clicking the item text
+            li.querySelector('.suggestion-info').addEventListener('click', () => {
+                addItem(suggestion.name, 1, suggestion.category, currentListId);
+            });
+            // Add event listener for the "✖" button
+            li.querySelector('.remove-btn').addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent li click from firing
+                if (confirm(`Delete suggestion "${suggestion.name}" (${suggestion.category})?`)) {
+                    deleteSuggestion(suggestion.id);
+                }
+            });
             suggestionList.appendChild(li);
         });
     }
 
-    function renderCategories() {
-        categoryList.innerHTML = '';
-        const categories = getCategories();
-        if (categories.length === 0) {
-            categoryList.innerHTML = '<p class="empty-list-message">No categories yet. Add some!</p>';
+    // --- Category Functions ---
+    async function addCategory(categoryName) {
+        if (!categoryName.trim()) {
+            alert('Please enter a category name.');
             return;
         }
-        categories.forEach(category => {
+        let categories = getCategories();
+        if (categories.some(cat => cat.toLowerCase() === categoryName.trim().toLowerCase())) {
+            alert(`Category "${categoryName.trim()}" already exists!`);
+            return;
+        }
+        categories.push(categoryName.trim());
+        saveCategories(categories);
+        newCategoryInput.value = '';
+        updateAllCategorySelects();
+        updateSuggestionCategoryFilter();
+        renderCategories();
+        loadCategoryOrder(); // Refresh the order list
+    }
+
+    function deleteCategory(categoryName) {
+        if (!confirm(`Are you sure you want to delete category "${categoryName}"? This will also delete all linked suggestions.`)) {
+            return;
+        }
+        let categories = getCategories();
+        categories = categories.filter(cat => cat !== categoryName);
+        saveCategories(categories);
+
+        // Remove from local category order if present
+        let currentOrder = JSON.parse(localStorage.getItem('category_order')) || [];
+        currentOrder = currentOrder.filter(cat => cat !== categoryName);
+        localStorage.setItem('category_order', JSON.stringify(currentOrder));
+
+        // Logic to remove suggestions linked to this category from local storage
+        let suggestions = getSuggestions();
+        suggestions = suggestions.filter(sug => sug.category !== categoryName);
+        saveSuggestions(suggestions);
+        loadSuggestions(); // Refresh suggestions list
+
+        updateAllCategorySelects();
+        updateSuggestionCategoryFilter();
+        renderCategories();
+        loadCategoryOrder();
+        loadShoppingList(); // Reload shopping list to reflect category changes
+    }
+
+    function renderCategories() {
+        const categories = getCategories();
+        categoryList.innerHTML = '';
+        if (categories.length === 0) {
+            categoryList.innerHTML = '<p class="empty-list-message">No categories defined. Add some above!</p>';
+            return;
+        }
+        // Sort categories alphabetically for "Your Categories" list
+        const sortedCategories = [...categories].sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
+
+        sortedCategories.forEach(category => {
             const li = document.createElement('li');
             li.textContent = category;
-
-            const removeBtn = document.createElement('button');
-            removeBtn.className = 'remove-btn';
-            removeBtn.innerHTML = '<i class="fas fa-times"></i>';
-            removeBtn.addEventListener('click', () => removeCategory(category));
-
-            li.appendChild(removeBtn);
+            li.innerHTML = `
+                <span>${category}</span>
+                <button class="remove-btn" data-category="${category}"><i class="fas fa-times"></i></button>
+            `;
+            // FIX: Use closest('.remove-btn') to get the button element that has the data-category attribute
+            li.querySelector('.remove-btn').addEventListener('click', (e) => {
+                deleteCategory(e.target.closest('.remove-btn').dataset.category);
+            });
             categoryList.appendChild(li);
         });
     }
 
-    let draggedCategory = null;
+    let draggingCategoryElement = null;
 
     function loadCategoryOrder() {
-        categoryOrderList.innerHTML = '';
-        const categories = getCategories();
-        const categoryOrder = JSON.parse(localStorage.getItem('category_order')) || [];
+        let categories = getCategories(); // Toutes les catégories actuelles
+        let savedOrder = JSON.parse(localStorage.getItem('category_order')) || []; // Ordre sauvegardé depuis localStorage
 
-        // Ensure all current categories are in the order list, adding new ones at the end if necessary
-        const finalOrder = [...new Set([...categoryOrder, ...categories])];
-        localStorage.setItem('category_order', JSON.stringify(finalOrder));
+        // Filtrer les catégories de savedOrder qui n'existent plus dans getCategories()
+        // Et s'assurer que les nouvelles catégories de getCategories() sont ajoutées à la fin de l'ordre
+        let newOrder = savedOrder.filter(cat => categories.includes(cat));
 
-        if (finalOrder.length === 0) {
-            document.querySelector('#categories p.empty-list-message').style.display = 'block';
+        categories.forEach(cat => {
+            if (!newOrder.includes(cat)) {
+                newOrder.push(cat); // Ajouter les nouvelles catégories à la fin
+            }
+        });
+
+        // Si après réconciliation, l'ordre a changé, le sauvegarder
+        if (JSON.stringify(savedOrder) !== JSON.stringify(newOrder)) {
+            localStorage.setItem('category_order', JSON.stringify(newOrder));
+        }
+        // Utiliser l'ordre réconcilié et potentiellement sauvegardé pour le rendu
+        let currentOrder = newOrder;
+
+        categoryOrderList.innerHTML = ''; // Effacer la liste d'abord
+
+        if (currentOrder.length === 0) {
+            categoryOrderList.innerHTML = '<p class="empty-list-message">Faites glisser les catégories pour définir leur ordre.</p>'; // Conserver le texte original
             return;
-        } else {
-            document.querySelector('#categories p.empty-list-message').style.display = 'none';
         }
 
-        finalOrder.forEach(category => {
+        currentOrder.forEach(category => {
             const li = document.createElement('li');
             li.textContent = category;
-            li.setAttribute('draggable', 'true');
-            li.classList.add('draggable'); // Add a class for drag-and-drop
-
-            const dragHandle = document.createElement('span');
-            dragHandle.className = 'drag-handle';
-            dragHandle.innerHTML = '<i class="fas fa-grip-lines"></i>'; // Font Awesome grip lines icon
-            li.prepend(dragHandle); // Add handle at the beginning of the li
-
+            li.draggable = true;
+            li.classList.add('category-item'); // Ajouter une classe pour le style/la sélection
+            li.innerHTML = `<i class="fas fa-grip-vertical drag-handle"></i><span>${category}</span>`;
             categoryOrderList.appendChild(li);
-        });
-
-        // Add drag and drop event listeners
-        categoryOrderList.querySelectorAll('.draggable').forEach(item => {
-            item.addEventListener('dragstart', (e) => {
-                draggedCategory = item;
-                setTimeout(() => item.classList.add('dragging'), 0);
-                e.dataTransfer.effectAllowed = 'move';
-                e.dataTransfer.setData('text/plain', item.textContent.trim()); // Store the category name
-            });
-
-            item.addEventListener('dragend', () => {
-                draggedCategory.classList.remove('dragging');
-                draggedCategory = null;
-            });
-
-            item.addEventListener('dragover', (e) => {
-                e.preventDefault(); // Allow drop
-                const draggingItem = document.querySelector('.dragging');
-                if (draggingItem && draggingItem !== item) {
-                    const bounding = item.getBoundingClientRect();
-                    const offset = bounding.y + (bounding.height / 2);
-                    if (e.clientY > offset) {
-                        categoryOrderList.insertBefore(draggingItem, item.nextSibling);
-                    } else {
-                        categoryOrderList.insertBefore(draggingItem, item);
-                    }
-                }
-            });
-        });
-
-        categoryOrderList.addEventListener('drop', (e) => {
-            e.preventDefault();
-            const newOrder = Array.from(categoryOrderList.children).map(li => li.textContent.trim());
-            saveCategoryOrder(newOrder);
-        });
-
-        categoryOrderList.addEventListener('dragleave', (e) => {
-            // This can be tricky. Often not needed.
-            // console.log('dragleave', e.target);
         });
     }
 
-    function renderSavedMessages(messages) {
+    function saveCategoryOrder() {
+        const items = Array.from(categoryOrderList.children);
+        const newOrder = items.map(li => li.querySelector('span').textContent.trim()); // Get text from span
+        localStorage.setItem('category_order', JSON.stringify(newOrder));
+        console.log('Category order saved!'); // Log instead of alert
+        loadShoppingList(); // Reload shopping list to apply new order
+    }
+
+    // --- Notification Push Functions (MODAL & SENDING) ---
+
+    // Function to send the push notification via the Edge Function
+    async function sendPushNotification(message) {
+        if (!currentListId) {
+            alert("Please load or create a list first before sending notifications.");
+            return;
+        }
+        if (!message || message.trim() === '') {
+            alert("Please enter a message to send.");
+            return;
+        }
+
+        try {
+            console.log(`Attempting to send push notification for list: ${currentListId}, message: "${message}"`);
+            const { data, error } = await supabase.functions.invoke('send-push-notification', {
+                body: {
+                    listId: currentListId,
+                    message: message // Now sending a generic message
+                }
+            });
+
+            if (error) {
+                console.error("Error invoking send-push-notification Edge Function:", error);
+                if (error.message.includes('No subscriptions found for list')) {
+                    alert(`Notification sent to list ${currentShareCode} (no push subscriptions found).`);
+                } else {
+                    alert("Failed to send push notification: " + error.message);
+                }
+            } else {
+                console.log("Push notification Edge Function invoked successfully:", data);
+                alert("Notification sent successfully!");
+                closeNotificationModal(); // Close modal on success
+                notificationMessageInput.value = ''; // Clear message input
+            }
+        } catch (error) {
+            console.error("Unexpected error calling send-push-notification:", error);
+            alert("An unexpected error occurred while sending notification: " + error.message);
+        }
+    }
+
+    function openNotificationModal() {
+        if (!currentListId) {
+            alert("Please load or create a list first to send notifications.");
+            showSection('settings');
+            return;
+        }
+        notificationModal.classList.add('visible');
+        notificationMessageInput.value = ''; // Clear input when opening
+        renderSavedMessages(); // Load saved messages
+    }
+
+    function closeNotificationModal() {
+        notificationModal.classList.remove('visible');
+    }
+
+    // Saved Messages management (Local Storage)
+    function getSavedMessages() {
+        return JSON.parse(localStorage.getItem('saved_notification_messages')) || [];
+    }
+
+    function saveSavedMessages(messages) {
+        localStorage.setItem('saved_notification_messages', JSON.stringify(messages));
+    }
+
+    function addSavedMessage(message) {
+        if (!message || message.trim() === '') {
+            alert('Cannot save an empty message.');
+            return;
+        }
+        let messages = getSavedMessages();
+        // Check for duplicates
+        if (messages.some(m => m.text.trim() === message.trim())) {
+            alert('This message is already saved!');
+            return;
+        }
+        messages.push({ id: Date.now(), text: message.trim() });
+        saveSavedMessages(messages);
+        renderSavedMessages();
+        alert('Message saved!');
+    }
+
+    function deleteSavedMessage(id) {
+        if (!confirm('Are you sure you want to delete this saved message?')) {
+            return;
+        }
+        let messages = getSavedMessages();
+        messages = messages.filter(m => m.id !== id);
+        saveSavedMessages(messages);
+        renderSavedMessages();
+    }
+
+    function renderSavedMessages() {
+        const messages = getSavedMessages();
         savedMessagesList.innerHTML = '';
         if (messages.length === 0) {
             emptySavedMessages.style.display = 'block';
-            return;
         } else {
             emptySavedMessages.style.display = 'none';
         }
 
-        messages.forEach(message => {
+        messages.forEach(msg => {
             const li = document.createElement('li');
-            li.setAttribute('data-id', message.id);
-
-            const messageTextSpan = document.createElement('span');
-            messageTextSpan.className = 'message-text';
-            messageTextSpan.textContent = message.message_text;
-            messageTextSpan.addEventListener('click', () => {
-                notificationMessageInput.value = message.message_text;
-                closeNotificationModal();
+            li.dataset.id = msg.id;
+            li.innerHTML = `
+                <span class="message-text">${msg.text}</span>
+                <div class="message-actions">
+                    <button class="remove-btn" data-id="${msg.id}"><i class="fas fa-times"></i></button>
+                </div>
+            `;
+            li.querySelector('.message-text').addEventListener('click', () => {
+                notificationMessageInput.value = msg.text; // Populate input with saved message
             });
-
-            const messageActionsDiv = document.createElement('div');
-            messageActionsDiv.className = 'message-actions';
-
-            const removeBtn = document.createElement('button');
-            removeBtn.className = 'remove-btn';
-            removeBtn.innerHTML = '<i class="fas fa-times"></i>';
-            removeBtn.addEventListener('click', () => removeSavedMessage(message.id));
-
-            messageActionsDiv.appendChild(removeBtn);
-            li.appendChild(messageTextSpan);
-            li.appendChild(messageActionsDiv);
+            li.querySelector('.remove-btn').addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent li click
+                deleteSavedMessage(msg.id);
+            });
             savedMessagesList.appendChild(li);
         });
     }
 
-
     // --- Event Listeners ---
+    addItemBtn.addEventListener('click', () => {
+        const itemName = newItemInput.value;
+        const quantity = parseInt(newQuantityInput.value) || 1;
+        const category = newCategorySelect.value;
+        addItem(itemName, quantity, category, currentListId);
+    });
+
+    addBuyLaterItemBtn.addEventListener('click', () => {
+        addBuyLaterItem(newBuyLaterItemInput.value);
+    });
+
+    addSuggestionBtn.addEventListener('click', () => {
+        addSuggestion(newSuggestionInput.value, newSuggestionCategorySelect.value);
+    });
+
+    addCategoryBtn.addEventListener('click', () => {
+        addCategory(newCategoryInput.value);
+    });
+
+    // Navigation button event listeners
+    navShoppingList.addEventListener('click', () => showSection('shoppingList'));
+    navBuyLater.addEventListener('click', () => showSection('buyLater'));
+    navSuggestions.addEventListener('click', () => showSection('suggestions'));
+    navCategories.addEventListener('click', () => showSection('categories'));
+    navSettings.addEventListener('click', () => showSection('settings'));
+
+    // Toggle nav button listener
+    toggleNavBtn.addEventListener('click', toggleBottomNav);
+
+    // Filter suggestions by category
+    suggestionCategoryFilter.addEventListener('change', loadSuggestions);
+
+    // Share code functionality
+    loadShareCodeBtn.addEventListener('click', async () => {
+        const code = shareCodeInput.value.trim().toUpperCase();
+        if (code) {
+            await getOrCreateListByShareCode(code);
+            if (currentListId) { // If successfully connected/created
+                showSection('shoppingList'); // Go to shopping list
+            }
+        } else {
+            alert("Please enter a share code.");
+        }
+    });
+
+    changeShareCodeBtn.addEventListener('click', () => {
+        if (confirm("Are you sure you want to change lists / disconnect? This will clear the current share code from this device.")) {
+            localStorage.removeItem('lastShareCode');
+            currentListId = null;
+            currentShareCode = null;
+            if (window.supabaseChannel) {
+                supabase.removeChannel(window.supabaseChannel);
+                window.supabaseChannel = null;
+            }
+            if (window.supabaseBuyLaterChannel) {
+                supabase.removeChannel(window.supabaseBuyLaterChannel);
+                window.supabaseBuyLaterChannel = null;
+            }
+
+            // Clear current list display
+            shoppingListToBuy.innerHTML = '<p class="empty-list-message">Your list is empty for now!</p>';
+            buyLaterList.innerHTML = '<p class="empty-list-message">Your "Buy Later" list is empty!</p>';
+            suggestionList.innerHTML = '<p class="empty-list-message">No suggestions available at the moment.</p>';
+            categoryList.innerHTML = '<p class="empty-list-message">No categories defined. Add some above!</p>';
+            categoryOrderList.innerHTML = '<p class="empty-list-message">Drag categories to set their order.</p>';
+
+            shareCodeInput.value = generateShareCode(); // Suggest a new code
+            activeShareCodeSpan.textContent = 'N/A';
+            showSection('settings');
+            alert("You have been disconnected. Please enter a new share code or create one.");
+        }
+    });
+
+    // Scroll to form when title is clicked
+    shoppingListTitle.addEventListener('click', (event) => { // Added event parameter
+        event.preventDefault(); // Prevent default browser behavior (e.g., text selection)
+        // Check if the click was on the bell icon itself, if so, don't scroll
+        if (event.target.id === 'notificationBell') {
+            return;
+        }
+        event.stopPropagation(); // Stop event propagation to avoid other actions
+        document.body.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    });
+
+    suggestionsTitle.addEventListener('click', (event) => { // Added event parameter
+        event.preventDefault(); // Prevent default browser behavior (e.g., text selection)
+        event.stopPropagation(); // Stop event propagation to avoid other actions
+        document.body.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    });
+
+
+    // Drag and Drop for Category Order
+    categoryOrderList.addEventListener('dragstart', (e) => {
+        draggingCategoryElement = e.target;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', draggingCategoryElement.innerHTML);
+        e.target.classList.add('dragging');
+    });
+
+    categoryOrderList.addEventListener('dragover', (e) => {
+        e.preventDefault(); // Necessary to allow dropping
+        e.dataTransfer.dropEffect = 'move';
+        const target = e.target.closest('li.category-item');
+        if (target && target !== draggingCategoryElement) {
+            const rect = target.getBoundingClientRect();
+            const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > .5;
+            categoryOrderList.insertBefore(draggingCategoryElement, next && target.nextSibling || target);
+        }
+    });
+
+    categoryOrderList.addEventListener('dragend', (e) => {
+        e.target.classList.remove('dragging');
+        draggingCategoryElement = null;
+        saveCategoryOrder(); // Save order immediately after drag
+    });
+
+    // Notification modal event listeners
+    notificationBell.addEventListener('click', openNotificationModal);
+    closeNotificationModalBtn.addEventListener('click', closeNotificationModal);
+    // Close modal if clicking outside content
+    notificationModal.addEventListener('click', (e) => {
+        if (e.target === notificationModal) {
+            closeNotificationModal();
+        }
+    });
+    sendNotificationBtn.addEventListener('click', () => {
+        sendPushNotification(notificationMessageInput.value);
+    });
+    saveMessageBtn.addEventListener('click', () => {
+        addSavedMessage(notificationMessageInput.value);
+    });
+
+
+    // --- Initialization on page load ---
     window.addEventListener('load', async () => {
-      // Initialize Supabase client here to ensure it's ready
-      try {
-          supabase = supabase_js.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-          console.log("Supabase client initialized.");
-      } catch (e) {
-          console.error("Failed to initialize Supabase client:", e);
+      // Initialize Supabase client
+      if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
+          supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          console.log("Supabase client initialized successfully.");
+      } else {
+          console.error("Error: Supabase 'createClient' function is not defined or the Supabase library is not loaded correctly.");
           alert("Loading error: Supabase library could not be initialized. Check your internet connection or configuration.");
           return;
       }
@@ -1693,134 +2070,6 @@
           alert("Startup error: Could not initialize database connection. Check your connection.");
           return;
       }
-    });
-
-    addItemBtn.addEventListener('click', () => {
-      const itemName = newItemInput.value.trim();
-      const quantity = parseInt(newQuantityInput.value, 10) || 1;
-      const category = newCategorySelect.value;
-      addItemToList(itemName, quantity, category);
-    });
-
-    newItemInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        addItemBtn.click();
-      }
-    });
-
-    // Navigation event listeners
-    navShoppingList.addEventListener('click', () => showSection('shoppingList'));
-    navBuyLater.addEventListener('click', () => showSection('buyLater'));
-    navSuggestions.addEventListener('click', () => showSection('suggestions'));
-    navCategories.addEventListener('click', () => showSection('categories'));
-    navSettings.addEventListener('click', () => showSection('settings'));
-
-    // Toggle navigation button
-    toggleNavBtn.addEventListener('click', toggleBottomNav);
-
-    // Initial padding adjustment
-    window.addEventListener('resize', updateBodyPadding);
-
-
-    // Buy Later section event listeners
-    addBuyLaterItemBtn.addEventListener('click', () => {
-        const itemName = newBuyLaterItemInput.value.trim();
-        addBuyLaterItem(itemName);
-    });
-
-    newBuyLaterItemInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            addBuyLaterItemBtn.click();
-        }
-    });
-
-    // Suggestions section event listeners
-    addSuggestionBtn.addEventListener('click', () => {
-        const suggestionName = newSuggestionInput.value.trim();
-        const category = newSuggestionCategorySelect.value;
-        addSuggestion(suggestionName, category);
-    });
-
-    newSuggestionInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            addSuggestionBtn.click();
-        }
-    });
-
-    suggestionCategoryFilter.addEventListener('change', loadSuggestions);
-
-
-    // Categories section event listeners
-    addCategoryBtn.addEventListener('click', () => {
-        const categoryName = newCategoryInput.value.trim();
-        addCategory(categoryName);
-    });
-
-    newCategoryInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            addCategoryBtn.click();
-        }
-    });
-
-
-    // Settings section event listeners
-    loadShareCodeBtn.addEventListener('click', async () => {
-      const shareCode = shareCodeInput.value.trim();
-      if (shareCode) {
-        await getOrCreateListByShareCode(shareCode);
-        showSection('shoppingList'); // Switch to shopping list after loading/creating
-      } else {
-        alert('Please enter a share code.');
-      }
-    });
-
-    changeShareCodeBtn.addEventListener('click', () => {
-      if (confirm('Are you sure you want to change the active list? You will need to enter a new code or create a new list.')) {
-        currentListId = null;
-        currentShareCode = null;
-        localStorage.removeItem('lastShareCode');
-        activeShareCodeSpan.textContent = 'N/A';
-        shareCodeInput.value = generateShareCode(); // Suggest new code
-        showSection('settings'); // Stay in settings
-        loadShoppingList(); // Clear current list display
-        updateSupabaseHeaders(null); // Clear share code header
-      }
-    });
-
-    // --- Notification Modal Logic ---
-    function openNotificationModal() {
-        notificationModal.classList.add('visible');
-        loadSavedMessages(); // Load messages when modal opens
-    }
-
-    function closeNotificationModal() {
-        notificationModal.classList.remove('visible');
-    }
-
-    notificationBell.addEventListener('click', openNotificationModal);
-    closeNotificationModalBtn.addEventListener('click', closeNotificationModal);
-    notificationModal.addEventListener('click', (e) => {
-        if (e.target === notificationModal) {
-            closeNotificationModal();
-        }
-    });
-
-    saveMessageBtn.addEventListener('click', () => {
-        const message = notificationMessageInput.value.trim();
-        saveMessage(message);
-    });
-
-    sendNotificationBtn.addEventListener('click', () => {
-        const message = notificationMessageInput.value.trim();
-        sendPushNotification(message);
-    });
-
-    // Scroll to top for h1/h2 clicks
-    shoppingListTitle.addEventListener('click', () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-    suggestionsTitle.addEventListener('click', () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   </script>
 </body>
