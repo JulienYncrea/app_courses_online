@@ -909,14 +909,18 @@
         const p256dh = arrayBufferToBase64(subscription.getKey('p256dh'));
         const auth = arrayBufferToBase64(subscription.getKey('auth'));
 
+        // Convertir l'objet de souscription complet en chaîne JSON
+        const subscriptionJson = JSON.stringify(subscription);
+
         const { data, error } = await supabase
-            .from('subscriptions')
+            .from('subscriptions') // Assurez-vous que le nom de la table est correct ici
             .insert([
                 {
                     list_id: currentListId,
                     endpoint: subscription.endpoint,
                     p256dh: p256dh,
-                    auth: auth
+                    auth: auth,
+                    subscription_json: subscriptionJson // <-- AJOUTEZ CETTE LIGNE
                 }
             ])
             .select();
@@ -926,6 +930,7 @@
             alert('Erreur lors de l\'enregistrement de l\'abonnement : ' + error.message);
         } else {
             console.log('Subscription saved:', data);
+            alert('Abonnement aux notifications réussi !'); // Confirmation de succès
         }
     }
 
