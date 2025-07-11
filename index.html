@@ -891,36 +891,41 @@
         }
         return outputArray;
     }
-
+    function arrayBufferToBase64(buffer) {
+        return btoa(String.fromCharCode.apply(null, new Uint8Array(buffer)))
+            .replace(/\+/g, '-')
+            .replace(/\//g, '_')
+            .replace(/=+$/, '');
+        }
     // Fonction pour sauvegarder l'abonnement dans la base de données Supabase
     async function saveSubscriptionToDatabase(subscription) {
         if (!currentListId) {
             console.error('No currentListId defined. Cannot save subscription.');
-            alert('Erreur : Aucune liste active sélectionnée. Impossible de sauvegarder l\'abonnement.');
+            alert('Veuillez charger ou créer une liste dans les paramètres avant de vous abonner aux notifications.');
             return;
         }
 
-        const { endpoint, expirationTime, keys } = subscription;
-        const { p256dh, auth } = keys;
-
-        const subscriptionData = {
-            list_id: currentListId,
-            endpoint: endpoint,
-            p256dh: p256dh,
-            auth: auth,
-            // Stockez l'objet d'abonnement complet en JSON pour faciliter la réutilisation
-            subscription_json: subscription.toJSON() 
-        };
+        // Récupérer p256dh et auth via getKey() et les convertir en Base64
+        const p256dh = arrayBufferToBase64(subscription.getKey('p256dh'));
+        const auth = arrayBufferToBase64(subscription.getKey('auth'));
 
         const { data, error } = await supabase
-            .from('push_subscriptions')
-            .upsert([subscriptionData], { onConflict: 'endpoint' }); // Utilise upsert pour mettre à jour si l'endpoint existe déjà
+            .from('subscriptions')
+            .insert([
+                {
+                    list_id: currentListId,
+                    endpoint: subscription.endpoint,
+                    p256dh: p256dh,
+                    auth: auth
+                }
+            ])
+            .select();
 
         if (error) {
-            console.error('Error saving subscription to DB:', error);
-            throw new Error('Could not save push subscription to database.');
+            console.error('Error saving subscription:', error.message);
+            alert('Erreur lors de l\'enregistrement de l\'abonnement : ' + error.message);
         } else {
-            console.log('Push subscription saved/updated in DB:', data);
+            console.log('Subscription saved:', data);
         }
     }
 
