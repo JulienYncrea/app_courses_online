@@ -847,7 +847,8 @@
                 // await saveSubscriptionToDatabase(existingSubscription);
                 return; // Sortez de la fonction car l'utilisateur est déjà abonné.
             }
-            
+            const VAPID_PUBLIC_KEY = "BC-_2wv1Kjqb8G575LuS7iuvgBSPrUqE7MIo-8aY8ro9CqMBVMMvJU0na3CAyO-EjJEnNG4nAiAiBxphlNcik_YYo";
+
             const convertedVapidKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
 
             console.log('Attempting to subscribe user...');
