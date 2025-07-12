@@ -1,9 +1,12 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import webpush from 'https://esm.sh/web-push@3.6.7'; // Importez la bibliothèque web-push
+// La ligne 'import webpush from ...' a été déplacée plus bas
+// Ce console.log devrait s'afficher si la fonction démarre avant un crash majeur
+console.log('--- Fonction Edge send-push-notification Démarrée ---');
 serve(async (req)=>{
   // Gérer les requêtes OPTIONS (pré-vérification CORS)
   if (req.method === 'OPTIONS') {
+    console.log('Requête OPTIONS reçue. Envoi de la réponse CORS 204.');
     return new Response(null, {
       status: 204,
       headers: {
@@ -14,7 +17,7 @@ serve(async (req)=>{
       }
     });
   }
-  // En-têtes CORS pour les réponses réussies
+  // En-têtes CORS pour les réponses réussies (pour les requêtes POST réelles)
   const corsHeaders = {
     'Access-Control-Allow-Origin': 'https://julienyncrea.github.io',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -23,6 +26,7 @@ serve(async (req)=>{
   try {
     const { listId, message } = await req.json();
     if (!listId || !message) {
+      console.error('Erreur: listId ou message manquant dans le corps de la requête.');
       return new Response(JSON.stringify({
         error: 'Missing listId or message in request body'
       }), {
@@ -38,11 +42,10 @@ serve(async (req)=>{
         persistSession: false
       }
     });
-    // Récupérer toutes les souscriptions de notifications pour cette listId
-    // Utilisation de 'subscriptions' car le nom de la table a été renommé
-    const { data: subscriptions, error: subscriptionsError } = await supabaseClient.from('subscriptions').select('subscription_json').eq('list_id', listId);
+    const { data: subscriptions, error: subscriptionsError } = await supabaseClient.from('subscriptions') // Assurez-vous que le nom de votre table est 'subscriptions'
+    .select('subscription_json').eq('list_id', listId);
     if (subscriptionsError) {
-      console.error('Error fetching subscriptions:', subscriptionsError);
+      console.error('Erreur lors de la récupération des souscriptions:', subscriptionsError);
       return new Response(JSON.stringify({
         error: 'Error fetching subscriptions'
       }), {
@@ -54,7 +57,7 @@ serve(async (req)=>{
       });
     }
     if (!subscriptions || subscriptions.length === 0) {
-      console.log(`No subscriptions found for list: ${listId}`);
+      console.log(`Aucune souscription trouvée pour la liste: ${listId}`);
       return new Response(JSON.stringify({
         message: 'No subscriptions found for this list.'
       }), {
@@ -65,23 +68,24 @@ serve(async (req)=>{
         status: 200
       });
     }
-    // Préparer les données pour la notification
     const notificationPayload = {
       title: 'Shopping List Update',
       body: message,
       url: `https://julienyncrea.github.io/app_courses_online/`
     };
-    // --- DÉBUT DES CORRECTIONS POUR LES CLÉS VAPID ---
-    // Récupérer les clés VAPID depuis les variables d'environnement par leurs NOMS
-    const VAPID_SUBJECT_ENV = 'mailto: <julien.minviel@gmail.com>'; // Votre sujet VAPID (peut aussi être une variable d'environnement)
+    // --- DÉPLACE L'IMPORTATION DE WEB-PUSH ICI, À L'INTÉRIEUR DU BLOC try ---
+    // Cela garantit que web-push n'est importé qu'au moment d'une requête réelle,
+    // ce qui peut aider si le crash se produit pendant le chargement initial du module.
+    const webpush = await import('npm:web-push@3.6.7');
+    const VAPID_SUBJECT_ENV = 'mailto:julien.minviel@gmail.com'; // Vous pouvez aussi en faire une variable d'environnement
     const VAPID_PUBLIC_KEY_ENV = Deno.env.get('VAPID_PUBLIC_KEY');
     const VAPID_PRIVATE_KEY_ENV = Deno.env.get('VAPID_PRIVATE_KEY');
-
-    console.log('VAPID_PUBLIC_KEY_ENV:', VAPID_PUBLIC_KEY_ENV);
-    console.log('VAPID_PRIVATE_KEY_ENV:', VAPID_PRIVATE_KEY_ENV ? '*** (présente)' : '*** (ABSENTE ou VIDE)');
-    // Vérification que les variables d'environnement VAPID sont bien définies
+    // *** CES LOGS SONT CRUCIAUX POUR VÉRIFIER LES VALEURS ***
+    console.log('VAPID_PUBLIC_KEY_ENV (dans try):', VAPID_PUBLIC_KEY_ENV);
+    console.log('VAPID_PRIVATE_KEY_ENV (dans try):', VAPID_PRIVATE_KEY_ENV ? '*** (présente)' : '*** (ABSENTE ou VIDE)');
+    // Si la clé privée est très longue, évitez de l'afficher en entier pour la sécurité.
     if (!VAPID_PUBLIC_KEY_ENV || !VAPID_PRIVATE_KEY_ENV) {
-      console.error('Missing VAPID_PUBLIC_KEY or VAPID_PRIVATE_KEY environment variables.');
+      console.error('Erreur: VAPID_PUBLIC_KEY ou VAPID_PRIVATE_KEY manquante dans les variables d\'environnement.');
       return new Response(JSON.stringify({
         error: 'Server VAPID keys not configured. Check Edge Function environment variables.'
       }), {
@@ -89,12 +93,10 @@ serve(async (req)=>{
           ...corsHeaders,
           'Content-Type': 'application/json'
         },
-        status: 500 // Internal Server Error car la configuration du serveur est incomplète
+        status: 500
       });
     }
-    // Configurer web-push avec les valeurs des variables d'environnement
     webpush.setVapidDetails(VAPID_SUBJECT_ENV, VAPID_PUBLIC_KEY_ENV, VAPID_PRIVATE_KEY_ENV);
-    // --- FIN DES CORRECTIONS POUR LES CLÉS VAPID ---
     let successCount = 0;
     let failureCount = 0;
     for (const sub of subscriptions){
@@ -103,13 +105,9 @@ serve(async (req)=>{
         await webpush.sendNotification(subscription, JSON.stringify(notificationPayload));
         successCount++;
       } catch (e) {
-        console.error('Error sending push notification to a subscriber:', e);
+        console.error('Erreur lors de l\'envoi de la notification push à un abonné:', e);
         failureCount++;
-      // Si l'abonnement n'est plus valide (e.g., NotRegistered), vous pouvez envisager de le supprimer de la base de données ici
-      // if (e.statusCode === 410 || e.statusCode === 404) {
-      //   console.log('Subscription expired or not found, deleting from DB.');
-      //   await supabaseClient.from('subscriptions').delete().eq('endpoint', subscription.endpoint);
-      // }
+      // Vous pourriez ajouter ici une logique pour supprimer les abonnements invalides de la DB
       }
     }
     return new Response(JSON.stringify({
@@ -122,7 +120,9 @@ serve(async (req)=>{
       status: 200
     });
   } catch (error) {
-    console.error('Unhandled error in Edge Function:', error.message);
+    console.error('Erreur non gérée dans la fonction Edge:', error.message);
+    // Log des détails complets de l'erreur pour un diagnostic approfondi
+    console.error('Détails de l\'erreur non gérée:', error);
     return new Response(JSON.stringify({
       error: error.message
     }), {
