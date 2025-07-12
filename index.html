@@ -745,7 +745,7 @@
     const SUPABASE_URL = 'https://cepqcretnxfhjbvdukkk.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlcHFjcmV0bnhmaGpidmR1a2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2MTc1NDcsImV4cCI6MjA2NjE5MzU0N30.H56IGRN14FpfHXQVODKsmTbqMEe27_gcCcgGLphEEOU'; // Replace with your actual anon key
     let supabase = null; // Will be initialized in window.addEventListener('load')
-    const VAPID_PUBLIC_KEY = "BC-_2wv1Kjqb8G575LuS7iuvgBSPrUqE7MIo-8aY8ro9CqMBVMMvJU0na3CAyO-EjJEnNG4nAiAiBxphlNcik_YYo";
+    const VAPID_PUBLIC_KEY = "BC-_2wv1Kjqb8G575LuS7iuvgBSPrUqE7MIo-8aY8ro9CqMBVMMvJU0na3CAyO-EjJEnNG4nAiBxphlNcik_YYo";
 
     // --- Global Variables ---
     let currentShareCode = null;
@@ -847,8 +847,8 @@
                 // await saveSubscriptionToDatabase(existingSubscription);
                 return; // Sortez de la fonction car l'utilisateur est déjà abonné.
             }
-            const VAPID_PUBLIC_KEY = "BC-_2wv1Kjqb8G575LuS7iuvgBSPrUqE7MIo-8aY8ro9CqMBVMMvJU0na3CAyO-EjJEnNG4nAiAiBxphlNcik_YYo";
-
+            const VAPID_PUBLIC_KEY = "BC-_2wv1Kjqb8G575LuS7iuvgBSPrUqE7MIo-8aY8ro9CqMBVMMvJU0na3CAyO-EjJEnNG4nAiBxphlNcik_YYo";
+                                        
             const convertedVapidKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
 
             console.log('Attempting to subscribe user...');
