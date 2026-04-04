@@ -743,7 +743,7 @@
     // --- Supabase Configuration ---
     const SUPABASE_URL = 'https://kbrstkkzfsjysohjdsqh.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImticnN0a2t6ZnNqeXNvaGpkc3FoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMTE0NzIsImV4cCI6MjA5MDg4NzQ3Mn0._WST41JUmDD_N0rApXzmc-EB7D1hgJTJ80lXnRl5VB8'; // Replace with your actual anon key
-    let supabase = null; // Will be initialized in window.addEventListener('load')
+    let supabaseClient = null; // Will be initialized in window.addEventListener('load')
     const VAPID_PUBLIC_KEY = "BC-_2wv1Kjqb8G575LuS7iuvgBSPrUqE7MIo-8aY8ro9CqMBVMMvJU0na3CAyO-EjJEnNG4nAiBxphlNcik_YYo";
 
     // --- Global Variables ---
@@ -906,7 +906,7 @@
         // Convertir l'objet de souscription complet en chaîne JSON
         const subscriptionJson = JSON.stringify(subscription);
 
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('subscriptions') // Assurez-vous que le nom de la table est correct ici
             .insert([
                 {
@@ -1011,8 +1011,8 @@
 
 
     function updateSupabaseHeaders(shareCode) {
-        if (supabase && supabase.rest) {
-            supabase.rest.headers['X-Share-Code'] = shareCode;
+        if (supabaseClient && supabaseClient.rest) {
+            supabaseClient.rest.headers['X-Share-Code'] = shareCode;
             console.log(`Supabase headers updated with X-Share-Code: ${shareCode}`);
         } else {
             console.warn("Supabase client not initialized or rest client not ready, cannot update headers.");
@@ -1070,7 +1070,7 @@
         updateSupabaseHeaders(code);
 
         try {
-            const { data: lists, error: selectError } = await supabase
+            const { data: lists, error: selectError } = await supabaseClient
                 .from('lists')
                 .select('id, name')
                 .eq('share_code', code);
@@ -1098,7 +1098,7 @@
                     name: `List ${code}`,
                     share_code: code
                 };
-                const { data: createdList, error: insertError } = await supabase
+                const { data: createdList, error: insertError } = await supabaseClient
                     .from('lists')
                     .insert([newList])
                     .select('id, name');
@@ -1153,7 +1153,7 @@
         }
 
         try {
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('list_items')
                 .update({ quantity: newQuantity })
                 .eq('id', itemId);
@@ -1177,7 +1177,7 @@
             return;
         }
         try {
-            const { data: existingItems, error: selectError } = await supabase
+            const { data: existingItems, error: selectError } = await supabaseClient
                 .from('list_items')
                 .select('id, quantity')
                 .eq('list_id', listId)
@@ -1190,7 +1190,7 @@
                 // Item exists, update its quantity
                 const existingItem = existingItems[0];
                 const newQuantity = existingItem.quantity + quantity;
-                const { data, error: updateError } = await supabase
+                const { data, error: updateError } = await supabaseClient
                     .from('list_items')
                     .update({ quantity: newQuantity })
                     .eq('id', existingItem.id);
@@ -1198,7 +1198,7 @@
                 console.log(`Quantity of item '${name}' updated to ${newQuantity}.`);
             } else {
                 // Item does not exist, insert new
-                const { data, error: insertError } = await supabase
+                const { data, error: insertError } = await supabaseClient
                     .from('list_items')
                     .insert([{ name, quantity, category, list_id: listId }]);
                 if (insertError) throw insertError;
@@ -1236,7 +1236,7 @@
         }
 
         try {
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('list_items')
                 .delete()
                 .eq('id', itemId);
@@ -1264,7 +1264,7 @@
         updateSupabaseHeaders(currentShareCode);
 
         try {
-            const { data: items, error } = await supabase
+            const { data: items, error } = await supabaseClient
                 .from('list_items')
                 .select('*')
                 .eq('list_id', currentListId)
@@ -1412,7 +1412,7 @@
 
     function setupRealtimeListener() {
       if (window.supabaseChannel) {
-          supabase.removeChannel(window.supabaseChannel);
+          supabaseClient.removeChannel(window.supabaseChannel);
       }
 
       if (!currentListId) {
@@ -1420,7 +1420,7 @@
           return;
       }
 
-      window.supabaseChannel = supabase.channel(`list_items_changes:${currentListId}`)
+      window.supabaseChannel = supabaseClient.channel(`list_items_changes:${currentListId}`)
         .on('postgres_changes', {
             event: 'UPDATE', // Listen specifically for UPDATEs
             schema: 'public',
@@ -1463,7 +1463,7 @@
         .subscribe();
 
         // Listener for changes on buy_later_items
-        window.supabaseBuyLaterChannel = supabase.channel(`buy_later_items_changes:${currentListId}`)
+        window.supabaseBuyLaterChannel = supabaseClient.channel(`buy_later_items_changes:${currentListId}`)
             .on('postgres_changes', {
                 event: '*',
                 schema: 'public',
@@ -1487,7 +1487,7 @@
             return;
         }
         try {
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('buy_later_items')
                 .insert([{ name, list_id: currentListId }]);
             if (error) {
@@ -1513,7 +1513,7 @@
         }
 
         try {
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('buy_later_items')
                 .delete()
                 .eq('id', itemId);
@@ -1539,7 +1539,7 @@
         updateSupabaseHeaders(currentShareCode);
 
         try {
-            const { data: items, error } = await supabase
+            const { data: items, error } = await supabaseClient
                 .from('buy_later_items')
                 .select('*')
                 .eq('list_id', currentListId)
@@ -1793,7 +1793,7 @@
 
         try {
             console.log(`Attempting to send push notification for list: ${currentListId}, message: "${message}"`);
-            const { data, error } = await supabase.functions.invoke('send-push-notification', {
+            const { data, error } = await supabaseClient.functions.invoke('send-push-notification', {
                 body: {
                     listId: currentListId,
                     message: message // Now sending a generic message
@@ -1951,11 +1951,11 @@
             currentListId = null;
             currentShareCode = null;
             if (window.supabaseChannel) {
-                supabase.removeChannel(window.supabaseChannel);
+                supabaseClient.removeChannel(window.supabaseChannel);
                 window.supabaseChannel = null;
             }
             if (window.supabaseBuyLaterChannel) {
-                supabase.removeChannel(window.supabaseBuyLaterChannel);
+                supabaseClient.removeChannel(window.supabaseBuyLaterChannel);
                 window.supabaseBuyLaterChannel = null;
             }
 
@@ -2036,8 +2036,8 @@
     // --- Initialization on page load ---
     window.addEventListener('load', async () => {
       // Initialize Supabase client
-      if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
-          supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      if (typeof window.supabaseClient !== 'undefined' && typeof window.supabaseClient.createClient === 'function') {
+          supabaseClient = window.supabaseClient.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
           console.log("Supabase client initialized successfully.");
       } else {
           console.error("Error: Supabase 'createClient' function is not defined or the Supabase library is not loaded correctly.");
@@ -2049,13 +2049,13 @@
       const maxAttempts = 20;
       const delayMs = 50;
 
-      while (!supabase.rest && attempts < maxAttempts) {
+      while (!supabaseClient.rest && attempts < maxAttempts) {
           console.log(`Waiting for supabase.rest (attempt ${attempts + 1}/${maxAttempts})...`);
           await new Promise(resolve => setTimeout(resolve, delayMs));
           attempts++;
       }
 
-      if (supabase.rest) {
+      if (supabaseClient.rest) {
           console.log("supabase.rest is now ready!");
           // Initialize categories if not present in local storage
           if (!localStorage.getItem('user_categories')) {
