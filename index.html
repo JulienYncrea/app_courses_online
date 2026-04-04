@@ -2036,8 +2036,8 @@
     // --- Initialization on page load ---
     window.addEventListener('load', async () => {
       // Initialize Supabase client
-      if (typeof window.supabaseClient !== 'undefined' && typeof window.supabaseClient.createClient === 'function') {
-          supabaseClient = window.supabaseClient.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
+          supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
           console.log("Supabase client initialized successfully.");
       } else {
           console.error("Error: Supabase 'createClient' function is not defined or the Supabase library is not loaded correctly.");
