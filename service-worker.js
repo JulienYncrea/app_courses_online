@@ -43,6 +43,9 @@ self.addEventListener('activate', (event) => {
 // 4. Stratégie de Fetch : Network First (Priorité au réseau)
 // C'est ce qui règle ton problème de "vieille version"
 self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET' || event.request.url.includes('supabase.co')) {
+    return; // Laisse la requête passer normalement sans toucher au cache
+  }
   event.respondWith(
     fetch(event.request)
       .then((response) => {
