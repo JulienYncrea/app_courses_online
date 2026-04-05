@@ -213,6 +213,43 @@
       font-weight: bold;
       color: #FFD700; /* Active color from index copy's navigation buttons */
     }
+    .category-header-clickable {
+        display: flex !important;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+    }
+
+    /* Rotation de l'icône */
+    .category-header-clickable.collapsed i {
+        transform: rotate(-90deg);
+    }
+
+    /* Masquer tous les <li> qui suivent un <h3> ayant la classe 'collapsed' 
+    jusqu'au prochain <h3> */
+    h3.collapsed + li, 
+    h3.collapsed ~ li:not(h3 ~ h3 ~ li) {
+        display: none !important;
+    }
+    .toggle-icon {
+    transition: transform 0.3s ease;
+    font-size: 0.9rem;
+    }
+
+    /* Classe pour cacher les items sous une catégorie repliée */
+    .collapsed-content {
+        display: none !important;
+    }
+    /* Version simple pour masquer les éléments frères jusqu'au prochain titre */
+    h3.collapsed + li,
+    h3.collapsed + li ~ li {
+        display: none;
+    }
+    h3.collapsed + li ~ h3,
+    h3.collapsed + li ~ h3 ~ li {
+        display: flex; /* Réaffiche dès qu'on croise un autre h3 */
+    }
+
     .toggle-nav-button {
       position: absolute;
       top: -45px;
@@ -310,6 +347,83 @@
         overflow: hidden;
         text-overflow: ellipsis;
         flex-shrink: 0; /* Prevent category from shrinking much initially */
+    }
+    #suggestionList {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: flex-start;
+        margin-top: 1rem;
+        list-style: none;
+        padding: 0;
+    }
+    .delete-mode-active #suggestionList li {
+        border: 2px solid #FF6347;
+        background-color: #fff0f0;
+    }
+
+    .suggestion-actions {
+        display: none; /* Caché par défaut */
+        margin-left: 10px;
+    }
+
+    .delete-mode-active .suggestion-actions {
+        display: block; /* Visible uniquement en mode suppression */
+    }
+    .filter-controls {
+    display: flex;
+    align-items: flex-end; /* Aligne le bouton sur la ligne du select */
+    gap: 8px;
+    margin-bottom: 15px;
+    }
+
+    .filter-controls div {
+        flex-grow: 1;
+    }
+
+    /* Style du bouton Corbeille */
+    #toggleDeleteModeBtn {
+        width: 45px !important;
+        height: 42px;
+        margin-top: 0 !important;
+        padding: 0 !important;
+        background: #ff4d4d !important; /* Rouge */
+        border-radius: 8px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.2rem;
+    }
+    #toggleDeleteModeBtn.active {
+        background-color: #333 !important;
+        animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    #suggestionList li {
+        background: #F8F8FF;
+        border: 1px solid #DDA0DD;
+        color: #6A057F;
+        border-radius: 20px; /* Style pilule/tag */
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 14px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        font-size: 0.9rem;
+    }
+
+    #suggestionList li .category {
+        font-size: 0.7rem;
+        opacity: 0.6;
+        margin-left: 8px;
+        border-left: 1px solid #DDA0DD;
+        padding-left: 8px;
     }
     /* Adjusted styles for the item name within #shoppingListToBuy and #buyLaterList */
     #shoppingListToBuy li .item-name, #buyLaterList li .item-name {
@@ -655,10 +769,15 @@
   </div>
 
   <div id="suggestions" class="section-container section hidden">
-    <h2 id="suggestionsTitle">Suggestions 💡</h2>
+    <h2 id="suggestionsTitle">Ideas 💡</h2>
     <div class="filter-controls">
-        <label for="suggestionCategoryFilter">Filter by category:</label>
-        <select id="suggestionCategoryFilter"></select>
+        <div>
+            <label for="suggestionCategoryFilter">Filter by category:</label>
+            <select id="suggestionCategoryFilter"></select>
+        </div>
+        <button id="toggleDeleteModeBtn" title="Mode suppression">
+            <i class="fas fa-trash-can"></i>
+        </button>
     </div>
     <ul id="suggestionList"></ul>
     <div id="addSuggestionForm" class="add-form">
@@ -884,6 +1003,22 @@
             outputArray[i] = rawData.charCodeAt(i);
         }
         return outputArray;
+    }
+    let isDeleteMode = false;
+
+    function toggleDeleteMode() {
+        isDeleteMode = !isDeleteMode;
+        const btn = document.getElementById('toggleDeleteModeBtn');
+        
+        if (isDeleteMode) {
+            btn.style.backgroundColor = "#ff4d4d"; // Bouton devient rouge
+            btn.style.color = "white";
+        } else {
+            btn.style.backgroundColor = ""; // Retour au style d'origine
+            btn.style.color = "";
+        }
+        
+        loadSuggestions(); // Relance le rendu avec la nouvelle couleur de liste
     }
     function arrayBufferToBase64(buffer) {
         return btoa(String.fromCharCode.apply(null, new Uint8Array(buffer)))
@@ -1129,45 +1264,36 @@
         if (!currentListId) return;
 
         const listItemElement = document.querySelector(`#shoppingListToBuy li[data-id="${itemId}"]`);
-        const quantitySpan = listItemElement ? listItemElement.querySelector('.quantity-control span') : null;
+        if (!listItemElement) return;
 
-        // Update the data-quantity attribute on the <li>
-        if (listItemElement) {
-            listItemElement.dataset.quantity = newQuantity.toString(); // Update the "source of truth" value
-        }
+        const quantitySpan = listItemElement.querySelector('.quantity-control span');
 
-        // Optimistically update the textual display (can be slower or ignored if loadShoppingList is called)
-        if (quantitySpan) {
-            quantitySpan.textContent = `${newQuantity}x`;
-        }
-
+        // 1. GESTION DE LA SUPPRESSION
         if (newQuantity <= 0) {
-            try {
-                await deleteItem(itemId);
-            } catch (error) {
-                console.error("Error deleting item:", error);
-                alert("Error deleting item: " + error.message);
-                loadShoppingList(); // Reload to ensure consistency if error
-            }
+            await deleteItem(itemId);
             return;
         }
 
+        // 2. MISE À JOUR OPTIMISTE (Immédiate pour l'utilisateur)
+        isUpdatingLocally = true; // On dit au listener Realtime de nous laisser tranquille
+        quantitySpan.textContent = `${newQuantity}x`;
+        listItemElement.dataset.quantity = newQuantity;
+
         try {
-            const { data, error } = await supabaseClient
+            const { error } = await supabaseClient
                 .from('list_items')
                 .update({ quantity: newQuantity })
                 .eq('id', itemId);
-            if (error) {
-                console.error("Error updating quantity:", error);
-                alert("Error updating item quantity: " + error.message);
-                loadShoppingList(); // <-- ESSENTIAL: Reload list in case of error
-            } else {
-                // loadShoppingList(); // Realtime listener handles this
-            }
+
+            if (error) throw error;
+
         } catch (error) {
-            console.error("Unexpected error updating quantity:", error);
-            alert("An unexpected error occurred: " + error.message);
-            loadShoppingList(); // Reload list in case of unexpected error
+            console.error("Erreur de mise à jour:", error);
+            // En cas de vraie erreur réseau, on rafraîchit pour remettre la bonne valeur
+            loadShoppingList();
+        } finally {
+            // On redonne la main au Realtime après un petit délai pour laisser le réseau respirer
+            setTimeout(() => { isUpdatingLocally = false; }, 1000);
         }
     }
 
@@ -1229,10 +1355,22 @@
     async function deleteItem(itemId) {
         if (!currentListId) return;
 
-        // Optimistic UI update: Remove the item from the DOM immediately
         const listItemElement = document.querySelector(`#shoppingListToBuy li[data-id="${itemId}"]`);
+        
         if (listItemElement) {
-            listItemElement.remove();
+            // --- NOUVELLE LOGIQUE DE SUPPRESSION DE CATÉGORIE VIDE ---
+            const previousElement = listItemElement.previousElementSibling;
+            const nextElement = listItemElement.nextElementSibling;
+
+            // Si l'élément précédent est un H3 et le suivant est soit un autre H3 soit rien (fin de liste)
+            // Cela signifie que c'était le dernier item de cette catégorie.
+            if (previousElement && previousElement.tagName === 'H3') {
+                if (!nextElement || nextElement.tagName === 'H3') {
+                    previousElement.remove(); // On supprime le titre de la catégorie
+                }
+            }
+            
+            listItemElement.remove(); // On supprime l'item
         }
 
         try {
@@ -1240,19 +1378,19 @@
                 .from('list_items')
                 .delete()
                 .eq('id', itemId);
+                
             if (error) {
                 console.error("Error deleting item:", error);
-                alert("Error deleting item: " + error.message);
-                loadShoppingList(); // If there's an error, reload the list to re-add the item if deletion failed on backend
+                loadShoppingList(); // En cas d'erreur, on recharge pour restaurer l'affichage
             } else {
-                console.log(`Item with ID ${itemId} deleted.`);
-                // No need to call loadShoppingList() here, as the Realtime listener for 'DELETE' will handle updates for other clients.
-                // For the current client, the item is already optimistically removed.
+                // Optionnel : Si la liste est maintenant totalement vide, on affiche le message "liste vide"
+                if (shoppingListToBuy.children.length === 0) {
+                    shoppingListToBuy.innerHTML = '<p class="empty-list-message">Your list is empty for now!</p>';
+                }
             }
         } catch (error) {
-            console.error("Unexpected error during deletion:", error);
-            alert("An unexpected error occurred: " + error.message);
-            loadShoppingList(); // Reload in case of unexpected JS error
+            console.error("Unexpected error:", error);
+            loadShoppingList();
         }
     }
 
@@ -1278,7 +1416,7 @@
 
             shoppingListToBuy.innerHTML = '';
 
-            if (items.length === 0) {
+            if (!items || items.length === 0) {
                 shoppingListToBuy.innerHTML = '<p class="empty-list-message">Your list is empty for now!</p>';
                 return;
             }
@@ -1286,42 +1424,47 @@
             const categories = getCategories();
             const categoryOrder = JSON.parse(localStorage.getItem('category_order')) || categories;
 
+            // 1. Groupage des items
             const groupedItems = {};
-            // Initialize groupedItems with all known categories in order
-            categoryOrder.forEach(cat => groupedItems[cat] = []);
-            // Add any existing categories from items that might not be in the current user_categories
             items.forEach(item => {
-                const category = item.category || 'Autres'; // Default to "Others" if category is null/empty
-                if (!groupedItems[category]) {
-                    groupedItems[category] = [];
-                }
-            });
-
-            items.forEach(item => {
-                const category = item.category || 'Autres'; // Default to "Others"
+                const category = item.category || 'Autres';
+                if (!groupedItems[category]) groupedItems[category] = [];
                 groupedItems[category].push(item);
             });
 
-            // Render items for each category
-            categoryOrder.forEach(category => {
-                if (groupedItems[category] && groupedItems[category].length > 0) {
-                    const categoryHeader = document.createElement('h3');
-                    categoryHeader.textContent = category;
-                    shoppingListToBuy.appendChild(categoryHeader);
-                    // Sort items alphabetically within each category
-                    groupedItems[category].sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
-                    groupedItems[category].forEach(item => renderListItem(item, shoppingListToBuy));
-                }
+            // 2. Déterminer l'ordre des catégories
+            const allCategoriesInItems = Object.keys(groupedItems);
+            const finalOrder = [...categoryOrder];
+            allCategoriesInItems.forEach(cat => {
+                if (!finalOrder.includes(cat)) finalOrder.push(cat);
             });
-            // Handle items with categories not in the current category order (e.g., deleted categories)
-            Object.keys(groupedItems).filter(cat => !categoryOrder.includes(cat)).forEach(category => {
-                if (groupedItems[category].length > 0) {
-                    const categoryHeader = document.createElement('h3');
-                    categoryHeader.textContent = category;
-                    shoppingListToBuy.appendChild(categoryHeader);
-                    // Sort items alphabetically within this category
-                    groupedItems[category].sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
-                    groupedItems[category].forEach(item => renderListItem(item, shoppingListToBuy));
+
+            // 3. Rendu (La correction est ici : on vérifie groupedItems[cat])
+            finalOrder.forEach(cat => {
+                // On ne crée l'en-tête QUE si la catégorie contient au moins 1 item
+                if (groupedItems[cat] && groupedItems[cat].length > 0) {
+                    
+                    const h3 = document.createElement('h3');
+                    h3.className = 'category-header-clickable';
+                    h3.innerHTML = `<span>${cat}</span> <i class="fas fa-chevron-down toggle-icon"></i>`;
+                    
+                    h3.onclick = () => {
+                        const icon = h3.querySelector('.toggle-icon');
+                        const isCollapsed = h3.classList.toggle('collapsed');
+                        icon.style.transform = isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)';
+                        
+                        let nextEl = h3.nextElementSibling;
+                        while (nextEl && nextEl.tagName !== 'H3') {
+                            nextEl.classList.toggle('collapsed-content');
+                            nextEl = nextEl.nextElementSibling;
+                        }
+                    };
+
+                    shoppingListToBuy.appendChild(h3);
+                    
+                    // Tri et rendu des items
+                    groupedItems[cat].sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
+                    groupedItems[cat].forEach(item => renderListItem(item, shoppingListToBuy));
                 }
             });
 
@@ -1427,6 +1570,7 @@
             table: 'list_items',
             filter: `list_id=eq.${currentListId}`
         }, (payload) => {
+            if (isUpdatingLocally) return;
             console.log('Realtime UPDATE detected:', payload);
             const updatedItem = payload.new;
             const listItemElement = document.querySelector(`#shoppingListToBuy li[data-id="${updatedItem.id}"]`);
@@ -1617,49 +1761,45 @@
 
     async function loadSuggestions() {
         let suggestions = getSuggestions();
-        suggestionList.innerHTML = '';
+        const list = document.getElementById('suggestionList');
+        const container = document.getElementById('suggestions'); // Le parent
+        
+        list.innerHTML = '';
 
+        // Gestion de la classe visuelle sur le conteneur
+        if (isDeleteMode) {
+            container.classList.add('delete-mode-active');
+        } else {
+            container.classList.remove('delete-mode-active');
+        }
+
+        // Filtrage (code existant)
         const selectedCategory = suggestionCategoryFilter.value;
         let filteredSuggestions = selectedCategory === 'all'
             ? suggestions
             : suggestions.filter(sug => sug.category === selectedCategory);
 
-        if (filteredSuggestions.length === 0) {
-            suggestionList.innerHTML = '<p class="empty-list-message">No suggestions for this category. Add some below!</p>';
-            return;
-        }
-
-        // Sort suggestions alphabetically by name
-        filteredSuggestions.sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
-
-        filteredSuggestions.forEach(suggestion => {
+        filteredSuggestions.forEach(sug => {
             const li = document.createElement('li');
-            li.dataset.id = suggestion.id; // Store ID for deletion
-            li.innerHTML = `
-                <div class="suggestion-info">
-                    <span class="name">${suggestion.name}</span>
-                    <span class="category">${suggestion.category}</span>
-                </div>
-                <div class="suggestion-actions">
-                    <button class="remove-btn" data-id="${suggestion.id}"><i class="fas fa-times"></i></button>
-                </div>
-            `;
-            // Add event listener to add to shopping list when clicking the item text
-            li.querySelector('.suggestion-info').addEventListener('click', () => {
-                addItem(suggestion.name, 1, suggestion.category, currentListId);
-            });
-            // Add event listener for the "✖" button
-            li.querySelector('.remove-btn').addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevent li click from firing
-                if (confirm(`Delete suggestion "${suggestion.name}" (${suggestion.category})?`)) {
-                    deleteSuggestion(suggestion.id);
+            li.innerHTML = `<span class="name">${sug.name}</span>`;
+            
+            li.onclick = () => {
+                if (isDeleteMode) {
+                    deleteSuggestion(sug.id);
+                    loadSuggestions(); 
+                } else {
+                    // ACTION D'AJOUT CLASSIQUE
+                    addItem(sug.name, 1, sug.category, currentListId);
+                    // Feedback visuel rapide d'ajout
+                    li.style.transform = "scale(0.95)";
+                    setTimeout(() => li.style.transform = "scale(1)", 100);
                 }
-            });
-            suggestionList.appendChild(li);
+            };
+
+            list.appendChild(li);
         });
     }
-
-    // --- Category Functions ---
+    document.getElementById('toggleDeleteModeBtn').addEventListener('click', toggleDeleteMode);
     async function addCategory(categoryName) {
         if (!categoryName.trim()) {
             alert('Please enter a category name.');
