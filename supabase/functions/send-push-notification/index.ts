@@ -1,9 +1,9 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import webpush from 'https://esm.sh/web-push@3.6.7'; // Import standard plus stable
+import webpush from 'https://esm.sh/web-push@3.6.7';
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*', // Plus flexible pour le debug
+  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
@@ -13,24 +13,41 @@ serve(async (req) => {
     return new Response('ok', { headers: corsHeaders });
   }
 
+  console.log("--- NOUVELLE REQUÊTE REÇUE ---");
+
   try {
-    const { listId, message } = await req.json();
+    const body = await req.json();
+    const { listId, message } = body;
+    
+    console.log("1. Payload reçu du client :", JSON.stringify(body));
+    console.log("   - listId recherché :", `[${listId}]`);
 
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // 1. Récupération des abonnements
+    // DEBUG : On regarde d'abord TOUT ce qu'il y a dans la table pour comparer les IDs
+    const { data: debugAll } = await supabaseClient.from('subscriptions').select('list_id');
+    console.log("2. Debug Base de données :");
+    console.log("   - IDs actuellement en base :", debugAll?.map(d => `[${d.list_id}]`));
+
+    // 1. Récupération des abonnements filtrés
     const { data: subscriptions, error: dbError } = await supabaseClient
       .from('subscriptions')
       .select('subscription_json')
       .eq('list_id', listId);
 
-    if (dbError) throw new Error(`Erreur DB: ${dbError.message}`);
+    if (dbError) {
+      console.error("3. Erreur SQL :", dbError.message);
+      throw new Error(`Erreur DB: ${dbError.message}`);
+    }
+
+    console.log(`4. Résultat du filtre : ${subscriptions?.length || 0} abonné(s) trouvé(s).`);
 
     if (!subscriptions || subscriptions.length === 0) {
-      return new Response(JSON.stringify({ message: 'No subs' }), {
+      console.log("   -> Aucun match. Vérifiez si list_id est bien un UUID en base.");
+      return new Response(JSON.stringify({ sent: 0, message: 'No subs found' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       });
@@ -44,19 +61,22 @@ serve(async (req) => {
     };
 
     if (!VAPID_KEYS.publicKey || !VAPID_KEYS.privateKey) {
-      throw new Error('Clés VAPID manquantes dans les secrets Supabase');
+      console.error("5. Erreur : Clés VAPID manquantes dans les Secrets.");
+      throw new Error('Clés VAPID manquantes');
     }
 
     webpush.setVapidDetails(VAPID_KEYS.subject, VAPID_KEYS.publicKey, VAPID_KEYS.privateKey);
 
     // 3. Envoi des notifications
+    console.log("6. Début de l'envoi push...");
     const results = await Promise.all(
-      subscriptions.map(async (sub) => {
+      subscriptions.map(async (sub, index) => {
         try {
-          // PROTECTION : On ne parse que si c'est une string
           const subscription = typeof sub.subscription_json === 'string' 
             ? JSON.parse(sub.subscription_json) 
             : sub.subscription_json;
+
+          console.log(`   - Envoi au sub #${index} (Endpoint: ${subscription.endpoint?.substring(0, 30)}...)`);
 
           await webpush.sendNotification(
             subscription,
@@ -64,13 +84,14 @@ serve(async (req) => {
           );
           return { success: true };
         } catch (e) {
-          console.error('Erreur envoi unité:', e.message);
+          console.error(`   - Échec envoi sub #${index} :`, e.message);
           return { success: false };
         }
       })
     );
 
     const successCount = results.filter(r => r.success).length;
+    console.log(`7. Fin de traitement. Succès : ${successCount}`);
 
     return new Response(JSON.stringify({ sent: successCount }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -78,10 +99,10 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('CRASH FONCTION:', error.message);
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error('CRASH GLOBAL FONCTION:', error.message);
+    return new Response(JSON.stringify({ error: error.message, sent: 0 }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500, // On renvoie 500 pour les vraies erreurs serveur
+      status: 500,
     });
   }
 });
