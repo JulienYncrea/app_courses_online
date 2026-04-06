@@ -954,9 +954,7 @@
         try {
             const registration = await navigator.serviceWorker.ready;
             const VAPID_PUBLIC_KEY = "BHvMEhklZrgvkLnopsv7GlF-nm7e-OSTzur56Cu6twTpHWjHu6YdPuriz-2G6gppyFjjYQxlt2uihEXOUY0rdXs";
-                                        
             const convertedVapidKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
-
             console.log('Attempting to subscribe user...');
             const subscription = await registration.pushManager.subscribe({
                 userVisibleOnly: true,
@@ -965,12 +963,13 @@
 
             console.log('New push subscription:', subscription);
             await saveSubscriptionToDatabase(subscription);
+            
             alert('Abonnement aux notifications réussi !');
 
         } catch (error) {
             console.error('Failed to subscribe the user:', error);
             if (error.name === 'NotAllowedError') {
-                alert('L\'autorisation de notification a été refusée par l\'utilisateur. Veuillez l\'activer dans les paramètres de votre navigateur.');
+                alert('L\'autorisation de notification a été refusée. Veuillez l\'activer dans les paramètres de votre navigateur.');
             } else {
                 alert('Erreur lors de l\'enregistrement de l\'abonnement : ' + (error.message || error.name));
             }
