@@ -1878,14 +1878,17 @@
         const subscription = await registration.pushManager.getSubscription();
 
         if (subscription) {
-            // On met à jour la ligne en base de données
-            // On cherche l'abonnement de cet appareil pour le lier à la NOUVELLE liste
+            // Extraire les clés de sécurité (format ArrayBuffer -> Base64)
+            const p256dh = btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('p256dh'))));
+            const auth = btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('auth'))));
+
             const { error } = await supabaseClient
                 .from('subscriptions')
                 .upsert({ 
-                    // Utilise une clé unique si possible (ex: endpoint) pour éviter les doublons
                     endpoint: subscription.endpoint, 
                     list_id: newListId,
+                    p256dh: p256dh, // On ajoute la clé publique
+                    auth: auth,     // On ajoute le secret d'authentification
                     subscription_json: JSON.stringify(subscription)
                 }, { onConflict: 'endpoint' }); 
 
