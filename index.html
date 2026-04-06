@@ -1011,11 +1011,9 @@
         const btn = document.getElementById('toggleDeleteModeBtn');
         
         if (isDeleteMode) {
-            console.log("actif");
             btn.style.backgroundColor = "#000000"; // Bouton devient rouge
             btn.style.color = "white";
         } else {
-            console.log("pas actif");
             btn.style.backgroundColor = "#ff4d4d"; // Retour au style d'origine
             btn.style.color = "white";
         }
@@ -1892,25 +1890,41 @@
 
     let draggingCategoryElement = null;
     async function updateSubscriptionForNewList(newListId) {
-        const registration = await navigator.serviceWorker.ready;
-        const subscription = await registration.pushManager.getSubscription();
+        try {
+            const registration = await navigator.serviceWorker.ready;
+            
+            // 1. Essayer de récupérer l'abonnement existant
+            let subscription = await registration.pushManager.getSubscription();
 
-        if (subscription) {
-            // Extraire les clés de sécurité (format ArrayBuffer -> Base64)
-            const p256dh = btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('p256dh'))));
-            const auth = btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('auth'))));
+            // 2. Si pas d'abonnement, on tente d'en créer un (cela déclenchera la demande de permission)
+            if (!subscription) {
+                console.log("Aucun abonnement trouvé, tentative de création...");
+                subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: "VOTRE_CLE_PUBLIQUE_VAPID_ICI" // <--- TRÈS IMPORTANT
+                });
+            }
 
-            const { error } = await supabaseClient
-                .from('subscriptions')
-                .upsert({ 
-                    endpoint: subscription.endpoint, 
-                    list_id: newListId,
-                    p256dh: p256dh, // On ajoute la clé publique
-                    auth: auth,     // On ajoute le secret d'authentification
-                    subscription_json: JSON.stringify(subscription)
-                }, { onConflict: 'endpoint' }); 
+            if (subscription) {
+                // Conversion plus moderne et fiable en Base64
+                const p256dh = btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('p256dh'))));
+                const auth = btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('auth'))));
 
-            if (error) console.error("Erreur de mise à jour d'abonnement:", error);
+                const { error } = await supabaseClient
+                    .from('subscriptions')
+                    .upsert({ 
+                        endpoint: subscription.endpoint, 
+                        list_id: newListId,
+                        p256dh: p256dh,
+                        auth: auth,
+                        subscription_json: JSON.stringify(subscription)
+                    }, { onConflict: 'endpoint' }); 
+
+                if (error) throw error;
+                console.log("Abonnement mis à jour pour la liste:", newListId);
+            }
+        } catch (err) {
+            console.error("Erreur critique lors de l'abonnement aux notifications:", err);
         }
     }
     function loadCategoryOrder() {
