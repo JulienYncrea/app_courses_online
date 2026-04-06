@@ -1880,7 +1880,7 @@
         if (subscription) {
             // On met à jour la ligne en base de données
             // On cherche l'abonnement de cet appareil pour le lier à la NOUVELLE liste
-            const { error } = await supabase
+            const { error } = await supabaseClient
                 .from('subscriptions')
                 .upsert({ 
                     // Utilise une clé unique si possible (ex: endpoint) pour éviter les doublons
