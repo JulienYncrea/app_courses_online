@@ -1011,9 +1011,11 @@
         const btn = document.getElementById('toggleDeleteModeBtn');
         
         if (isDeleteMode) {
+            console.log("actif");
             btn.style.backgroundColor = "#000000"; // Bouton devient rouge
             btn.style.color = "white";
         } else {
+            console.log("pas actif");
             btn.style.backgroundColor = "#ff4d4d"; // Retour au style d'origine
             btn.style.color = "white";
         }
