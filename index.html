@@ -1757,16 +1757,23 @@
     }
 
     async function deleteSuggestion(suggestionId) {
-        const listItemElement = document.querySelector(`#suggestionList li[data-id="${suggestionId}"]`);
-        const suggestionName = listItemElement ? listItemElement.textContent.replace('Delete', '').trim() : "this suggestion";
+        const suggestions = getSuggestions();
+        const suggestionToDelete = suggestions.find(sug => sug.id === suggestionId);
+        const suggestionName = suggestionToDelete ? suggestionToDelete.name : "this suggestion";
+        // 3. On affiche le confirm avec le vrai nom
         if (confirm(`Are you sure you want to delete "${suggestionName}"?`)) {
+            // Mise à jour du DOM
+            const listItemElement = document.querySelector(`#suggestionList li[data-id="${suggestionId}"]`);
             if (listItemElement) {
                 listItemElement.remove();
             }
-            let suggestions = getSuggestions();
-            suggestions = suggestions.filter(sug => sug.id !== suggestionId);
-            saveSuggestions(suggestions);
-            if (suggestions.length === 0) {
+
+            // Mise à jour du Local Storage
+            const updatedSuggestions = suggestions.filter(sug => sug.id !== suggestionId);
+            saveSuggestions(updatedSuggestions);
+
+            // Message si vide
+            if (updatedSuggestions.length === 0) {
                 document.getElementById('suggestionList').innerHTML = '<p class="empty-list-message">No suggestions available at the moment.</p>';
             }
         }
