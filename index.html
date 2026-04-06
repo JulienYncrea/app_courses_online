@@ -1555,60 +1555,66 @@
     }
 
 
-    function setupRealtimeListener() {
-      if (window.supabaseChannel) {
-          supabaseClient.removeChannel(window.supabaseChannel);
-      }
+    async function setupRealtimeListener() {
+        // 1. NETTOYAGE COMPLET des deux canaux avant de commencer
+        if (window.supabaseChannel) {
+            await supabaseClient.removeChannel(window.supabaseChannel);
+            window.supabaseChannel = null;
+        }
+        if (window.supabaseBuyLaterChannel) {
+            await supabaseClient.removeChannel(window.supabaseBuyLaterChannel);
+            window.supabaseBuyLaterChannel = null;
+        }
 
-      if (!currentListId) {
-          console.warn("No currentListId defined, cannot set up Realtime listener.");
-          return;
-      }
+        if (!currentListId) {
+            console.warn("No currentListId defined, cannot set up Realtime listener.");
+            return;
+        }
 
-      window.supabaseChannel = supabaseClient.channel(`list_items_changes:${currentListId}`)
-        .on('postgres_changes', {
-            event: 'UPDATE', // Listen specifically for UPDATEs
-            schema: 'public',
-            table: 'list_items',
-            filter: `list_id=eq.${currentListId}`
-        }, (payload) => {
-            if (isUpdatingLocally) return;
-            console.log('Realtime UPDATE detected:', payload);
-            const updatedItem = payload.new;
-            const listItemElement = document.querySelector(`#shoppingListToBuy li[data-id="${updatedItem.id}"]`);
-            if (listItemElement) {
-                const quantitySpan = listItemElement.querySelector('.quantity-control span');
-                if (quantitySpan) {
-                    quantitySpan.textContent = `${updatedItem.quantity}x`;
+        // 2. CONFIGURATION DU CANAL PRINCIPAL (list_items)
+        window.supabaseChannel = supabaseClient.channel(`list_items_changes:${currentListId}`)
+            .on('postgres_changes', {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'list_items',
+                filter: `list_id=eq.${currentListId}`
+            }, (payload) => {
+                if (isUpdatingLocally) return;
+                console.log('Realtime UPDATE detected:', payload);
+                const updatedItem = payload.new;
+                const listItemElement = document.querySelector(`#shoppingListToBuy li[data-id="${updatedItem.id}"]`);
+                if (listItemElement) {
+                    const quantitySpan = listItemElement.querySelector('.quantity-control span');
+                    if (quantitySpan) {
+                        quantitySpan.textContent = `${updatedItem.quantity}x`;
+                    }
+                } else {
+                    loadShoppingList();
                 }
-            } else {
-                // Fallback: If for some reason the element is not found, reload the whole list
+            })
+            .on('postgres_changes', {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'list_items',
+                filter: `list_id=eq.${currentListId}`
+            }, (payload) => {
+                console.log('Realtime INSERT detected:', payload);
                 loadShoppingList();
-            }
-        })
-        .on('postgres_changes', {
-            event: 'INSERT', // Listen specifically for INSERTs
-            schema: 'public',
-            table: 'list_items',
-            filter: `list_id=eq.${currentListId}`
-        }, (payload) => {
-            console.log('Realtime INSERT detected:', payload);
-            loadShoppingList(); // Reload entire list to handle adding in the correct category/order
-        })
-        .on('postgres_changes', {
-            event: 'DELETE', // Listen specifically for DELETEs
-            schema: 'public',
-            table: 'list_items',
-            filter: `list_id=eq.${currentListId}`
-        }, (payload) => {
-            console.log('Realtime DELETE detected:', payload);
-            // The optimistic UI update for delete is handled in deleteItem() itself.
-            // This reload is a fallback for other clients or robustness.
-            loadShoppingList(); // Reload list to re-evaluate empty message and categories
-        })
-        .subscribe();
+            })
+            .on('postgres_changes', {
+                event: 'DELETE',
+                schema: 'public',
+                table: 'list_items',
+                filter: `list_id=eq.${currentListId}`
+            }, (payload) => {
+                console.log('Realtime DELETE detected:', payload);
+                loadShoppingList();
+            })
+            .subscribe((status) => {
+                if (status !== 'SUBSCRIBED') console.warn("List channel status:", status);
+            });
 
-        // Listener for changes on buy_later_items
+        // 3. CONFIGURATION DU CANAL BUY LATER
         window.supabaseBuyLaterChannel = supabaseClient.channel(`buy_later_items_changes:${currentListId}`)
             .on('postgres_changes', {
                 event: '*',
@@ -1617,12 +1623,13 @@
                 filter: `list_id=eq.${currentListId}`
             }, (payload) => {
                 console.log('Buy Later Realtime change detected:', payload);
-                // Always reload if a change is detected, regardless of section visibility
                 loadBuyLaterList();
             })
-            .subscribe();
+            .subscribe((status) => {
+                if (status !== 'SUBSCRIBED') console.warn("Buy Later channel status:", status);
+            });
 
-      console.log(`Realtime listeners configured for list_id: ${currentListId}`);
+        console.log(`Realtime listeners configured for list_id: ${currentListId}`);
     }
 
 
