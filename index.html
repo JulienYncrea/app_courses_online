@@ -1011,11 +1011,11 @@
         const btn = document.getElementById('toggleDeleteModeBtn');
         
         if (isDeleteMode) {
-            btn.style.backgroundColor = "#ff4d4d"; // Bouton devient rouge
+            btn.style.backgroundColor = "#000000"; // Bouton devient rouge
             btn.style.color = "white";
         } else {
-            btn.style.backgroundColor = ""; // Retour au style d'origine
-            btn.style.color = "";
+            btn.style.backgroundColor = "#ff4d4d"; // Retour au style d'origine
+            btn.style.color = "white";
         }
         
         loadSuggestions(); // Relance le rendu avec la nouvelle couleur de liste
