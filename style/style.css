@@ -1,0 +1,723 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #fcf2f2;
+    color: #333;
+    transition: padding-bottom 0.3s ease-out; /* Animation for padding */
+}
+h1, h2 {
+    text-align: center;
+    color: #E75480;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    cursor: pointer; /* Indicate clickable titles for scrolling */
+    -webkit-user-select: none; /* For WebKit browsers (Chrome, Safari) */
+    -moz-user-select: none;    /* For Firefox */
+    -ms-user-select: none;     /* For Internet Explorer/Edge */
+    user-select: none;         /* Standard */
+    cursor: pointer; 
+}
+.section-container {
+    max-width: 600px;
+    margin: 1rem auto;
+    background: #fcf2f2;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+label {
+    display: block;
+    margin-top: 0.75rem;
+    font-weight: bold;
+    color: #6A057F; /* Color from index copy */
+}
+input[type="text"], input[type="number"], select, textarea { /* Added textarea */
+    width: 100%; /* Changed from calc(100% - 20px) for consistency with padding */
+    padding: 0.7rem; /* Adjusted from 0.8rem */
+    margin-top: 0.4rem; /* Adjusted from margin-bottom */
+    border: 1px solid #DDA0DD; /* Color from index copy */
+    border-radius: 0.5rem;
+    box-sizing: border-box;
+    color: #333;
+    font-size: 1rem;
+}
+button {
+    background: #FF69B4; /* From index copy */
+    color: #FFFFFF; /* From index copy */
+    font-weight: bold; /* From index copy */
+    cursor: pointer;
+    transition: all 0.3s ease; /* From index copy */
+    border: none; /* From index copy */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* From index copy */
+    width: 100%; /* Ensure full width for general buttons */
+    padding: 0.7rem; /* From index copy */
+    margin-top: 0.4rem; /* From index copy */
+    border-radius: 0.5rem; /* From index copy */
+}
+button:hover {
+    background: #C71585; /* From index copy */
+    transform: translateY(-2px); /* From index copy */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* From index copy */
+}
+select {
+    background: #F8F8FF; /* From index copy */
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='%23C71585' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>"); /* From index copy */
+    background-repeat: no-repeat;
+    background-position: right 0.7em top 50%;
+    background-size: 0.65em auto;
+    padding-right: 2.5em;
+}
+
+/* Reset UL padding for left alignment */
+#shoppingListToBuy, #buyLaterList, #suggestionList, #categoryList, #categoryOrderList, #savedMessagesList { /* Added #savedMessagesList */
+    list-style: none; /* Remove default bullet points */
+    padding-left: 0; /* Remove default browser padding */
+    margin-left: 0; /* Ensure no margin is pushing it */
+}
+
+/* Styles for the shopping list items (adapting from index copy's .shopping-list-item) */
+#shoppingListToBuy li, #buyLaterList li { /* ADDED #buyLaterList li here */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #FFF0F5; /* From index copy */
+    padding: 0.7rem 1.2rem 0.7rem 0; /* Adjusted padding-left for alignment */
+    margin-top: 0.7rem; /* From index copy */
+    border-radius: 0.75rem; /* From index copy */
+    font-size: 1.1rem; /* From index copy */
+    color: #6A057F; /* From index copy */
+    border: 1px solid #FFC0CB; /* From index copy */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* From index copy */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    flex-wrap: nowrap; /* Prevent wrapping in main list items */
+
+}
+
+/* Adapting delete/decrement buttons from index copy */
+.quantity-control {
+    display: flex;
+    align-items: center;
+    /* margin-right: 10px; Removed as it's part of flex-grow now */
+    flex-shrink: 0; /* Prevent it from shrinking */
+}
+.quantity-control button { /* This will be the decrement/increment buttons */
+    background: none; /* Changed from #ddd */
+    border: 1px solid #DDA0DD; /* Added border */
+    border-radius: 50%; /* Rounded borders */
+    color: #6A057F; /* Darker color for decrement, from index copy */
+    font-size: 1rem; /* Slightly larger for visibility, from index copy */
+    cursor: pointer;
+    padding: 0; /* Remove padding */
+    margin: 0 2px; /* Adjusted margin */
+    width: 30px; /* Fixed width for round button */
+    height: 30px; /* Fixed height for round button */
+    display: flex; /* For centering content */
+    justify-content: center; /* For centering content */
+    align-items: center; /* For centering content */
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
+}
+.quantity-control button:hover {
+    background-color: #E6E6FA; /* Ensure no background on hover */
+    color: #8A2BE2; /* Change color on hover for decrement, from index copy */
+    transform: scale(1.05);
+}
+.quantity-control span {
+    font-weight: bold; /* From index copy */
+    margin: 0 5px; /* Adjusted margin */
+    color: #FF8C00; /* From index copy */
+    min-width: 20px;
+    text-align: center;
+}
+
+.item-actions .remove-btn { /* This will be the main delete button for list items */
+    background: none; /* Changed from #f44336 */
+    border: 1px solid #FF6347; /* Added border for round button */
+    border-radius: 50%; /* Make it round */
+    color: #FF6347; /* From index copy */
+    font-size: 1.2rem; /* Adjusted for round button */
+    cursor: pointer;
+    padding: 0; /* Remove padding for round button */
+    margin: 0;
+    width: 30px; /* Fixed width for round button */
+    height: 30px; /* Fixed height for round button */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: color 0.3s ease, background-color 0.3s ease;
+    line-height: 1;
+}
+.item-actions .remove-btn:hover {
+    background-color: #ffe0e0; /* Light red background on hover */
+    color: #DC143C; /* From index copy */
+}
+/* Updated to use <i> tag directly, removing ::before */
+.item-actions .remove-btn i {
+    font-family: "Font Awesome 6 Free"; /* Ensure correct font-family for FA6 */
+    font-weight: 900;
+}
+.item-actions .remove-btn span {
+    display: none; /* Hide original text */
+}
+
+/* Fixed bottom navigation (from index.html, retaining structure) */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #EE82EE; /* From index copy's navigation buttons */
+    display: flex;
+    white-space: nowrap;
+    justify-content: space-around;
+    padding: 0.5rem 0;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+    z-index: 1000;
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+    transform: translateY(0);
+    transition: transform 0.3s ease-out;
+}
+.bottom-nav.hidden-nav {
+    transform: translateY(100%);
+}
+.nav-item {
+    color: #FFFFFF; /* From index copy's navigation buttons */
+    text-align: center;
+    padding: 0.5rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.nav-item i {
+    font-size: 1.5rem;
+    margin-bottom: 0.2rem;
+}
+.nav-item.active {
+    font-weight: bold;
+    color: #FFD700; /* Active color from index copy's navigation buttons */
+}
+.category-header-clickable {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+/* Rotation de l'icône */
+.category-header-clickable.collapsed i {
+    transform: rotate(-90deg);
+}
+
+/* Masquer tous les <li> qui suivent un <h3> ayant la classe 'collapsed' 
+jusqu'au prochain <h3> */
+h3.collapsed + li, 
+h3.collapsed ~ li:not(h3 ~ h3 ~ li) {
+    display: none !important;
+}
+.toggle-icon {
+transition: transform 0.3s ease;
+font-size: 0.9rem;
+}
+
+/* Classe pour cacher les items sous une catégorie repliée */
+.collapsed-content {
+    display: none !important;
+}
+/* Version simple pour masquer les éléments frères jusqu'au prochain titre */
+h3.collapsed + li,
+h3.collapsed + li ~ li {
+    display: none;
+}
+h3.collapsed + li ~ h3,
+h3.collapsed + li ~ h3 ~ li {
+    display: flex; /* Réaffiche dès qu'on croise un autre h3 */
+}
+
+.toggle-nav-button {
+    position: absolute;
+    top: -45px;
+    right: 20px;
+    background-color: #9370DB; /* From index copy's toggle button */
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+    z-index: 1001;
+    transition: background-color 0.3s ease, transform 0.3s ease; /* Added transform for consistency */
+}
+.toggle-nav-button:hover {
+    background-color: #8A2BE2; /* From index copy's toggle button hover */
+    transform: translateY(-2px); /* Added for consistency */
+}
+.toggle-nav-button i {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease; /* For icon rotation */
+}
+
+/* Style for hidden sections */
+.section.hidden {
+    display: none;
+}
+
+/* Style for suggestion list items (adapting from index copy's .suggestion-item) */
+#suggestionList li {
+    position: relative;
+    background: #F8F8FF; /* From index copy */
+    border: 1px solid #DDA0DD;
+    color: #6A057F; /* From index copy */
+    padding: 0.6rem 1.2rem 0.6rem 0; /* Adjusted padding-left for alignment */
+    border-radius: 0.75rem; /* From index copy */
+    text-align: left; /* Adjust from center for content */
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease; /* Unified transition */
+    user-select: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 5px; /* From index copy */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* From index copy */
+    margin-top: 0.7rem; /* Consistent spacing */
+}
+#suggestionList li:hover {
+    background: #E6E6FA; /* From index copy */
+    transform: translateY(-2px); /* From index copy */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* From index copy */
+}
+/* Only apply hover effect to the item info part for adding to list */
+#suggestionList li .suggestion-info:hover {
+    background: none; /* Reset background if it was changed */
+    cursor: pointer;
+}
+
+#suggestionList .suggestion-info {
+    flex-grow: 1;
+    padding-right: 5px;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap; /* Ensure text stays on one line */
+    padding: 0.6rem 0; /* Add padding to make the clickable area larger */
+    /* Updated for combined name and category on one line with ellipsis */
+    display: flex; /* Use flex to align name and category */
+    gap: 5px; /* Small gap between name and category */
+    align-items: center;
+    position: relative;
+    top: 5px;
+}
+#suggestionList .suggestion-info .name {
+    font-weight: bold;
+    color: #6A057F; /* Ensure visibility */
+    padding-left: 1.2rem;
+    white-space: nowrap; /* Prevent name from wrapping */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 1; /* Allow name to shrink if needed */
+    min-width: 0; /* Important for flex items with overflow */
+}
+#suggestionList .suggestion-info .category {
+    font-size: 0.85em;
+    color: #C71585; /* Lighter color for category */
+    white-space: nowrap; /* Prevent category from wrapping */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 0; /* Prevent category from shrinking much initially */
+}
+#suggestionList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-start;
+    margin-top: 1rem;
+    list-style: none;
+    padding: 0;
+}
+.delete-mode-active #suggestionList li {
+    border: 2px solid #FF6347;
+    background-color: #fff0f0;
+}
+
+.suggestion-actions {
+    display: none; /* Caché par défaut */
+    margin-left: 10px;
+}
+
+.delete-mode-active .suggestion-actions {
+    display: block; /* Visible uniquement en mode suppression */
+}
+.filter-controls {
+display: flex;
+align-items: flex-end; /* Aligne le bouton sur la ligne du select */
+gap: 8px;
+margin-bottom: 15px;
+}
+
+.filter-controls div {
+    flex-grow: 1;
+}
+
+/* Style du bouton Corbeille */
+#toggleDeleteModeBtn {
+    width: 45px !important;
+    height: 42px;
+    margin-top: 0 !important;
+    padding: 0 !important;
+    background: #ff4d4d; /* Rouge */
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2rem;
+}
+#toggleDeleteModeBtn.active {
+    background-color: #333 !important;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+#suggestionList li {
+    background: #F8F8FF;
+    border: 1px solid #DDA0DD;
+    color: #6A057F;
+    border-radius: 20px; /* Style pilule/tag */
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    font-size: 0.9rem;
+}
+
+#suggestionList li .category {
+    font-size: 0.7rem;
+    opacity: 0.6;
+    margin-left: 8px;
+    border-left: 1px solid #DDA0DD;
+    padding-left: 8px;
+}
+/* Adjusted styles for the item name within #shoppingListToBuy and #buyLaterList */
+#shoppingListToBuy li .item-name, #buyLaterList li .item-name {
+    flex-grow: 1; /* Allow the name to take up available space */
+    padding-left: 10px; /* Space between quantity controls and name */
+    white-space: normal; /* Allow text to wrap naturally if there are spaces */
+    overflow-wrap: break-word; /* Break long words if necessary */
+    word-break: break-word; /* Fallback for older browsers */
+    min-width: 0; /* Ensure it can shrink in flex container */
+    color: #6A057F; /* Set explicit color */
+    font-weight: normal; /* Ensure it's not bold */
+}
+/* Removed add-to-shopping-list-btn styles as the button is removed from HTML */
+#suggestionList .suggestion-actions .remove-btn {
+    background: none; /* Changed from #f44336 */
+    border: 1px solid #FF6347; /* Added border for round button */
+    border-radius: 50%; /* Make it round */
+    color: #FF6347; /* From index copy */
+    font-size: 1.2rem; /* Adjusted for round button */
+    cursor: pointer;
+    padding: 0; /* Remove padding for round button */
+    margin: 0;
+    width: 30px; /* Fixed width for round button */
+    height: 30px; /* Fixed height for round button */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: color 0.3s ease, background-color 0.3s ease;
+    line-height: 1;
+}
+#suggestionList .suggestion-actions .remove-btn:hover {
+    background-color: #ffe0e0; /* Light red background on hover */
+    color: #DC143C; /* From index copy */
+}
+/* Updated to use <i> tag directly, removing ::before */
+#suggestionList .suggestion-actions .remove-btn i {
+    font-family: "Font Awesome 6 Free"; /* Ensure correct font-family for FA6 */
+    font-weight: 900;
+}
+#suggestionList .suggestion-actions .remove-btn span {
+    display: none; /* Hide original text */
+}
+
+/* Styles for category list items (adapting from index copy's #categoryOrderList li) */
+#categoryList li, #categoryOrderList li {
+    background: #F8F8FF; /* From index copy */
+    border: 1px solid #DDA0DD; /* From index copy */
+    padding: 0.75rem 1.2rem 0.75rem 0; /* Adjusted padding-left for alignment */
+    margin-bottom: 0.5rem;
+    border-radius: 0.5rem;
+    padding-left: 1.2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold; /* From index copy */
+    color: #6A057F; /* From index copy */
+    cursor: grab; /* From index copy */
+    transition: background-color 0.2s ease, transform 0.2s ease; /* From index copy */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+#categoryList li:hover, #categoryOrderList li:hover {
+    background-color: #E6E6FA; /* From index copy */
+    transform: scale(1.01); /* From index copy */
+}
+#categoryOrderList li.dragging { /* From index copy */
+    opacity: 0.7;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+.drag-handle { /* From index copy */
+    font-size: 1.5rem;
+    cursor: grab;
+    margin-right: 10px;
+    color: #EE82EE;
+}
+#categoryList .remove-btn { /* Adapting delete button for categories */
+    background: none;
+    border: 1px solid #FF6347; /* Added border for round button */
+    border-radius: 50%; /* Make it round */
+    color: #FF6347; /* From index copy */
+    font-size: 1.2rem; /* Adjusted for round button */
+    cursor: pointer;
+    padding: 0; /* Remove padding for round button */
+    margin: 0;
+    width: 30px; /* Fixed width for round button */
+    height: 30px; /* Fixed height for round button */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: color 0.3s ease, background-color 0.3s ease;
+    line-height: 1;
+}
+#categoryList .remove-btn:hover {
+    background-color: #ffe0e0; /* Light red background on hover */
+    color: #DC143C; /* From index copy */
+}
+/* Updated to use <i> tag directly, removing ::before */
+#categoryList .remove-btn i {
+    font-family: "Font Awesome 6 Free"; /* Ensure correct font-family for FA6 */
+    font-weight: 900;
+}
+#categoryList .remove-btn span {
+    display: none; /* Hide original text */
+}
+
+/* Styles for add forms */
+.add-form { /* New style based on index copy structure */
+    margin-top: 1.5rem;
+    border-top: 1px solid #DDA0DD;
+    padding-top: 1rem;
+}
+/* Apply add-form to specific elements */
+#addItemForm, #addBuyLaterItemForm, #addSuggestionForm, #addCategoryForm {
+    margin-top: 1.5rem;
+    border-top: 1px solid #DDA0DD;
+    padding-top: 1rem;
+}
+#addItemForm label, #addBuyLaterItemForm label, #addSuggestionForm label, #addCategoryForm label {
+    display: block;
+    margin-top: 0.75rem;
+    font-weight: bold;
+    color: #6A057F;
+}
+
+/* Style for empty list text (adapting existing .total-items style) */
+p.empty-list-message { /* New class for clear distinction */
+    color: #C71585 !important;
+    font-style: italic;
+    font-size: 0.95rem;
+    text-align: center;
+    margin-top: 0.5rem;
+}
+
+/* Styles for section headers */
+.section-container h3 {
+    color: #E75480; /* From index copy */
+    border-bottom: 1px solid #FFD1DC; /* From index copy */
+    padding-bottom: 0.3rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    padding-left: 0; /* Ensure alignment with list items */
+}
+
+/* Bell icon for notification trigger */
+#shoppingListTitle .notification-bell {
+    margin-left: 10px;
+    font-size: 1.2em;
+    color: #E75480;
+    cursor: pointer;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+#shoppingListTitle .notification-bell:hover {
+    color: #C71585;
+    transform: scale(1.1);
+}
+
+/* Notification Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000; /* Above everything else */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.modal-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+.modal-content {
+    background: #fcf2f2;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 450px;
+    position: relative;
+    transform: translateY(-20px);
+    transition: transform 0.3s ease;
+}
+.modal-overlay.visible .modal-content {
+    transform: translateY(0);
+}
+.modal-close-btn {
+    background: none;
+    top: -5px;
+    padding: -5px -5px;
+    border: none;
+    font-size: 1.5rem;
+    color: #888;
+    cursor: pointer;
+}
+.modal-close-btn:hover {
+    color: #333;
+}
+.modal-content h3 {
+    color: #E75480;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #FFD1DC;
+    padding-bottom: 0.5rem;
+}
+.modal-content textarea {
+    min-height: 80px;
+    resize: vertical;
+    margin-bottom: 1rem;
+}
+.modal-content .modal-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 1rem;
+}
+.modal-content .modal-buttons button {
+    flex-grow: 1;
+}
+#savedMessagesList li {
+    background: #F8F8FF;
+    border: 1px solid #DDA0DD;
+    color: #6A057F;
+    padding: 0.6rem 1.2rem;
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    word-break: break-word; /* Allow long messages to wrap */
+    white-space: normal; /* Ensure text wraps */
+}
+#savedMessagesList li:hover {
+    background: #E6E6FA;
+}
+#savedMessagesList .message-actions .remove-btn {
+    background: none;
+    border: 1px solid #FF6347;
+    border-radius: 50%;
+    color: #FF6347;
+    font-size: 0.9rem; /* Smaller for saved messages */
+    cursor: pointer;
+    width: 25px;
+    height: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: color 0.3s ease, background-color 0.3s ease;
+}
+#savedMessagesList .message-actions .remove-btn:hover {
+    background-color: #ffe0e0;
+    color: #DC143C;
+}
+#savedMessagesList .message-text {
+    flex-grow: 1;
+    margin-right: 10px;
+}
+
+@media (max-width: 640px) {
+    body {
+        /* Try to reduce horizontal padding (0.5rem here) */
+        padding: 0.2rem 0.2rem; /* For example, very little lateral padding */
+    }
+    .section-container {
+        /* Same for the section container (0.75rem here) */
+        padding: 0.2rem 0.3rem; /* For example, very little lateral padding */
+    }
+    h1, h2 {
+        /* Ajustez cette valeur négative pour remonter les titres. */
+        /* Commencez avec une petite valeur comme -1rem et augmentez si nécessaire. */
+        margin-top: -1.5rem; /* Exemple: remonte le titre de 1.5rem */
+        /* Vous pouvez aussi ajuster les paddings si les précédents ajustements ne suffisent pas */
+        padding-top: 0; /* Assurez-vous qu'il n'y a pas de padding supérieur indésirable sur les titres eux-mêmes */
+        /* Conservez vos autres styles de titres pour mobile */
+        padding-bottom: 0.8rem;
+        margin-bottom: 0.8rem;
+        line-height: 1.5;
+        font-size: 1.8rem;
+    }
+    .bottom-nav {
+        padding: 0.5rem 0;
+    }
+    .nav-item {
+        font-size: 0.9rem;
+        padding: 0.5rem;
+    }
+    .nav-item i {
+        font-size: 2rem;
+    }
+    .toggle-nav-button {
+        width: 35px;
+        height: 35px;
+        top: -40px;
+        right: 15px;
+    }
+    .toggle-nav-button i {
+        font-size: 1rem;
+    }
+    .modal-content {
+        padding: 1rem;
+    }
+}

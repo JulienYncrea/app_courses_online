@@ -76,7 +76,6 @@ self.addEventListener('push', (event) => {
   const options = {
     body: data.body || 'Vous avez un nouveau message.',
     icon: '/app_courses_online/icon.png',
-    badge: '/app_courses_online/badge.png', // Assure-toi que ce fichier existe
     data: {
       url: data.url || self.location.origin
     }
