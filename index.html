@@ -952,6 +952,7 @@
         }
 
         try {
+            const registration = await navigator.serviceWorker.ready;
             const VAPID_PUBLIC_KEY = "BHvMEhklZrgvkLnopsv7GlF-nm7e-OSTzur56Cu6twTpHWjHu6YdPuriz-2G6gppyFjjYQxlt2uihEXOUY0rdXs";
                                         
             const convertedVapidKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
@@ -1897,7 +1898,6 @@
 
             if (error) console.error("Erreur de mise à jour d'abonnement:", error);
         } else {
-        // CAS 2 : Pas d'abonnement, on déclenche la création complète
         console.log("Aucun abonnement, lancement de subscribeUserToPush...");
         await subscribeUserToPush();
         }
