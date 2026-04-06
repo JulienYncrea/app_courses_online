@@ -1222,6 +1222,7 @@
                 currentListId = lists[0].id;
                 console.log(currentListId)
                 currentShareCode = code;
+                await updateSubscriptionForNewList(currentListId);
                 localStorage.setItem('lastShareCode', shareCodeInput.value); // Save on successful load
                 setupRealtimeListener(currentListId);
                 loadShoppingList();
@@ -1246,6 +1247,7 @@
                     console.log("New list created:", createdList[0]);
                     currentListId = createdList[0].id;
                     currentShareCode = code;
+                    await updateSubscriptionForNewList(currentListId);
                     localStorage.setItem('lastShareCode', shareCodeInput.value); // Save on successful creation
                     setupRealtimeListener(currentListId);
                     loadShoppingList();
@@ -1871,7 +1873,25 @@
     }
 
     let draggingCategoryElement = null;
+    async function updateSubscriptionForNewList(newListId) {
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.getSubscription();
 
+        if (subscription) {
+            // On met à jour la ligne en base de données
+            // On cherche l'abonnement de cet appareil pour le lier à la NOUVELLE liste
+            const { error } = await supabase
+                .from('subscriptions')
+                .upsert({ 
+                    // Utilise une clé unique si possible (ex: endpoint) pour éviter les doublons
+                    endpoint: subscription.endpoint, 
+                    list_id: newListId,
+                    subscription_json: JSON.stringify(subscription)
+                }, { onConflict: 'endpoint' }); 
+
+            if (error) console.error("Erreur de mise à jour d'abonnement:", error);
+        }
+    }
     function loadCategoryOrder() {
         let categories = getCategories(); // Toutes les catégories actuelles
         let savedOrder = JSON.parse(localStorage.getItem('category_order')) || []; // Ordre sauvegardé depuis localStorage
