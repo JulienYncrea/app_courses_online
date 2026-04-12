@@ -272,7 +272,12 @@
     function toggleDeleteMode() {
         isDeleteMode = !isDeleteMode;
         const btn = document.getElementById('toggleDeleteModeBtn');
-        
+        if (confirm(`You have activate the delete mode, tape yes for continue or cancel for desactivate delete mode`)) {
+                isDeleteMode = true;
+            }
+        else {
+            isDeleteMode = false;
+        }
         if (isDeleteMode) {
             btn.style.backgroundColor = "#000000"; // Bouton devient rouge
             btn.style.color = "white";
@@ -1045,10 +1050,7 @@
 
         // Gestion de la classe visuelle sur le conteneur
         if (isDeleteMode) {
-            
-            if (confirm(`You have activate the delete mode, `)) {
-                container.classList.add('delete-mode-active');
-            }
+            container.classList.add('delete-mode-active');
         } else {
             container.classList.remove('delete-mode-active');
         }
