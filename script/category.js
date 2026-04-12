@@ -229,3 +229,28 @@ categoryOrderList.addEventListener('dragend', (e) => {
     draggingCategoryElement = null;
     saveCategoryOrder(); // Save order immediately after drag
 });
+
+function renderCategories() {
+    const categories = getCategories();
+    categoryList.innerHTML = '';
+    if (categories.length === 0) {
+        categoryList.innerHTML = '<p class="empty-list-message">No categories defined. Add some above!</p>';
+        return;
+    }
+    // Sort categories alphabetically for "Your Categories" list
+    const sortedCategories = [...categories].sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
+
+    sortedCategories.forEach(category => {
+        const li = document.createElement('li');
+        li.textContent = category;
+        li.innerHTML = `
+            <span>${category}</span>
+            <button class="remove-btn" data-category="${category}"><i class="fas fa-times"></i></button>
+        `;
+        // FIX: Use closest('.remove-btn') to get the button element that has the data-category attribute
+        li.querySelector('.remove-btn').addEventListener('click', (e) => {
+            deleteCategory(e.target.closest('.remove-btn').dataset.category);
+        });
+        categoryList.appendChild(li);
+    });
+}
