@@ -1021,21 +1021,18 @@
         const suggestionToDelete = suggestions.find(sug => sug.id === suggestionId);
         const suggestionName = suggestionToDelete ? suggestionToDelete.name : "this suggestion";
         // 3. On affiche le confirm avec le vrai nom
-        if (confirm(`Are you sure you want to delete "${suggestionName}"?`)) {
-            // Mise à jour du DOM
-            const listItemElement = document.querySelector(`#suggestionList li[data-id="${suggestionId}"]`);
-            if (listItemElement) {
-                listItemElement.remove();
-            }
+        const listItemElement = document.querySelector(`#suggestionList li[data-id="${suggestionId}"]`);
+        if (listItemElement) {
+            listItemElement.remove();
+        }
 
-            // Mise à jour du Local Storage
-            const updatedSuggestions = suggestions.filter(sug => sug.id !== suggestionId);
-            saveSuggestions(updatedSuggestions);
+        // Mise à jour du Local Storage
+        const updatedSuggestions = suggestions.filter(sug => sug.id !== suggestionId);
+        saveSuggestions(updatedSuggestions);
 
-            // Message si vide
-            if (updatedSuggestions.length === 0) {
-                document.getElementById('suggestionList').innerHTML = '<p class="empty-list-message">No suggestions available at the moment.</p>';
-            }
+        // Message si vide
+        if (updatedSuggestions.length === 0) {
+            document.getElementById('suggestionList').innerHTML = '<p class="empty-list-message">No suggestions available at the moment.</p>';
         }
     }
 
@@ -1048,7 +1045,10 @@
 
         // Gestion de la classe visuelle sur le conteneur
         if (isDeleteMode) {
-            container.classList.add('delete-mode-active');
+            
+            if (confirm(`You have activate the delete mode, `)) {
+                container.classList.add('delete-mode-active');
+            }
         } else {
             container.classList.remove('delete-mode-active');
         }
