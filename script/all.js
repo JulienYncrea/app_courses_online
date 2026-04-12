@@ -1,0 +1,1386 @@
+// --- Supabase Configuration ---
+const SUPABASE_URL = 'https://kbrstkkzfsjysohjdsqh.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImticnN0a2t6ZnNqeXNvaGpkc3FoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMTE0NzIsImV4cCI6MjA5MDg4NzQ3Mn0._WST41JUmDD_N0rApXzmc-EB7D1hgJTJ80lXnRl5VB8'; // Replace with your actual anon key
+let supabaseClient = null; // Will be initialized in window.addEventListener('load')
+const VAPID_PUBLIC_KEY = "BHvMEhklZrgvkLnopsv7GlF-nm7e-OSTzur56Cu6twTpHWjHu6YdPuriz-2G6gppyFjjYQxlt2uihEXOUY0rdXs";
+
+// --- Global Variables ---
+let currentShareCode = null;
+let currentListId = null;
+const shoppingListToBuy = document.getElementById('shoppingListToBuy');
+const newItemInput = document.getElementById('newItemInput');
+const newQuantityInput = document.getElementById('newQuantityInput');
+const newCategorySelect = document.getElementById('newCategorySelect');
+const addItemBtn = document.getElementById('addItemBtn');
+const shoppingListTitle = document.getElementById('shoppingListTitle'); // Added for scroll
+
+// Moved to settings section
+const shareCodeInput = document.getElementById('shareCodeInput');
+const loadShareCodeBtn = document.getElementById('loadShareCodeBtn');
+const addItemForm = document.getElementById('addItemForm');
+
+// Sections
+const shoppingListSection = document.getElementById('shoppingList');
+const buyLaterSection = document.getElementById('buyLater');
+const suggestionsSection = document.getElementById('suggestions');
+const categoriesSection = document.getElementById('categories');
+const settingsSection = document.getElementById('settings');
+
+// Navigation
+const navShoppingList = document.getElementById('navShoppingList');
+const navBuyLater = document.getElementById('navBuyLater');
+const navSuggestions = document.getElementById('navSuggestions');
+const navCategories = document.getElementById('navCategories');
+const navSettings = document.getElementById('navSettings');
+const bottomNav = document.querySelector('.bottom-nav'); // Reference to the bottom menu
+
+// Buy Later section elements
+const newBuyLaterItemInput = document.getElementById('newBuyLaterItemInput');
+const addBuyLaterItemBtn = document.getElementById('addBuyLaterItemBtn');
+const buyLaterList = document.getElementById('buyLaterList');
+
+// Suggestions section elements
+const suggestionsTitle = document.getElementById('suggestionsTitle'); // Added for scroll
+const suggestionCategoryFilter = document.getElementById('suggestionCategoryFilter'); // New category filter
+const newSuggestionInput = document.getElementById('newSuggestionInput');
+const newSuggestionCategorySelect = document.getElementById('newSuggestionCategorySelect');
+const addSuggestionBtn = document.getElementById('addSuggestionBtn');
+const suggestionList = document.getElementById('suggestionList');
+
+// Categories section elements
+const newCategoryInput = document.getElementById('newCategoryInput');
+const addCategoryBtn = document.getElementById('addCategoryBtn');
+const categoryList = document.getElementById('categoryList');
+const categoryOrderList = document.getElementById('categoryOrderList');
+
+// Settings section elements
+const activeShareCodeSpan = document.getElementById('activeShareCode');
+const changeShareCodeBtn = document.getElementById('changeShareCodeBtn');
+
+// New variable for the toggle button
+const toggleNavBtn = document.getElementById('toggleNavBtn');
+
+// Notification Modal Elements
+const notificationBell = document.getElementById('notificationBell');
+const notificationModal = document.getElementById('notificationModal');
+const closeNotificationModalBtn = document.getElementById('closeNotificationModalBtn');
+const notificationMessageInput = document.getElementById('notificationMessageInput');
+const sendNotificationBtn = document.getElementById('sendNotificationBtn');
+const saveMessageBtn = document.getElementById('saveMessageBtn');
+const savedMessagesList = document.getElementById('savedMessagesList');
+const emptySavedMessages = document.getElementById('emptySavedMessages');
+
+
+// --- Default Categories ---
+const initialDefaultCategories = [
+    "Fruits et Légumes",
+    "Produits Laitiers",
+    "Viandes et Poissons",
+    "Produits d'Épicerie",
+    "Boulangerie",
+    "Boissons",
+    "Surgelés",
+    "Entretien",
+    "Hygiène",
+    "Autres"
+];
+async function subscribeUserToPush() {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        alert('Les notifications push ne sont pas supportées par votre navigateur.');
+        return;
+    }
+
+    try {
+        const registration = await navigator.serviceWorker.ready;
+        const VAPID_PUBLIC_KEY = "BHvMEhklZrgvkLnopsv7GlF-nm7e-OSTzur56Cu6twTpHWjHu6YdPuriz-2G6gppyFjjYQxlt2uihEXOUY0rdXs";
+        const convertedVapidKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+        console.log('Attempting to subscribe user...');
+        const subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: convertedVapidKey
+        });
+
+        console.log('New push subscription:', subscription);
+        await saveSubscriptionToDatabase(subscription);
+        
+        alert('Abonnement aux notifications réussi !');
+
+    } catch (error) {
+        console.error('Failed to subscribe the user:', error);
+        if (error.name === 'NotAllowedError') {
+            alert('L\'autorisation de notification a été refusée. Veuillez l\'activer dans les paramètres de votre navigateur.');
+        } else {
+            alert('Erreur lors de l\'enregistrement de l\'abonnement : ' + (error.message || error.name));
+        }
+    }
+}
+
+// Fonction utilitaire pour convertir la clé VAPID
+function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+        .replace(/\-/g, '+')
+        .replace(/_/g, '/');
+
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+
+    for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+}
+let isDeleteMode = false;
+
+function toggleDeleteMode() {
+    isDeleteMode = !isDeleteMode;
+    const btn = document.getElementById('toggleDeleteModeBtn');
+    if (isDeleteMode){
+        if (confirm(`You have activate the delete mode, tape yes for continue or cancel for desactivate delete mode. You can deactivate delete mode with click to the trash icon back`)) {
+                isDeleteMode = true;
+            }
+        else {
+            isDeleteMode = false;
+        }
+    }
+    if (isDeleteMode) {
+        btn.style.backgroundColor = "#000000"; // Bouton devient rouge
+        btn.style.color = "white";
+    } else {
+        btn.style.backgroundColor = "#ff4d4d"; // Retour au style d'origine
+        btn.style.color = "white";
+    }
+    
+    loadSuggestions(); // Relance le rendu avec la nouvelle couleur de liste
+}
+function arrayBufferToBase64(buffer) {
+    return btoa(String.fromCharCode.apply(null, new Uint8Array(buffer)))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+    }
+// Fonction pour sauvegarder l'abonnement dans la base de données Supabase
+async function saveSubscriptionToDatabase(subscription) {
+    if (!currentListId) {
+        console.error('No currentListId defined. Cannot save subscription.');
+        alert('Veuillez charger ou créer une liste dans les paramètres avant de vous abonner aux notifications.');
+        return;
+    }
+
+    // Récupérer p256dh et auth via getKey() et les convertir en Base64
+    const p256dh = arrayBufferToBase64(subscription.getKey('p256dh'));
+    const auth = arrayBufferToBase64(subscription.getKey('auth'));
+
+    // Convertir l'objet de souscription complet en chaîne JSON
+    const subscriptionJson = JSON.stringify(subscription);
+
+    const { data, error } = await supabaseClient
+        .from('subscriptions') // Assurez-vous que le nom de la table est correct ici
+        .insert([
+            {
+                list_id: currentListId,
+                endpoint: subscription.endpoint,
+                p256dh: p256dh,
+                auth: auth,
+                subscription_json: subscriptionJson // <-- AJOUTEZ CETTE LIGNE
+            }
+        ])
+        .select();
+
+    if (error) {
+        console.error('Error saving subscription:', error.message);
+        alert('Erreur lors de l\'enregistrement de l\'abonnement : ' + error.message);
+    } else {
+        console.log('Subscription saved:', data);
+    }
+}
+
+// --- Écouteur d'événements pour la cloche de notification ---
+notificationBell.addEventListener('click', async () => {
+    // Appeler la fonction d'abonnement ici
+    // await subscribeUserToPush();
+    // Optionnellement, vous pouvez ensuite ouvrir le modal d'envoi si l'abonnement est réussi
+    // openNotificationModal(); 
+});
+// --- Utility Functions ---
+function generateShareCode() {
+    return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
+
+async function handleInitialLoad() {
+    let shareCode = localStorage.getItem('lastShareCode');
+    if (shareCode) {
+        shareCodeInput.value = shareCode; // Set the input in settings
+        await getOrCreateListByShareCode(shareCode);
+        showSection('shoppingList'); // Show shopping list if connected
+    } else {
+        // If no share code, go to settings for the user to enter one
+        showSection('settings');
+        // Optionally, pre-fill with a generated code to suggest creation            shareCodeInput.value = generateShareCode();
+    }
+}
+
+function showSection(sectionId) {
+    document.querySelectorAll('.section').forEach(section => {
+        section.classList.add('hidden');
+    });
+    document.getElementById(sectionId).classList.remove('hidden');
+
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    document.getElementById('nav' + sectionId.charAt(0).toUpperCase() + sectionId.slice(1)).classList.add('active');
+
+    // Specific for the settings section
+    if (sectionId === 'settings') {
+        activeShareCodeSpan.textContent = currentShareCode || 'N/A';
+    }
+    // Load section-specific data if necessary
+    if (sectionId === 'buyLater') {
+        loadBuyLaterList();
+    } else if (sectionId === 'suggestions') {
+        updateSuggestionCategoryFilter(); // Update category filter
+        loadSuggestions(); // Load suggestions after filter update
+    } else if (sectionId === 'categories') {
+        renderCategories();
+        loadCategoryOrder();
+    }
+}
+
+// New function to toggle the bottom navigation
+function toggleBottomNav() {
+    const bottomNav = document.querySelector('.bottom-nav');
+    const icon = toggleNavBtn.querySelector('i');
+
+    if (bottomNav.classList.contains('hidden-nav')) {
+        bottomNav.classList.remove('hidden-nav');
+        icon.classList.remove('fa-chevron-up');
+        icon.classList.add('fa-chevron-down');
+    } else {
+        bottomNav.classList.add('hidden-nav');
+        icon.classList.remove('fa-chevron-down');
+        icon.classList.add('fa-chevron-up');
+    }
+    updateBodyPadding(); // Update body padding after toggle
+}
+
+// New function to adjust body padding-bottom
+function updateBodyPadding() {
+    const bottomNavHeight = bottomNav.offsetHeight;
+    // The toggle button is outside the bottom-nav for fixed positioning.
+    // We need to account for both the nav and the toggle button's height
+    // to avoid content being hidden. Assuming toggle button is 40px height + 20px top margin from nav.
+    const effectiveNavHeight = bottomNav.classList.contains('hidden-nav') ? 0 : bottomNavHeight;
+    const toggleButtonHeight = bottomNav.classList.contains('hidden-nav') ? 40 : 0; // Only visible when nav is hidden
+
+    document.body.style.paddingBottom = `${effectiveNavHeight + toggleButtonHeight + 20}px`;
+}
+
+
+function updateSupabaseHeaders(shareCode) {
+    if (supabaseClient && supabaseClient.rest) {
+        supabaseClient.rest.headers['X-Share-Code'] = shareCode;
+        console.log(`Supabase headers updated with X-Share-Code: ${shareCode}`);
+    } else {
+        console.warn("Supabase client not initialized or rest client not ready, cannot update headers.");
+    }
+}
+
+function getCategories() {
+    return JSON.parse(localStorage.getItem('user_categories')) || initialDefaultCategories;
+}
+
+function saveCategories(categories) {
+    localStorage.setItem('user_categories', JSON.stringify(categories));
+}
+
+function updateAllCategorySelects() {
+    const categories = getCategories();
+    const selects = document.querySelectorAll('select#newCategorySelect, select#newSuggestionCategorySelect');
+    selects.forEach(select => {
+        select.innerHTML = '';
+        categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            select.appendChild(option);
+        });
+    });
+    if (categories.length > 0) {
+        newCategorySelect.value = categories[0];
+        newSuggestionCategorySelect.value = categories[0];
+    }
+}
+
+function updateSuggestionCategoryFilter() {
+    const categories = getCategories();
+    suggestionCategoryFilter.innerHTML = '';
+
+    // Add "All categories" option
+    const allOption = document.createElement('option');
+    allOption.value = 'all';
+    allOption.textContent = 'All categories';
+    suggestionCategoryFilter.appendChild(allOption);
+
+    categories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = category;
+        suggestionCategoryFilter.appendChild(option);
+    });
+    suggestionCategoryFilter.value = 'all'; // Default to "All Categories"
+}
+
+// --- Supabase Functions ---
+
+async function getOrCreateListByShareCode(code) {
+    updateSupabaseHeaders(code);
+
+    try {
+        const { data: lists, error: selectError } = await supabaseClient
+            .from('lists')
+            .select('id, name')
+            .eq('share_code', code);
+
+        if (selectError && selectError.code !== '406') {
+            if (selectError.code === 'PGRST400' && selectError.message.includes('406')) {
+            } else {
+                throw selectError;
+            }
+        }
+
+        if (lists && lists.length > 0) {
+            console.log(`List found for code ${code}:`, lists[0]);
+            currentListId = lists[0].id;
+            console.log(currentListId)
+            currentShareCode = code;
+            await updateSubscriptionForNewList(currentListId);
+            localStorage.setItem('lastShareCode', shareCodeInput.value); // Save on successful load
+            setupRealtimeListener(currentListId);
+            loadShoppingList();
+            activeShareCodeSpan.textContent = currentShareCode; // Update display in settings
+            return lists[0];
+        } else {
+            console.log(`No list found for code ${code}. Creating a new list.`);
+            const newList = {
+                name: `List ${code}`,
+                share_code: code
+            };
+            const { data: createdList, error: insertError } = await supabaseClient
+                .from('lists')
+                .insert([newList])
+                .select('id, name');
+
+            if (insertError) {
+                console.error("Error creating list:", insertError);
+                alert("Error creating list: " + insertError.message);
+                return null;
+            } else {
+                console.log("New list created:", createdList[0]);
+                currentListId = createdList[0].id;
+                currentShareCode = code;
+                await updateSubscriptionForNewList(currentListId);
+                localStorage.setItem('lastShareCode', shareCodeInput.value); // Save on successful creation
+                setupRealtimeListener(currentListId);
+                loadShoppingList();
+                activeShareCodeSpan.textContent = currentShareCode; // Update display in settings
+                return createdList[0];
+            }
+        }
+    } catch (error) {
+        console.error("Unexpected error in getOrCreateListByShareCode:", error);
+        alert("An unexpected error occurred: " + error.message);
+        return null;
+    }
+}
+
+async function updateItemQuantity(itemId, newQuantity) {
+    if (!currentListId) return;
+
+    const listItemElement = document.querySelector(`#shoppingListToBuy li[data-id="${itemId}"]`);
+    if (!listItemElement) return;
+
+    const quantitySpan = listItemElement.querySelector('.quantity-control span');
+
+    // 1. GESTION DE LA SUPPRESSION
+    if (newQuantity <= 0) {
+        await deleteItem(itemId);
+        return;
+    }
+
+    // 2. MISE À JOUR OPTIMISTE (Immédiate pour l'utilisateur)
+    isUpdatingLocally = true; // On dit au listener Realtime de nous laisser tranquille
+    quantitySpan.textContent = `${newQuantity}x`;
+    listItemElement.dataset.quantity = newQuantity;
+
+    try {
+        const { error } = await supabaseClient
+            .from('list_items')
+            .update({ quantity: newQuantity })
+            .eq('id', itemId);
+
+        if (error) throw error;
+
+    } catch (error) {
+        console.error("Erreur de mise à jour:", error);
+        // En cas de vraie erreur réseau, on rafraîchit pour remettre la bonne valeur
+        loadShoppingList();
+    } finally {
+        // On redonne la main au Realtime après un petit délai pour laisser le réseau respirer
+        setTimeout(() => { isUpdatingLocally = false; }, 1000);
+    }
+}
+
+async function addItem(name, quantity, category, listId) {
+    if (!listId) {
+        alert("Please load or create a list first.");
+        return;
+    }
+    try {
+        const { data: existingItems, error: selectError } = await supabaseClient
+            .from('list_items')
+            .select('id, quantity')
+            .eq('list_id', listId)
+            .eq('name', name)
+            .eq('category', category); // Include category in check
+
+        if (selectError) throw selectError;
+
+        if (existingItems && existingItems.length > 0) {
+            // Item exists, update its quantity
+            const existingItem = existingItems[0];
+            const newQuantity = existingItem.quantity + quantity;
+            const { data, error: updateError } = await supabaseClient
+                .from('list_items')
+                .update({ quantity: newQuantity })
+                .eq('id', existingItem.id);
+            if (updateError) throw updateError;
+            console.log(`Quantity of item '${name}' updated to ${newQuantity}.`);
+        } else {
+            // Item does not exist, insert new
+            const { data, error: insertError } = await supabaseClient
+                .from('list_items')
+                .insert([{ name, quantity, category, list_id: listId }]);
+            if (insertError) throw insertError;
+            console.log(`Item '${name}' added to list.`);
+        }
+
+        // Add category to local storage if it doesn't exist
+        if (category) {
+            const currentCategories = getCategories();
+            if (!currentCategories.includes(category)) {
+                currentCategories.push(category);
+                saveCategories(currentCategories);
+                updateAllCategorySelects(); // Update category dropdowns
+                updateSuggestionCategoryFilter(); // Update filter dropdown
+                renderCategories(); // Re-render category list in 'Manage Categories'
+                loadCategoryOrder(); // Update category order list
+            }
+        }
+
+        newItemInput.value = '';
+        newQuantityInput.value = '1';
+    } catch (error) {
+        console.error("Error adding/updating item:", error);
+        alert("Error adding/updating item: " + error.message);
+    }
+}
+
+async function deleteItem(itemId) {
+    if (!currentListId) return;
+
+    const listItemElement = document.querySelector(`#shoppingListToBuy li[data-id="${itemId}"]`);
+    
+    if (listItemElement) {
+        // --- NOUVELLE LOGIQUE DE SUPPRESSION DE CATÉGORIE VIDE ---
+        const previousElement = listItemElement.previousElementSibling;
+        const nextElement = listItemElement.nextElementSibling;
+
+        // Si l'élément précédent est un H3 et le suivant est soit un autre H3 soit rien (fin de liste)
+        // Cela signifie que c'était le dernier item de cette catégorie.
+        if (previousElement && previousElement.tagName === 'H3') {
+            if (!nextElement || nextElement.tagName === 'H3') {
+                previousElement.remove(); // On supprime le titre de la catégorie
+            }
+        }
+        
+        listItemElement.remove(); // On supprime l'item
+    }
+
+    try {
+        const { data, error } = await supabaseClient
+            .from('list_items')
+            .delete()
+            .eq('id', itemId);
+            
+        if (error) {
+            console.error("Error deleting item:", error);
+            loadShoppingList(); // En cas d'erreur, on recharge pour restaurer l'affichage
+        } else {
+            // Optionnel : Si la liste est maintenant totalement vide, on affiche le message "liste vide"
+            if (shoppingListToBuy.children.length === 0) {
+                shoppingListToBuy.innerHTML = '<p class="empty-list-message">Your list is empty for now!</p>';
+            }
+        }
+    } catch (error) {
+        console.error("Unexpected error:", error);
+        loadShoppingList();
+    }
+}
+
+async function loadShoppingList() {
+    if (!currentListId) {
+        shoppingListToBuy.innerHTML = '<p class="empty-list-message">Your list is empty for now!</p>';
+        return;
+    }
+    updateSupabaseHeaders(currentShareCode);
+
+    try {
+        const { data: items, error } = await supabaseClient
+            .from('list_items')
+            .select('*')
+            .eq('list_id', currentListId)
+            .order('id', { ascending: true });
+
+        if (error) {
+            console.error("Error loading shopping list:", error);
+            alert("Error loading list: " + error.message);
+            return;
+        }
+
+        shoppingListToBuy.innerHTML = '';
+
+        if (!items || items.length === 0) {
+            shoppingListToBuy.innerHTML = '<p class="empty-list-message">Your list is empty for now!</p>';
+            return;
+        }
+
+        const categories = getCategories();
+        const categoryOrder = JSON.parse(localStorage.getItem('category_order')) || categories;
+
+        // 1. Groupage des items
+        const groupedItems = {};
+        items.forEach(item => {
+            const category = item.category || 'Autres';
+            if (!groupedItems[category]) groupedItems[category] = [];
+            groupedItems[category].push(item);
+        });
+
+        // 2. Déterminer l'ordre des catégories
+        const allCategoriesInItems = Object.keys(groupedItems);
+        const finalOrder = [...categoryOrder];
+        allCategoriesInItems.forEach(cat => {
+            if (!finalOrder.includes(cat)) finalOrder.push(cat);
+        });
+
+        // 3. Rendu (La correction est ici : on vérifie groupedItems[cat])
+        finalOrder.forEach(cat => {
+            // On ne crée l'en-tête QUE si la catégorie contient au moins 1 item
+            if (groupedItems[cat] && groupedItems[cat].length > 0) {
+                
+                const h3 = document.createElement('h3');
+                h3.className = 'category-header-clickable';
+                h3.innerHTML = `<span>${cat}</span> <i class="fas fa-chevron-down toggle-icon"></i>`;
+                
+                h3.onclick = () => {
+                    const icon = h3.querySelector('.toggle-icon');
+                    const isCollapsed = h3.classList.toggle('collapsed');
+                    icon.style.transform = isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)';
+                    
+                    let nextEl = h3.nextElementSibling;
+                    while (nextEl && nextEl.tagName !== 'H3') {
+                        nextEl.classList.toggle('collapsed-content');
+                        nextEl = nextEl.nextElementSibling;
+                    }
+                };
+
+                shoppingListToBuy.appendChild(h3);
+                
+                // Tri et rendu des items
+                groupedItems[cat].sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
+                groupedItems[cat].forEach(item => renderListItem(item, shoppingListToBuy));
+            }
+        });
+
+    } catch (error) {
+        console.error("Unexpected error loading shopping list:", error);
+        alert("An unexpected error occurred: " + error.message);
+    }
+}
+
+function renderListItem(item, listElement) {
+    const li = document.createElement('li');
+    li.dataset.id = item.id;
+
+    // Check if it's a shopping list item (has quantity controls) or a buy later item
+    const isShoppingListItem = listElement === shoppingListToBuy;
+
+    if (isShoppingListItem) {
+        // Container for quantity and item name
+        const quantityAndNameContainer = document.createElement('div');
+        quantityAndNameContainer.style.display = 'flex'; // Use flexbox
+        quantityAndNameContainer.style.alignItems = 'center';
+        quantityAndNameContainer.style.flexGrow = '1'; // Allow it to take available space
+
+        const quantityControl = document.createElement('div');
+        quantityControl.classList.add('quantity-control');
+        quantityControl.style.display = 'flex'; // Ensure buttons are inline
+        quantityControl.style.alignItems = 'center';
+
+        const minusBtn = document.createElement('button');
+        minusBtn.textContent = '-';
+        minusBtn.onclick = () => {
+            const currentDisplayedQuantity = parseInt(quantitySpan.textContent.replace('x', ''));
+            updateItemQuantity(item.id, currentDisplayedQuantity - 1);
+        };
+        quantityControl.appendChild(minusBtn);
+
+        const quantitySpan = document.createElement('span');
+        quantitySpan.textContent = `${item.quantity}x`; // Add 'x' here
+        quantityControl.appendChild(quantitySpan);
+
+        const plusBtn = document.createElement('button');
+        plusBtn.textContent = '+';
+        plusBtn.onclick = () => {
+            const currentDisplayedQuantity = parseInt(quantitySpan.textContent.replace('x', ''));
+            updateItemQuantity(item.id, currentDisplayedQuantity + 1);
+        };
+        quantityControl.appendChild(plusBtn);
+
+        // Add quantity controls to the container
+        quantityAndNameContainer.appendChild(quantityControl);
+
+        // Create a span for the item name, applying the new CSS class
+        const itemName = document.createElement('span');
+        itemName.classList.add('item-name'); /* Add this class */
+        itemName.textContent = item.name;
+        quantityAndNameContainer.appendChild(itemName);
+
+        li.appendChild(quantityAndNameContainer); // Add the main container
+    } else { // For buyLaterList
+        const itemName = document.createElement('span');
+        itemName.classList.add('item-name'); /* Add this class for consistency */
+        itemName.textContent = item.name;
+        itemName.style.paddingLeft = '1.2rem'; /* Match li padding-left */
+        itemName.style.flexGrow = '1'; /* Allow name to take available space */
+        li.appendChild(itemName);
+    }
+
+
+    const itemActions = document.createElement('div');
+    itemActions.classList.add('item-actions');
+
+    const removeBtn = document.createElement('button');
+    removeBtn.classList.add('remove-btn');
+    // Use Font Awesome cross icon directly
+    removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+    if (isShoppingListItem) {
+        removeBtn.onclick = () => deleteItem(item.id);
+    } else { // For buyLaterList
+        removeBtn.onclick = () => deleteBuyLaterItem(item.id);
+    }
+
+    itemActions.appendChild(removeBtn);
+
+    li.appendChild(itemActions);
+    listElement.appendChild(li);
+}
+
+
+async function setupRealtimeListener() {
+    // 1. NETTOYAGE COMPLET des deux canaux avant de commencer
+    if (window.supabaseChannel) {
+        await supabaseClient.removeChannel(window.supabaseChannel);
+        window.supabaseChannel = null;
+    }
+    if (window.supabaseBuyLaterChannel) {
+        await supabaseClient.removeChannel(window.supabaseBuyLaterChannel);
+        window.supabaseBuyLaterChannel = null;
+    }
+
+    if (!currentListId) {
+        console.warn("No currentListId defined, cannot set up Realtime listener.");
+        return;
+    }
+
+    // 2. CONFIGURATION DU CANAL PRINCIPAL (list_items)
+    window.supabaseChannel = supabaseClient.channel(`list_items_changes:${currentListId}`)
+        .on('postgres_changes', {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'list_items',
+            filter: `list_id=eq.${currentListId}`
+        }, (payload) => {
+            if (isUpdatingLocally) return;
+            console.log('Realtime UPDATE detected:', payload);
+            const updatedItem = payload.new;
+            const listItemElement = document.querySelector(`#shoppingListToBuy li[data-id="${updatedItem.id}"]`);
+            if (listItemElement) {
+                const quantitySpan = listItemElement.querySelector('.quantity-control span');
+                if (quantitySpan) {
+                    quantitySpan.textContent = `${updatedItem.quantity}x`;
+                }
+            } else {
+                loadShoppingList();
+            }
+        })
+        .on('postgres_changes', {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'list_items',
+            filter: `list_id=eq.${currentListId}`
+        }, (payload) => {
+            console.log('Realtime INSERT detected:', payload);
+            loadShoppingList();
+        })
+        .on('postgres_changes', {
+            event: 'DELETE',
+            schema: 'public',
+            table: 'list_items',
+            filter: `list_id=eq.${currentListId}`
+        }, (payload) => {
+            console.log('Realtime DELETE detected:', payload);
+            loadShoppingList();
+        })
+        .subscribe((status) => {
+            if (status !== 'SUBSCRIBED') console.warn("List channel status:", status);
+        });
+
+    // 3. CONFIGURATION DU CANAL BUY LATER
+    window.supabaseBuyLaterChannel = supabaseClient.channel(`buy_later_items_changes:${currentListId}`)
+        .on('postgres_changes', {
+            event: '*',
+            schema: 'public',
+            table: 'buy_later_items',
+            filter: `list_id=eq.${currentListId}`
+        }, (payload) => {
+            console.log('Buy Later Realtime change detected:', payload);
+            loadBuyLaterList();
+        })
+        .subscribe((status) => {
+            if (status !== 'SUBSCRIBED') console.warn("Buy Later channel status:", status);
+        });
+
+    console.log(`Realtime listeners configured for list_id: ${currentListId}`);
+}
+
+
+// --- Buy Later Functions ---
+async function addBuyLaterItem(name) {
+    if (!currentListId) {
+        alert("Please load or create a list first.");
+        return;
+    }
+    try {
+        const { data, error } = await supabaseClient
+            .from('buy_later_items')
+            .insert([{ name, list_id: currentListId }]);
+        if (error) {
+            console.error("Error adding 'Buy Later' item:", error);
+            alert("Error adding 'Buy Later' item: " + error.message);
+        } else {
+            newBuyLaterItemInput.value = '';
+            // loadBuyLaterList is handled by the Realtime listener
+        }
+    } catch (error) {
+        console.error("Unexpected error adding 'Buy Later' item:", error);
+        alert("An unexpected error occurred: " + error.message);
+    }
+}
+
+async function deleteBuyLaterItem(itemId) {
+    if (!currentListId) return;
+
+    // Optimistic UI update: Remove the item from the DOM immediately
+    const listItemElement = document.querySelector(`#buyLaterList li[data-id="${itemId}"]`);
+    if (listItemElement) {
+        listItemElement.remove();
+    }
+
+    try {
+        const { data, error } = await supabaseClient
+            .from('buy_later_items')
+            .delete()
+            .eq('id', itemId);
+        if (error) {
+            console.error("Error deleting 'Buy Later' item:", error);
+            alert("Error deleting 'Buy Later' item: " + error.message);
+            loadBuyLaterList(); // Reload if there's an error
+        } else {
+            // loadBuyLaterList is handled by the Realtime listener
+        }
+    } catch (error) {
+        console.error("Unexpected error deleting 'Buy Later' item:", error);
+        alert("An unexpected error occurred: " + error.message);
+        loadBuyLaterList(); // Reload in case of unexpected JS error
+    }
+}
+
+async function loadBuyLaterList() {
+    if (!currentListId) {
+        buyLaterList.innerHTML = '<p class="empty-list-message">Your "Buy Later" list is empty!</p>';
+        return;
+    }
+    updateSupabaseHeaders(currentShareCode);
+
+    try {
+        const { data: items, error } = await supabaseClient
+            .from('buy_later_items')
+            .select('*')
+            .eq('list_id', currentListId)
+            .order('id', { ascending: true });
+
+        if (error) {
+            console.error("Error loading 'Buy Later' list:", error);
+            alert("Error loading 'Buy Later' list: " + error.message);
+            return;
+        }
+
+        buyLaterList.innerHTML = '';
+        if (items.length === 0) {
+            buyLaterList.innerHTML = '<p class="empty-list-message">Your "Buy Later" list is empty!</p>';
+            return;
+        }
+        // Sort buy later items alphabetically
+        items.sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
+
+        items.forEach(item => {
+            // Use the shared renderListItem function
+            renderListItem(item, buyLaterList);
+        });
+    } catch (error) {
+        console.error("Unexpected error loading 'Buy Later' list:", error);
+        alert("An unexpected error occurred: " + error.message);
+    }
+}
+
+// --- Suggestions Functions (LOCAL STORAGE) ---
+function getSuggestions() {
+    return JSON.parse(localStorage.getItem('shopping_suggestions') || '[]');
+}
+
+function saveSuggestions(suggestions) {
+    localStorage.setItem('shopping_suggestions', JSON.stringify(suggestions));
+}
+
+async function addSuggestion(name, category) {
+    if (!name.trim() || !category) {
+        alert("Please enter a name and choose a category for the suggestion.");
+        return;
+    }
+    const suggestions = getSuggestions();
+    // Check for existing suggestion
+    if (suggestions.some(sug => sug.name.toLowerCase() === name.trim().toLowerCase() && sug.category.toLowerCase() === category.toLowerCase())) {
+        alert(`"${name.trim()}" is already a suggestion in category "${category}"!`);
+        return;
+    }
+
+    const newSuggestion = {
+        id: Date.now(), // Simple unique ID
+        name: name.trim(),
+        category: category
+    };
+    suggestions.push(newSuggestion);
+    saveSuggestions(suggestions);
+    newSuggestionInput.value = '';
+    loadSuggestions(); // Refresh the list
+}
+
+async function deleteSuggestion(suggestionId) {
+    const suggestions = getSuggestions();
+    const suggestionToDelete = suggestions.find(sug => sug.id === suggestionId);
+    const suggestionName = suggestionToDelete ? suggestionToDelete.name : "this suggestion";
+    // 3. On affiche le confirm avec le vrai nom
+    const listItemElement = document.querySelector(`#suggestionList li[data-id="${suggestionId}"]`);
+    if (listItemElement) {
+        listItemElement.remove();
+    }
+
+    // Mise à jour du Local Storage
+    const updatedSuggestions = suggestions.filter(sug => sug.id !== suggestionId);
+    saveSuggestions(updatedSuggestions);
+
+    // Message si vide
+    if (updatedSuggestions.length === 0) {
+        document.getElementById('suggestionList').innerHTML = '<p class="empty-list-message">No suggestions available at the moment.</p>';
+    }
+}
+
+async function loadSuggestions() {
+    let suggestions = getSuggestions();
+    const list = document.getElementById('suggestionList');
+    const container = document.getElementById('suggestions'); // Le parent
+    
+    list.innerHTML = '';
+
+    // Gestion de la classe visuelle sur le conteneur
+    if (isDeleteMode) {
+        container.classList.add('delete-mode-active');
+    } else {
+        container.classList.remove('delete-mode-active');
+    }
+
+    // Filtrage (code existant)
+    const selectedCategory = suggestionCategoryFilter.value;
+    let filteredSuggestions = selectedCategory === 'all'
+        ? suggestions
+        : suggestions.filter(sug => sug.category === selectedCategory);
+
+    filteredSuggestions.forEach(sug => {
+        const li = document.createElement('li');
+        li.innerHTML = `<span class="name">${sug.name}</span>`;
+        
+        li.onclick = () => {
+            if (isDeleteMode) {
+                deleteSuggestion(sug.id);
+                loadSuggestions(); 
+            } else {
+                // ACTION D'AJOUT CLASSIQUE
+                addItem(sug.name, 1, sug.category, currentListId);
+                // Feedback visuel rapide d'ajout
+                li.style.transform = "scale(0.95)";
+                setTimeout(() => li.style.transform = "scale(1)", 100);
+            }
+        };
+
+        list.appendChild(li);
+    });
+}
+document.getElementById('toggleDeleteModeBtn').addEventListener('click', toggleDeleteMode);
+async function addCategory(categoryName) {
+    if (!categoryName.trim()) {
+        alert('Please enter a category name.');
+        return;
+    }
+    let categories = getCategories();
+    if (categories.some(cat => cat.toLowerCase() === categoryName.trim().toLowerCase())) {
+        alert(`Category "${categoryName.trim()}" already exists!`);
+        return;
+    }
+    categories.push(categoryName.trim());
+    saveCategories(categories);
+    newCategoryInput.value = '';
+    updateAllCategorySelects();
+    updateSuggestionCategoryFilter();
+    renderCategories();
+    loadCategoryOrder(); // Refresh the order list
+}
+
+function deleteCategory(categoryName) {
+    if (!confirm(`Are you sure you want to delete category "${categoryName}"? This will also delete all linked suggestions.`)) {
+        return;
+    }
+    let categories = getCategories();
+    categories = categories.filter(cat => cat !== categoryName);
+    saveCategories(categories);
+
+    // Remove from local category order if present
+    let currentOrder = JSON.parse(localStorage.getItem('category_order')) || [];
+    currentOrder = currentOrder.filter(cat => cat !== categoryName);
+    localStorage.setItem('category_order', JSON.stringify(currentOrder));
+
+    // Logic to remove suggestions linked to this category from local storage
+    let suggestions = getSuggestions();
+    suggestions = suggestions.filter(sug => sug.category !== categoryName);
+    saveSuggestions(suggestions);
+    loadSuggestions(); // Refresh suggestions list
+
+    updateAllCategorySelects();
+    updateSuggestionCategoryFilter();
+    renderCategories();
+    loadCategoryOrder();
+    loadShoppingList(); // Reload shopping list to reflect category changes
+}
+
+function renderCategories() {
+    const categories = getCategories();
+    categoryList.innerHTML = '';
+    if (categories.length === 0) {
+        categoryList.innerHTML = '<p class="empty-list-message">No categories defined. Add some above!</p>';
+        return;
+    }
+    // Sort categories alphabetically for "Your Categories" list
+    const sortedCategories = [...categories].sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
+
+    sortedCategories.forEach(category => {
+        const li = document.createElement('li');
+        li.textContent = category;
+        li.innerHTML = `
+            <span>${category}</span>
+            <button class="remove-btn" data-category="${category}"><i class="fas fa-times"></i></button>
+        `;
+        // FIX: Use closest('.remove-btn') to get the button element that has the data-category attribute
+        li.querySelector('.remove-btn').addEventListener('click', (e) => {
+            deleteCategory(e.target.closest('.remove-btn').dataset.category);
+        });
+        categoryList.appendChild(li);
+    });
+}
+
+let draggingCategoryElement = null;
+async function updateSubscriptionForNewList(newListId) {
+    const registration = await navigator.serviceWorker.ready;
+    const subscription = await registration.pushManager.getSubscription();
+
+    if (subscription) {
+        // Extraire les clés de sécurité (format ArrayBuffer -> Base64)
+        const p256dh = btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('p256dh'))));
+        const auth = btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('auth'))));
+
+        const { error } = await supabaseClient
+            .from('subscriptions')
+            .upsert({ 
+                endpoint: subscription.endpoint, 
+                list_id: newListId,
+                p256dh: p256dh, // On ajoute la clé publique
+                auth: auth,     // On ajoute le secret d'authentification
+                subscription_json: JSON.stringify(subscription)
+            }, { onConflict: 'endpoint' }); 
+
+        if (error) console.error("Erreur de mise à jour d'abonnement:", error);
+    } else {
+    console.log("Aucun abonnement, lancement de subscribeUserToPush...");
+    await subscribeUserToPush();
+    }
+}
+function loadCategoryOrder() {
+    let categories = getCategories(); // Toutes les catégories actuelles
+    let savedOrder = JSON.parse(localStorage.getItem('category_order')) || []; // Ordre sauvegardé depuis localStorage
+
+    // Filtrer les catégories de savedOrder qui n'existent plus dans getCategories()
+    // Et s'assurer que les nouvelles catégories de getCategories() sont ajoutées à la fin de l'ordre
+    let newOrder = savedOrder.filter(cat => categories.includes(cat));
+
+    categories.forEach(cat => {
+        if (!newOrder.includes(cat)) {
+            newOrder.push(cat); // Ajouter les nouvelles catégories à la fin
+        }
+    });
+
+    // Si après réconciliation, l'ordre a changé, le sauvegarder
+    if (JSON.stringify(savedOrder) !== JSON.stringify(newOrder)) {
+        localStorage.setItem('category_order', JSON.stringify(newOrder));
+    }
+    // Utiliser l'ordre réconcilié et potentiellement sauvegardé pour le rendu
+    let currentOrder = newOrder;
+
+    categoryOrderList.innerHTML = ''; // Effacer la liste d'abord
+
+    if (currentOrder.length === 0) {
+        categoryOrderList.innerHTML = '<p class="empty-list-message">Faites glisser les catégories pour définir leur ordre.</p>'; // Conserver le texte original
+        return;
+    }
+
+    currentOrder.forEach(category => {
+        const li = document.createElement('li');
+        li.textContent = category;
+        li.draggable = true;
+        li.classList.add('category-item'); // Ajouter une classe pour le style/la sélection
+        li.innerHTML = `<i class="fas fa-grip-vertical drag-handle"></i><span>${category}</span>`;
+        categoryOrderList.appendChild(li);
+    });
+}
+
+function saveCategoryOrder() {
+    const items = Array.from(categoryOrderList.children);
+    const newOrder = items.map(li => li.querySelector('span').textContent.trim()); // Get text from span
+    localStorage.setItem('category_order', JSON.stringify(newOrder));
+    console.log('Category order saved!'); // Log instead of alert
+    loadShoppingList(); // Reload shopping list to apply new order
+}
+
+// --- Notification Push Functions (MODAL & SENDING) ---
+
+// Function to send the push notification via the Edge Function
+async function sendPushNotification(message) {
+    if (!currentListId) {
+        alert("Please load or create a list first before sending notifications.");
+        return;
+    }
+    if (!message || message.trim() === '') {
+        alert("Please enter a message to send.");
+        return;
+    }
+
+    try {
+        console.log(`Attempting to send push notification for list: ${currentListId}, message: "${message}"`);
+        const { data, error } = await supabaseClient.functions.invoke('send-push-notification', {
+            body: {
+                listId: currentListId,
+                message: message // Now sending a generic message
+            }
+        });
+
+        if (error) {
+            console.error("Error invoking send-push-notification Edge Function:", error);
+            if (error.message.includes('No subscriptions found for list')) {
+                alert(`Notification sent to list ${currentShareCode} (no push subscriptions found).`);
+            } else {
+                alert("Failed to send push notification: " + error.message);
+            }
+        } else {
+            console.log("Push notification Edge Function invoked successfully:", data);
+            alert("Notification sent successfully!");
+            closeNotificationModal(); // Close modal on success
+            notificationMessageInput.value = ''; // Clear message input
+        }
+    } catch (error) {
+        console.error("Unexpected error calling send-push-notification:", error);
+        alert("An unexpected error occurred while sending notification: " + error.message);
+    }
+}
+
+function openNotificationModal() {
+    if (!currentListId) {
+        alert("Please load or create a list first to send notifications.");
+        showSection('settings');
+        return;
+    }
+    notificationModal.classList.add('visible');
+    notificationMessageInput.value = ''; // Clear input when opening
+    renderSavedMessages(); // Load saved messages
+}
+
+function closeNotificationModal() {
+    notificationModal.classList.remove('visible');
+}
+
+// Saved Messages management (Local Storage)
+function getSavedMessages() {
+    return JSON.parse(localStorage.getItem('saved_notification_messages')) || [];
+}
+
+function saveSavedMessages(messages) {
+    localStorage.setItem('saved_notification_messages', JSON.stringify(messages));
+}
+
+function addSavedMessage(message) {
+    if (!message || message.trim() === '') {
+        alert('Cannot save an empty message.');
+        return;
+    }
+    let messages = getSavedMessages();
+    // Check for duplicates
+    if (messages.some(m => m.text.trim() === message.trim())) {
+        alert('This message is already saved!');
+        return;
+    }
+    messages.push({ id: Date.now(), text: message.trim() });
+    saveSavedMessages(messages);
+    renderSavedMessages();
+    alert('Message saved!');
+}
+
+function deleteSavedMessage(id) {
+    if (!confirm('Are you sure you want to delete this saved message?')) {
+        return;
+    }
+    let messages = getSavedMessages();
+    messages = messages.filter(m => m.id !== id);
+    saveSavedMessages(messages);
+    renderSavedMessages();
+}
+
+function renderSavedMessages() {
+    const messages = getSavedMessages();
+    savedMessagesList.innerHTML = '';
+    if (messages.length === 0) {
+        emptySavedMessages.style.display = 'block';
+    } else {
+        emptySavedMessages.style.display = 'none';
+    }
+
+    messages.forEach(msg => {
+        const li = document.createElement('li');
+        li.dataset.id = msg.id;
+        li.innerHTML = `
+            <span class="message-text">${msg.text}</span>
+            <div class="message-actions">
+                <button class="remove-btn" data-id="${msg.id}"><i class="fas fa-times"></i></button>
+            </div>
+        `;
+        li.querySelector('.message-text').addEventListener('click', () => {
+            notificationMessageInput.value = msg.text; // Populate input with saved message
+        });
+        li.querySelector('.remove-btn').addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent li click
+            deleteSavedMessage(msg.id);
+        });
+        savedMessagesList.appendChild(li);
+    });
+}
+
+// --- Event Listeners ---
+addItemBtn.addEventListener('click', () => {
+    const itemName = newItemInput.value;
+    const quantity = parseInt(newQuantityInput.value) || 1;
+    const category = newCategorySelect.value;
+    addItem(itemName, quantity, category, currentListId);
+});
+
+addBuyLaterItemBtn.addEventListener('click', () => {
+    addBuyLaterItem(newBuyLaterItemInput.value);
+});
+
+addSuggestionBtn.addEventListener('click', () => {
+    addSuggestion(newSuggestionInput.value, newSuggestionCategorySelect.value);
+});
+
+addCategoryBtn.addEventListener('click', () => {
+    addCategory(newCategoryInput.value);
+});
+
+// Navigation button event listeners
+navShoppingList.addEventListener('click', () => showSection('shoppingList'));
+navBuyLater.addEventListener('click', () => showSection('buyLater'));
+navSuggestions.addEventListener('click', () => showSection('suggestions'));
+navCategories.addEventListener('click', () => showSection('categories'));
+navSettings.addEventListener('click', () => showSection('settings'));
+
+// Toggle nav button listener
+toggleNavBtn.addEventListener('click', toggleBottomNav);
+
+// Filter suggestions by category
+suggestionCategoryFilter.addEventListener('change', loadSuggestions);
+
+// Share code functionality
+loadShareCodeBtn.addEventListener('click', async () => {
+    const code = shareCodeInput.value.trim().toUpperCase();
+    if (code) {
+        await getOrCreateListByShareCode(code);
+        if (currentListId) { // If successfully connected/created
+            showSection('shoppingList'); // Go to shopping list
+        }
+    } else {
+        alert("Please enter a share code.");
+    }
+});
+
+changeShareCodeBtn.addEventListener('click', () => {
+    if (confirm("Are you sure you want to change lists / disconnect? This will clear the current share code from this device.")) {
+        localStorage.removeItem('lastShareCode');
+        currentListId = null;
+        currentShareCode = null;
+        if (window.supabaseChannel) {
+            supabaseClient.removeChannel(window.supabaseChannel);
+            window.supabaseChannel = null;
+        }
+        if (window.supabaseBuyLaterChannel) {
+            supabaseClient.removeChannel(window.supabaseBuyLaterChannel);
+            window.supabaseBuyLaterChannel = null;
+        }
+
+        // Clear current list display
+        shoppingListToBuy.innerHTML = '<p class="empty-list-message">Your list is empty for now!</p>';
+        buyLaterList.innerHTML = '<p class="empty-list-message">Your "Buy Later" list is empty!</p>';
+        suggestionList.innerHTML = '<p class="empty-list-message">No suggestions available at the moment.</p>';
+        categoryList.innerHTML = '<p class="empty-list-message">No categories defined. Add some above!</p>';
+        categoryOrderList.innerHTML = '<p class="empty-list-message">Drag categories to set their order.</p>';
+
+        shareCodeInput.value = generateShareCode(); // Suggest a new code
+        activeShareCodeSpan.textContent = 'N/A';
+        showSection('settings');
+        alert("You have been disconnected. Please enter a new share code or create one.");
+    }
+});
+
+// Scroll to form when title is clicked
+shoppingListTitle.addEventListener('click', (event) => { // Added event parameter
+    event.preventDefault(); // Prevent default browser behavior (e.g., text selection)
+    // Check if the click was on the bell icon itself, if so, don't scroll
+    if (event.target.id === 'notificationBell') {
+        return;
+    }
+    event.stopPropagation(); // Stop event propagation to avoid other actions
+    document.body.scrollIntoView({ behavior: 'smooth', block: 'end' });
+});
+
+suggestionsTitle.addEventListener('click', (event) => { // Added event parameter
+    event.preventDefault(); // Prevent default browser behavior (e.g., text selection)
+    event.stopPropagation(); // Stop event propagation to avoid other actions
+    document.body.scrollIntoView({ behavior: 'smooth', block: 'end' });
+});
+
+
+// Drag and Drop for Category Order
+categoryOrderList.addEventListener('dragstart', (e) => {
+    draggingCategoryElement = e.target;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', draggingCategoryElement.innerHTML);
+    e.target.classList.add('dragging');
+});
+
+categoryOrderList.addEventListener('dragover', (e) => {
+    e.preventDefault(); // Necessary to allow dropping
+    e.dataTransfer.dropEffect = 'move';
+    const target = e.target.closest('li.category-item');
+    if (target && target !== draggingCategoryElement) {
+        const rect = target.getBoundingClientRect();
+        const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > .5;
+        categoryOrderList.insertBefore(draggingCategoryElement, next && target.nextSibling || target);
+    }
+});
+
+categoryOrderList.addEventListener('dragend', (e) => {
+    e.target.classList.remove('dragging');
+    draggingCategoryElement = null;
+    saveCategoryOrder(); // Save order immediately after drag
+});
+
+// Notification modal event listeners
+notificationBell.addEventListener('click', openNotificationModal);
+closeNotificationModalBtn.addEventListener('click', closeNotificationModal);
+// Close modal if clicking outside content
+notificationModal.addEventListener('click', (e) => {
+    if (e.target === notificationModal) {
+        closeNotificationModal();
+    }
+});
+sendNotificationBtn.addEventListener('click', () => {
+    sendPushNotification(notificationMessageInput.value);
+});
+saveMessageBtn.addEventListener('click', () => {
+    addSavedMessage(notificationMessageInput.value);
+});
+
+
+// --- Initialization on page load ---
+window.addEventListener('load', async () => {
+    // Initialize Supabase client
+    if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log("Supabase client initialized successfully.");
+    } else {
+        console.error("Error: Supabase 'createClient' function is not defined or the Supabase library is not loaded correctly.");
+        alert("Loading error: Supabase library could not be initialized. Check your internet connection or configuration.");
+        return;
+    }
+
+    let attempts = 0;
+    const maxAttempts = 20;
+    const delayMs = 50;
+
+    while (!supabaseClient.rest && attempts < maxAttempts) {
+        console.log(`Waiting for supabase.rest (attempt ${attempts + 1}/${maxAttempts})...`);
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+        attempts++;
+    }
+
+    if (supabaseClient.rest) {
+        console.log("supabase.rest is now ready!");
+        // Initialize categories if not present in local storage
+        if (!localStorage.getItem('user_categories')) {
+            localStorage.setItem('user_categories', JSON.stringify(initialDefaultCategories));
+        }
+        await handleInitialLoad(); // This will load data and set currentListId
+        updateAllCategorySelects();
+        updateSuggestionCategoryFilter();
+        updateBodyPadding(); // Update body padding on initial load
+        renderCategories(); // Initial rendering of categories list
+        loadCategoryOrder(); // Initial load of category order list
+    } else {
+        console.error("Error: supabase.rest did not become ready after multiple attempts. Cannot start application.");
+        alert("Startup error: Could not initialize database connection. Check your connection.");
+        return;
+    }
+});
