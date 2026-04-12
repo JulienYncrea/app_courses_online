@@ -1,10 +1,8 @@
-// --- Supabase Configuration ---
 const SUPABASE_URL = 'https://kbrstkkzfsjysohjdsqh.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImticnN0a2t6ZnNqeXNvaGpkc3FoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMTE0NzIsImV4cCI6MjA5MDg4NzQ3Mn0._WST41JUmDD_N0rApXzmc-EB7D1hgJTJ80lXnRl5VB8'; // Replace with your actual anon key
 let supabaseClient = null; // Will be initialized in window.addEventListener('load')
 const VAPID_PUBLIC_KEY = "BHvMEhklZrgvkLnopsv7GlF-nm7e-OSTzur56Cu6twTpHWjHu6YdPuriz-2G6gppyFjjYQxlt2uihEXOUY0rdXs";
 
-// --- Global Variables ---
 let currentShareCode = null;
 let currentListId = null;
 const shoppingListToBuy = document.getElementById('shoppingListToBuy');
@@ -14,19 +12,17 @@ const newCategorySelect = document.getElementById('newCategorySelect');
 const addItemBtn = document.getElementById('addItemBtn');
 const shoppingListTitle = document.getElementById('shoppingListTitle'); // Added for scroll
 
-// Moved to settings section
 const shareCodeInput = document.getElementById('shareCodeInput');
 const loadShareCodeBtn = document.getElementById('loadShareCodeBtn');
 const addItemForm = document.getElementById('addItemForm');
 
-// Sections
 const shoppingListSection = document.getElementById('shoppingList');
 const buyLaterSection = document.getElementById('buyLater');
 const suggestionsSection = document.getElementById('suggestions');
 const categoriesSection = document.getElementById('categories');
 const settingsSection = document.getElementById('settings');
 
-// Navigation
+
 const navShoppingList = document.getElementById('navShoppingList');
 const navBuyLater = document.getElementById('navBuyLater');
 const navSuggestions = document.getElementById('navSuggestions');
@@ -34,12 +30,10 @@ const navCategories = document.getElementById('navCategories');
 const navSettings = document.getElementById('navSettings');
 const bottomNav = document.querySelector('.bottom-nav'); // Reference to the bottom menu
 
-// Buy Later section elements
 const newBuyLaterItemInput = document.getElementById('newBuyLaterItemInput');
 const addBuyLaterItemBtn = document.getElementById('addBuyLaterItemBtn');
 const buyLaterList = document.getElementById('buyLaterList');
 
-// Suggestions section elements
 const suggestionsTitle = document.getElementById('suggestionsTitle'); // Added for scroll
 const suggestionCategoryFilter = document.getElementById('suggestionCategoryFilter'); // New category filter
 const newSuggestionInput = document.getElementById('newSuggestionInput');
@@ -47,20 +41,16 @@ const newSuggestionCategorySelect = document.getElementById('newSuggestionCatego
 const addSuggestionBtn = document.getElementById('addSuggestionBtn');
 const suggestionList = document.getElementById('suggestionList');
 
-// Categories section elements
 const newCategoryInput = document.getElementById('newCategoryInput');
 const addCategoryBtn = document.getElementById('addCategoryBtn');
 const categoryList = document.getElementById('categoryList');
 const categoryOrderList = document.getElementById('categoryOrderList');
 
-// Settings section elements
 const activeShareCodeSpan = document.getElementById('activeShareCode');
 const changeShareCodeBtn = document.getElementById('changeShareCodeBtn');
 
-// New variable for the toggle button
 const toggleNavBtn = document.getElementById('toggleNavBtn');
 
-// Notification Modal Elements
 const notificationBell = document.getElementById('notificationBell');
 const notificationModal = document.getElementById('notificationModal');
 const closeNotificationModalBtn = document.getElementById('closeNotificationModalBtn');
@@ -71,7 +61,6 @@ const savedMessagesList = document.getElementById('savedMessagesList');
 const emptySavedMessages = document.getElementById('emptySavedMessages');
 
 
-// --- Default Categories ---
 const initialDefaultCategories = [
     "Fruits et Légumes",
     "Produits Laitiers",
@@ -115,7 +104,6 @@ async function subscribeUserToPush() {
     }
 }
 
-// Fonction utilitaire pour convertir la clé VAPID
 function urlBase64ToUint8Array(base64String) {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
     const base64 = (base64String + padding)
@@ -195,14 +183,6 @@ async function saveSubscriptionToDatabase(subscription) {
     }
 }
 
-// --- Écouteur d'événements pour la cloche de notification ---
-notificationBell.addEventListener('click', async () => {
-    // Appeler la fonction d'abonnement ici
-    // await subscribeUserToPush();
-    // Optionnellement, vous pouvez ensuite ouvrir le modal d'envoi si l'abonnement est réussi
-    // openNotificationModal(); 
-});
-// --- Utility Functions ---
 function generateShareCode() {
     return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
@@ -247,7 +227,6 @@ function showSection(sectionId) {
     }
 }
 
-// New function to toggle the bottom navigation
 function toggleBottomNav() {
     const bottomNav = document.querySelector('.bottom-nav');
     const icon = toggleNavBtn.querySelector('i');
@@ -264,7 +243,6 @@ function toggleBottomNav() {
     updateBodyPadding(); // Update body padding after toggle
 }
 
-// New function to adjust body padding-bottom
 function updateBodyPadding() {
     const bottomNavHeight = bottomNav.offsetHeight;
     // The toggle button is outside the bottom-nav for fixed positioning.
@@ -331,7 +309,6 @@ function updateSuggestionCategoryFilter() {
     suggestionCategoryFilter.value = 'all'; // Default to "All Categories"
 }
 
-// --- Supabase Functions ---
 
 async function getOrCreateListByShareCode(code) {
     updateSupabaseHeaders(code);
@@ -765,7 +742,6 @@ async function setupRealtimeListener() {
 }
 
 
-// --- Buy Later Functions ---
 async function addBuyLaterItem(name) {
     if (!currentListId) {
         alert("Please load or create a list first.");
@@ -854,7 +830,6 @@ async function loadBuyLaterList() {
     }
 }
 
-// --- Suggestions Functions (LOCAL STORAGE) ---
 function getSuggestions() {
     return JSON.parse(localStorage.getItem('shopping_suggestions') || '[]');
 }
@@ -1089,9 +1064,7 @@ function saveCategoryOrder() {
     loadShoppingList(); // Reload shopping list to apply new order
 }
 
-// --- Notification Push Functions (MODAL & SENDING) ---
 
-// Function to send the push notification via the Edge Function
 async function sendPushNotification(message) {
     if (!currentListId) {
         alert("Please load or create a list first before sending notifications.");
@@ -1210,7 +1183,6 @@ function renderSavedMessages() {
     });
 }
 
-// --- Event Listeners ---
 addItemBtn.addEventListener('click', () => {
     const itemName = newItemInput.value;
     const quantity = parseInt(newQuantityInput.value) || 1;
@@ -1230,20 +1202,16 @@ addCategoryBtn.addEventListener('click', () => {
     addCategory(newCategoryInput.value);
 });
 
-// Navigation button event listeners
 navShoppingList.addEventListener('click', () => showSection('shoppingList'));
 navBuyLater.addEventListener('click', () => showSection('buyLater'));
 navSuggestions.addEventListener('click', () => showSection('suggestions'));
 navCategories.addEventListener('click', () => showSection('categories'));
 navSettings.addEventListener('click', () => showSection('settings'));
 
-// Toggle nav button listener
 toggleNavBtn.addEventListener('click', toggleBottomNav);
 
-// Filter suggestions by category
 suggestionCategoryFilter.addEventListener('change', loadSuggestions);
 
-// Share code functionality
 loadShareCodeBtn.addEventListener('click', async () => {
     const code = shareCodeInput.value.trim().toUpperCase();
     if (code) {
@@ -1284,7 +1252,6 @@ changeShareCodeBtn.addEventListener('click', () => {
     }
 });
 
-// Scroll to form when title is clicked
 shoppingListTitle.addEventListener('click', (event) => { // Added event parameter
     event.preventDefault(); // Prevent default browser behavior (e.g., text selection)
     // Check if the click was on the bell icon itself, if so, don't scroll
@@ -1302,7 +1269,6 @@ suggestionsTitle.addEventListener('click', (event) => { // Added event parameter
 });
 
 
-// Drag and Drop for Category Order
 categoryOrderList.addEventListener('dragstart', (e) => {
     draggingCategoryElement = e.target;
     e.dataTransfer.effectAllowed = 'move';
@@ -1327,7 +1293,6 @@ categoryOrderList.addEventListener('dragend', (e) => {
     saveCategoryOrder(); // Save order immediately after drag
 });
 
-// Notification modal event listeners
 notificationBell.addEventListener('click', openNotificationModal);
 closeNotificationModalBtn.addEventListener('click', closeNotificationModal);
 // Close modal if clicking outside content
@@ -1344,7 +1309,6 @@ saveMessageBtn.addEventListener('click', () => {
 });
 
 
-// --- Initialization on page load ---
 window.addEventListener('load', async () => {
     // Initialize Supabase client
     if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
