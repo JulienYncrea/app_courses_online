@@ -272,11 +272,13 @@
     function toggleDeleteMode() {
         isDeleteMode = !isDeleteMode;
         const btn = document.getElementById('toggleDeleteModeBtn');
-        if (confirm(`You have activate the delete mode, tape yes for continue or cancel for desactivate delete mode`)) {
-                isDeleteMode = true;
+        if (isDeleteMode){
+            if (confirm(`You have activate the delete mode, tape yes for continue or cancel for desactivate delete mode. You can deactivate delete mode with click to the trash icon back`)) {
+                    isDeleteMode = true;
+                }
+            else {
+                isDeleteMode = false;
             }
-        else {
-            isDeleteMode = false;
         }
         if (isDeleteMode) {
             btn.style.backgroundColor = "#000000"; // Bouton devient rouge
