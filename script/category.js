@@ -202,10 +202,27 @@ function saveCategoryOrder() {
     loadShoppingList(); // Reload shopping list to apply new order
 }
 
+async function addCategory(categoryName) {
+    if (!categoryName.trim()) {
+        alert('Please enter a category name.');
+        return;
+    }
+    let categories = getCategories();
+    if (categories.some(cat => cat.toLowerCase() === categoryName.trim().toLowerCase())) {
+        alert(`Category "${categoryName.trim()}" already exists!`);
+        return;
+    }
+    categories.push(categoryName.trim());
+    saveCategories(categories);
+    newCategoryInput.value = '';
+    updateAllCategorySelects();
+    updateSuggestionCategoryFilter();
+    renderCategories();
+    loadCategoryOrder(); // Refresh the order list
+}
 addCategoryBtn.addEventListener('click', () => {
     addCategory(newCategoryInput.value);
 });
-
 categoryOrderList.addEventListener('dragstart', (e) => {
     draggingCategoryElement = e.target;
     e.dataTransfer.effectAllowed = 'move';
