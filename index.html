@@ -9,6 +9,38 @@
   <link rel="stylesheet" href="style/style.css">
   <meta name="theme-color" content="#fcf2f2" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    /* Styles pour la nouvelle section Map */
+    #mapSection {
+      padding-bottom: 100px;
+    }
+    #map {
+      height: 400px;
+      width: 100%;
+      border-radius: 15px;
+      margin: 15px 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      z-index: 1;
+    }
+    .location-item {
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .location-item b { color: #e91e63; }
+    
+    /* Correction pour l'affichage des sections */
+    .hidden { display: none !important; }
+  </style>
+
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -23,7 +55,6 @@
 <body>
   <div id="shoppingList" class="section-container section">
     <h1 id="shoppingListTitle">My Shopping List 🛒 <i class="fas fa-bell notification-bell" id="notificationBell"></i></h1>
-
     <ul id="shoppingListToBuy" class="item-list"></ul>
     <div id="addItemForm" class="add-form">
         <h3>Add an item</h3>
@@ -42,6 +73,14 @@
         <button id="addBuyLaterItemBtn">Add</button>
     </div>
     <ul id="buyLaterList"></ul>
+  </div>
+
+  <div id="mapSection" class="section-container section hidden">
+    <h2>Mes Endroits Kiffés 📍</h2>
+    <p>Clique sur la carte pour noter un lieu que tu kiffes !</p>
+    <div id="map"></div>
+    <h3>Lieux enregistrés</h3>
+    <div id="savedLocationsList"></div>
   </div>
 
   <div id="suggestions" class="section-container section hidden">
@@ -99,13 +138,11 @@
         <button id="sendNotificationBtn">Send Notification</button>
         <button id="saveMessageBtn">Save Message</button>
       </div>
-
       <h4>Saved Messages</h4>
       <p id="emptySavedMessages" class="empty-list-message">No saved messages.</p>
       <ul id="savedMessagesList"></ul>
     </div>
   </div>
-
 
   <div class="bottom-nav">
     <button id="toggleNavBtn" class="toggle-nav-button">
@@ -117,6 +154,10 @@
     <div class="nav-item" id="navBuyLater">
       <i class="fas fa-clock"></i>
       <span>Later</span>
+    </div>
+    <div class="nav-item" id="navMap">
+      <i class="fas fa-map-marker-alt"></i>
+      <span>Map</span>
     </div>
     <div class="nav-item" id="navSuggestions">
       <i class="fas fa-lightbulb"></i>
@@ -132,17 +173,86 @@
     </div>
   </div>
 
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- <script src="script/all.js"></script> -->
-    <script src="script/config.js"></script>
-    <script src="script/settings.js"></script>
-    <script src="script/subscription.js"></script>
-    <script src="script/menu.js"></script>
-    <script src="script/my_list.js"></script>
-    <script src="script/notifications.js"></script>
-    <script src="script/ideas.js"></script>
-    <script src="script/suggestions.js"></script>
-    <script src="script/category.js"></script>  
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <script src="script/config.js"></script>
+  <script src="script/settings.js"></script>
+  <script src="script/subscription.js"></script>
+  <script src="script/menu.js"></script>
+  <script src="script/my_list.js"></script>
+  <script src="script/notifications.js"></script>
+  <script src="script/ideas.js"></script>
+  <script src="script/suggestions.js"></script>
+  <script src="script/category.js"></script>  
+
+  <script>
+    // --- LOGIQUE DE LA CARTE ---
+    let map;
+    let mapInitialized = false;
+
+    function initMap() {
+      if (mapInitialized) return;
+      
+      map = L.map('map').setView([46.2276, 2.2137], 6);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+      }).addTo(map);
+
+      map.locate({setView: true, maxZoom: 13});
+
+      map.on('click', function(e) {
+        const description = prompt("C'est quoi cet endroit ? (ex: Meilleure Pizza, Super Parc...)");
+        if (description) {
+          addLocationMarker(e.latlng.lat, e.latlng.lng, description);
+          saveLocation(e.latlng.lat, e.latlng.lng, description);
+        }
+      });
+
+      loadSavedLocations();
+      mapInitialized = true;
+    }
+
+    function addLocationMarker(lat, lng, text) {
+      L.marker([lat, lng]).addTo(map)
+        .bindPopup(`<b>${text}</b>`)
+        .openPopup();
+      
+      const list = document.getElementById('savedLocationsList');
+      const item = document.createElement('div');
+      item.className = 'location-item';
+      item.innerHTML = `<span><b>📍</b> ${text}</span>`;
+      list.prepend(item);
+    }
+
+    function saveLocation(lat, lng, text) {
+      const locations = JSON.parse(localStorage.getItem('kiffLocations') || '[]');
+      locations.push({lat, lng, text});
+      localStorage.setItem('kiffLocations', JSON.stringify(locations));
+    }
+
+    function loadSavedLocations() {
+      const locations = JSON.parse(localStorage.getItem('kiffLocations') || '[]');
+      locations.forEach(loc => {
+        L.marker([loc.lat, loc.lng]).addTo(map).bindPopup(`<b>${loc.text}</b>`);
+        const list = document.getElementById('savedLocationsList');
+        const item = document.createElement('div');
+        item.className = 'location-item';
+        item.innerHTML = `<span><b>📍</b> ${loc.text}</span>`;
+        list.prepend(item);
+      });
+    }
+
+    document.getElementById('navMap').addEventListener('click', function() {
+      document.querySelectorAll('.section').forEach(sec => sec.classList.add('hidden'));
+      document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+      
+      document.getElementById('mapSection').classList.remove('hidden');
+      this.classList.add('active');
+      initMap();
+      setTimeout(() => { map.invalidateSize(); }, 200);
+    });
+  </script>
 </body>
 </html>

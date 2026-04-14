@@ -8,7 +8,6 @@ async function subscribeUserToPush() {
         const registration = await navigator.serviceWorker.ready;
         const VAPID_PUBLIC_KEY = "BHvMEhklZrgvkLnopsv7GlF-nm7e-OSTzur56Cu6twTpHWjHu6YdPuriz-2G6gppyFjjYQxlt2uihEXOUY0rdXs";
         const convertedVapidKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
-        console.log('Attempting to subscribe user...');
         const subscription = await registration.pushManager.subscribe({
             userVisibleOnly: true,
             applicationServerKey: convertedVapidKey
@@ -17,15 +16,10 @@ async function subscribeUserToPush() {
         console.log('New push subscription:', subscription);
         await saveSubscriptionToDatabase(subscription);
         
-        alert('Abonnement aux notifications réussi !');
 
     } catch (error) {
         console.error('Failed to subscribe the user:', error);
-        if (error.name === 'NotAllowedError') {
-            alert('L\'autorisation de notification a été refusée. Veuillez l\'activer dans les paramètres de votre navigateur.');
-        } else {
-            alert('Erreur lors de l\'enregistrement de l\'abonnement : ' + (error.message || error.name));
-        }
+
     }
 }
 function urlBase64ToUint8Array(base64String) {
@@ -53,7 +47,6 @@ function arrayBufferToBase64(buffer) {
 async function saveSubscriptionToDatabase(subscription) {
     if (!currentListId) {
         console.error('No currentListId defined. Cannot save subscription.');
-        alert('Veuillez charger ou créer une liste dans les paramètres avant de vous abonner aux notifications.');
         return;
     }
 
@@ -79,7 +72,7 @@ async function saveSubscriptionToDatabase(subscription) {
 
     if (error) {
         console.error('Error saving subscription:', error.message);
-        alert('Erreur lors de l\'enregistrement de l\'abonnement : ' + error.message);
+        
     } else {
         console.log('Subscription saved:', data);
     }
