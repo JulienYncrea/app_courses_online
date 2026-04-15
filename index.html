@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -14,46 +14,37 @@
 
   <style>
     /* Style pour l'icône Map à côté du titre */
-    .title-icon-btn {
-      margin-left: 15px;
-      cursor: pointer;
-      color: #e91e63;
-      font-size: 0.8em;
-      transition: transform 0.2s;
-    }
+    .title-icon-btn { margin-left: 15px; cursor: pointer; color: #e91e63; font-size: 0.8em; transition: transform 0.2s; }
     .title-icon-btn:hover { transform: scale(1.2); }
 
     /* Section Map */
     #mapSection { padding-bottom: 100px; }
-    #map {
-      height: 450px;
-      width: 100%;
-      border-radius: 15px;
-      margin: 15px 0;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      z-index: 1;
-    }
-    .location-item {
-      background: white;
-      padding: 12px;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      border-left: 4px solid #e91e63;
-    }
+    #map { height: 450px; width: 100%; border-radius: 15px; margin: 15px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 1; }
+
+    /* Barre de recherche et bouton position */
+    .map-controls { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
+    .search-city-container { display: flex; gap: 8px; }
+    .search-city-container input { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #ccc; }
+    .search-city-container button { padding: 8px 15px; background: #e91e63; color: white; border: none; border-radius: 8px; cursor: pointer; }
+    #addAtCurrentPosBtn { padding: 10px; background: #3498db; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+    /* Styles pour la Popup Form */
+    .popup-form { min-width: 200px; font-family: sans-serif; }
+    .popup-form label { font-size: 0.8em; color: #666; font-weight: bold; display: block; margin-top: 5px; }
+    .popup-form input, .popup-form select, .popup-form textarea { width: 100%; margin-bottom: 8px; border: 1px solid #ddd; border-radius: 4px; padding: 6px; box-sizing: border-box; }
+    .star-rating { color: #f1c40f; margin-bottom: 10px; cursor: pointer; font-size: 1.2em; display: flex; justify-content: center; gap: 4px; }
+    .popup-form button { width: 100%; background: #e91e63; color: white; border: none; padding: 8px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+
+    /* Thèmes de lieux */
+    .location-item { background: white; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; flex-direction: column; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #e91e63; }
+    .theme-food { border-left-color: #e67e22 !important; }
+    .theme-bar { border-left-color: #9b59b6 !important; }
+    .theme-shop { border-left-color: #2ecc71 !important; }
+    .theme-other { border-left-color: #95a5a6 !important; }
+    
     .location-item b { color: #333; }
     .location-item span { font-size: 0.9em; color: #666; margin-top: 4px; }
-    
     .hidden { display: none !important; }
-
-    /* Petit point bleu pour la position de l'utilisateur */
-    .user-pos {
-      background: #3498db;
-      border: 2px solid white;
-      border-radius: 50%;
-    }
   </style>
 
   <script>
@@ -92,7 +83,13 @@
 
   <div id="mapSection" class="section-container section hidden">
     <h2>My favorite places 📍</h2>
-    <p>Clique sur un commerce ou n'importe où pour noter !</p>
+    <div class="map-controls">
+      <div class="search-city-container">
+        <input type="text" id="citySearchInput" placeholder="Ta ville de cœur...">
+        <button id="searchCityBtn"><i class="fas fa-search"></i></button>
+      </div>
+      <button id="addAtCurrentPosBtn"><i class="fas fa-location-arrow"></i> Noter là où je suis</button>
+    </div>
     <div id="map"></div>
     <h3>Lieux enregistrés</h3>
     <div id="savedLocationsList"></div>
@@ -122,6 +119,9 @@
         <button id="addCategoryBtn">Add Category</button>
     </div>
     <ul id="categoryList"></ul>
+    <h3>Category Order</h3>
+    <p class="empty-list-message">Drag categories to set their order.</p>
+    <ul id="categoryOrderList" class="sortable-list"></ul>
   </div>
 
   <div id="settings" class="section-container section hidden">
@@ -158,102 +158,138 @@
     let map;
     let mapInitialized = false;
     let userMarker;
+    let currentPos = null;
+    let currentMarkers = [];
+
+    const themeColors = { food: '#e67e22', bar: '#9b59b6', shop: '#2ecc71', other: '#95a5a6' };
 
     function initMap() {
       if (mapInitialized) return;
-      
-      // Initialisation par défaut
       map = L.map('map').setView([48.8566, 2.3522], 13);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap'
-      }).addTo(map);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
 
-      // Géolocalisation automatique : Zoom sur l'utilisateur
       map.locate({setView: true, maxZoom: 16});
 
       map.on('locationfound', function(e) {
+        currentPos = e.latlng;
         if (userMarker) map.removeLayer(userMarker);
         userMarker = L.circleMarker(e.latlng, {
-          radius: 8,
-          fillColor: "#3498db",
-          color: "#fff",
-          weight: 2,
-          opacity: 1,
-          fillOpacity: 0.8
-        }).addTo(map).bindPopup("Tu es ici").openPopup();
+          radius: 8, fillColor: "#3498db", color: "#fff", weight: 2, opacity: 1, fillOpacity: 0.8
+        }).addTo(map).bindPopup("Tu es ici");
       });
 
-      // Clic sur la carte
-      map.on('click', function(e) {
-        const lat = e.latlng.lat;
-        const lng = e.latlng.lng;
+      document.getElementById('addAtCurrentPosBtn').onclick = () => {
+        if (currentPos) {
+          map.setView(currentPos, 17);
+          fetchAddressAndOpenForm(currentPos.lat, currentPos.lng);
+        } else {
+          alert("Position non détectée.");
+        }
+      };
 
-        // Appel API gratuit pour deviner le nom du commerce/lieu (Reverse Geocoding)
-        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-          .then(res => res.json())
-          .then(data => {
-            const autoName = data.display_name.split(',')[0] || "Point personnalisé";
-            askForLocationDetails(lat, lng, autoName);
-          })
-          .catch(() => askForLocationDetails(lat, lng, "Point personnalisé"));
-      });
+      document.getElementById('searchCityBtn').onclick = function() {
+        const city = document.getElementById('citySearchInput').value;
+        if(city) {
+          fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${city}`)
+            .then(res => res.json()).then(data => {
+              if(data.length > 0) map.setView([data[0].lat, data[0].lon], 13);
+            });
+        }
+      };
 
+      map.on('click', (e) => fetchAddressAndOpenForm(e.latlng.lat, e.latlng.lng));
       renderLocationList();
       mapInitialized = true;
     }
 
-    function askForLocationDetails(lat, lng, autoName) {
-      const name = prompt("Nom de l'établissement / lieu :", autoName);
-      if (name === null) return;
-      
-      const note = prompt("Pourquoi tu kiffes cet endroit ? (Note/Commentaire)");
-      if (note === null) return;
-
-      saveLocation(lat, lng, name, note);
-      addMarkerToMap(lat, lng, name, note);
-      renderLocationList();
+    function fetchAddressAndOpenForm(lat, lng) {
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+        .then(res => res.json()).then(data => {
+          const name = data.display_name.split(',')[0] || "Point personnalisé";
+          openPopupForm(lat, lng, name);
+        }).catch(() => openPopupForm(lat, lng, "Point personnalisé"));
     }
 
-    function addMarkerToMap(lat, lng, name, note) {
-      L.marker([lat, lng]).addTo(map)
-        .bindPopup(`<b>${name}</b><br>${note}`)
-        .openPopup();
+    function openPopupForm(lat, lng, name) {
+      const popupContent = `
+        <div class="popup-form">
+          <label>Nom du lieu :</label>
+          <input type="text" id="popName" value="${name}">
+          <label>Catégorie :</label>
+          <select id="popTheme">
+            <option value="food">🍴 Food</option>
+            <option value="bar">🍺 Bar / Café</option>
+            <option value="shop">🛍️ Shopping</option>
+            <option value="other">📍 Autre</option>
+          </select>
+          <div class="star-rating" id="popStars">
+            <i class="fas fa-star" data-v="1"></i>
+            <i class="far fa-star" data-v="2"></i>
+            <i class="far fa-star" data-v="3"></i>
+            <i class="far fa-star" data-v="4"></i>
+            <i class="far fa-star" data-v="5"></i>
+          </div>
+          <input type="hidden" id="popRating" value="1">
+          <textarea id="popNote" placeholder="Ton avis..."></textarea>
+          <button id="popSubmit">Enregistrer</button>
+        </div>
+      `;
+
+      L.popup().setLatLng([lat, lng]).setContent(popupContent).openOn(map);
+
+      setTimeout(() => {
+        const stars = document.querySelectorAll('#popStars i');
+        stars.forEach(s => {
+          s.onclick = (e) => {
+            const val = parseInt(e.target.getAttribute('data-v'));
+            document.getElementById('popRating').value = val;
+            stars.forEach((st, i) => { st.className = i < val ? 'fas fa-star' : 'far fa-star'; });
+          };
+        });
+        document.getElementById('popSubmit').onclick = () => {
+          saveLocation(lat, lng, document.getElementById('popName').value, document.getElementById('popNote').value, document.getElementById('popTheme').value, document.getElementById('popRating').value);
+          map.closePopup();
+        };
+      }, 10);
     }
 
-    function saveLocation(lat, lng, name, note) {
+    function saveLocation(lat, lng, name, note, theme, rating) {
       const locations = JSON.parse(localStorage.getItem('kiffLocations') || '[]');
-      locations.push({lat, lng, name, note});
+      locations.push({lat, lng, name, note, theme, rating});
       localStorage.setItem('kiffLocations', JSON.stringify(locations));
+      renderLocationList();
     }
 
     function renderLocationList() {
       const list = document.getElementById('savedLocationsList');
       const locations = JSON.parse(localStorage.getItem('kiffLocations') || '[]');
       list.innerHTML = '';
+      currentMarkers.forEach(m => map.removeLayer(m));
+      currentMarkers = [];
+
       locations.forEach(loc => {
         const item = document.createElement('div');
-        item.className = 'location-item';
-        item.innerHTML = `<b>📍 ${loc.name}</b><span>${loc.note}</span>`;
+        item.className = `location-item theme-${loc.theme || 'other'}`;
+        item.innerHTML = `<b>📍 ${loc.name} ${'★'.repeat(loc.rating || 1)}</b><span>${loc.note}</span>`;
         list.prepend(item);
         
-        // On réaffiche aussi les markers si on vient d'ouvrir la page
-        if (mapInitialized) {
-            L.marker([loc.lat, loc.lng]).addTo(map).bindPopup(`<b>${loc.name}</b><br>${loc.note}`);
-        }
+        const color = themeColors[loc.theme] || '#95a5a6';
+        const marker = L.marker([loc.lat, loc.lng], {
+          icon: L.divIcon({
+            className: 'custom-icon',
+            html: `<div style="background-color:${color}; width:12px; height:12px; border:2px solid white; border-radius:50%;"></div>`,
+            iconSize: [12, 12], iconAnchor: [6, 6]
+          })
+        }).addTo(map).bindPopup(`<b>${loc.name}</b><br>${'★'.repeat(loc.rating)}<br>${loc.note}`);
+        currentMarkers.push(marker);
       });
     }
 
-    // OUVERTURE DE LA CARTE VIA LE LOGO DU TITRE "BUY LATER"
     document.getElementById('openMapBtn').addEventListener('click', function() {
-      // Masquer les autres sections
       document.querySelectorAll('.section').forEach(sec => sec.classList.add('hidden'));
       document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-      
-      // Afficher la map
       document.getElementById('mapSection').classList.remove('hidden');
       initMap();
-      
-      // Correction bug d'affichage Leaflet
       setTimeout(() => { map.invalidateSize(); }, 200);
     });
   </script>
