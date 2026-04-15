@@ -13,55 +13,37 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
   <style>
-    /* Style pour l'icône Map à côté du titre */
-    .title-icon-btn {
-      margin-left: 15px;
-      cursor: pointer;
-      color: #e91e63;
-      font-size: 0.8em;
-      transition: transform 0.2s;
-    }
+    /* UI Globale */
+    .title-icon-btn { margin-left: 15px; cursor: pointer; color: #e91e63; font-size: 0.8em; transition: transform 0.2s; }
     .title-icon-btn:hover { transform: scale(1.2); }
-
-    /* Section Map */
     #mapSection { padding-bottom: 100px; }
-    #map {
-      height: 450px;
-      width: 100%;
-      border-radius: 15px;
-      margin: 15px 0;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      z-index: 1;
-    }
+    #map { height: 450px; width: 100%; border-radius: 15px; margin: 15px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 1; }
+    
+    /* Popup Formulaire Perso */
+    .popup-form { display: flex; flex-direction: column; gap: 8px; min-width: 200px; padding: 5px; }
+    .popup-form h4 { margin: 0; color: #e91e63; font-size: 1.1em; }
+    .popup-form input, .popup-form select, .popup-form textarea { padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; }
+    .star-rating { color: #ddd; cursor: pointer; font-size: 1.4em; display: flex; justify-content: center; gap: 5px; }
+    .star-rating .active { color: #f1c40f; }
+    .btn-save-kiff { background: #e91e63; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+
+    /* Liste des lieux */
     .location-item {
-      background: white;
-      padding: 12px;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      border-left: 4px solid #e91e63;
+      background: white; padding: 12px; border-radius: 8px; margin-bottom: 10px;
+      display: flex; flex-direction: column; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      border-left: 5px solid #ccc;
     }
-    .location-item b { color: #333; }
-    .location-item span { font-size: 0.9em; color: #666; margin-top: 4px; }
+    .loc-header { display: flex; justify-content: space-between; align-items: center; }
+    .loc-tag { font-size: 0.7em; padding: 2px 6px; border-radius: 10px; color: white; text-transform: uppercase; font-weight: bold; }
+    .loc-stars { color: #f1c40f; margin: 4px 0; font-size: 0.9em; }
     
     .hidden { display: none !important; }
-
-    /* Petit point bleu pour la position de l'utilisateur */
-    .user-pos {
-      background: #3498db;
-      border: 2px solid white;
-      border-radius: 50%;
-    }
   </style>
 
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js')
-          .then(reg => console.log('Service Worker registered:', reg.scope))
-          .catch(err => console.error('SW error:', err));
+        navigator.serviceWorker.register('service-worker.js').catch(err => console.error('SW error:', err));
       });
     }
   </script>
@@ -74,7 +56,7 @@
     <div id="addItemForm" class="add-form">
         <h3>Add an item</h3>
         <input type="text" id="newItemInput" placeholder="Add an item" />
-        <input type="number" id="newQuantityInput" placeholder="Quantity (optional)" value="1" min="1" />
+        <input type="number" id="newQuantityInput" value="1" min="1" />
         <select id="newCategorySelect"></select>
         <button id="addItemBtn">Add to list</button>
     </div>
@@ -83,7 +65,6 @@
   <div id="buyLater" class="section-container section hidden">
     <h2>Buy Later 🛒 <i class="fas fa-map-marker-alt title-icon-btn" id="openMapBtn" title="Voir la carte"></i></h2>
     <div id="addBuyLaterItemForm" class="add-form">
-        <label for="newBuyLaterItemInput">Add item to buy later:</label>
         <input type="text" id="newBuyLaterItemInput" placeholder="Item to buy later" />
         <button id="addBuyLaterItemBtn">Add</button>
     </div>
@@ -91,46 +72,15 @@
   </div>
 
   <div id="mapSection" class="section-container section hidden">
-    <h2>My favorite places 📍</h2>
-    <p>Clique sur un commerce ou n'importe où pour noter !</p>
+    <h2>My Favorite Places 📍</h2>
     <div id="map"></div>
-    <h3>Lieux enregistrés</h3>
+    <h3>Mes pépites enregistrées</h3>
     <div id="savedLocationsList"></div>
   </div>
 
-  <div id="suggestions" class="section-container section hidden">
-    <h2 id="suggestionsTitle">Ideas 💡</h2>
-    <div class="filter-controls">
-        <div>
-            <label for="suggestionCategoryFilter">Filter by category:</label>
-            <select id="suggestionCategoryFilter"></select>
-        </div>
-        <button id="toggleDeleteModeBtn" title="Mode suppression"><i class="fas fa-trash-can"></i></button>
-    </div>
-    <ul id="suggestionList"></ul>
-    <div id="addSuggestionForm" class="add-form">
-        <input type="text" id="newSuggestionInput" placeholder="Suggest an item" />
-        <select id="newSuggestionCategorySelect"></select>
-        <button id="addSuggestionBtn">Add Suggestion</button>
-    </div>
-  </div>
-
-  <div id="categories" class="section-container section hidden">
-    <h2>Manage Categories 📂</h2>
-    <div id="addCategoryForm" class="add-form">
-        <input type="text" id="newCategoryInput" placeholder="New category" />
-        <button id="addCategoryBtn">Add Category</button>
-    </div>
-    <ul id="categoryList"></ul>
-  </div>
-
-  <div id="settings" class="section-container section hidden">
-    <h2>Settings ⚙️</h2>
-    <p>Active list code: <strong id="activeShareCode">N/A</strong></p>
-    <hr>
-    <input type="text" id="shareCodeInput" placeholder="Enter a share code" />
-    <button id="loadShareCodeBtn">Load/Create List</button>
-  </div>
+  <div id="suggestions" class="section-container section hidden">...</div>
+  <div id="categories" class="section-container section hidden">...</div>
+  <div id="settings" class="section-container section hidden">...</div>
 
   <div class="bottom-nav">
     <button id="toggleNavBtn" class="toggle-nav-button"><i class="fas fa-chevron-down"></i></button>
@@ -146,115 +96,137 @@
   
   <script src="script/config.js"></script>
   <script src="script/settings.js"></script>
-  <script src="script/subscription.js"></script>
   <script src="script/menu.js"></script>
-  <script src="script/my_list.js"></script>
-  <script src="script/notifications.js"></script>
-  <script src="script/ideas.js"></script>
-  <script src="script/suggestions.js"></script>
-  <script src="script/category.js"></script>  
-
   <script>
     let map;
     let mapInitialized = false;
-    let userMarker;
+    let tempRating = 5;
+
+    const themeData = {
+      'food': { color: '#e74c3c', label: 'Food' },
+      'bar': { color: '#3498db', label: 'Bar' },
+      'shop': { color: '#2ecc71', label: 'Shopping' },
+      'other': { color: '#9b59b6', label: 'Autre' }
+    };
 
     function initMap() {
       if (mapInitialized) return;
       
-      // Initialisation par défaut
       map = L.map('map').setView([48.8566, 2.3522], 13);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap'
-      }).addTo(map);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-      // Géolocalisation automatique : Zoom sur l'utilisateur
-      map.locate({setView: true, maxZoom: 16});
+      // Géolocalisation
+      map.locate({setView: true, maxZoom: 15});
 
-      map.on('locationfound', function(e) {
-        if (userMarker) map.removeLayer(userMarker);
-        userMarker = L.circleMarker(e.latlng, {
-          radius: 8,
-          fillColor: "#3498db",
-          color: "#fff",
-          weight: 2,
-          opacity: 1,
-          fillOpacity: 0.8
-        }).addTo(map).bindPopup("Tu es ici").openPopup();
+      map.on('locationerror', function() {
+        const heartCity = prompt("Position introuvable. Quelle est ta ville de cœur ?");
+        if(heartCity) {
+          fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${heartCity}`)
+            .then(r => r.json()).then(data => {
+              if(data[0]) map.setView([data[0].lat, data[0].lon], 13);
+            });
+        }
       });
 
-      // Clic sur la carte
       map.on('click', function(e) {
-        const lat = e.latlng.lat;
-        const lng = e.latlng.lng;
-
-        // Appel API gratuit pour deviner le nom du commerce/lieu (Reverse Geocoding)
+        const {lat, lng} = e.latlng;
         fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-          .then(res => res.json())
-          .then(data => {
-            const autoName = data.display_name.split(',')[0] || "Point personnalisé";
-            askForLocationDetails(lat, lng, autoName);
-          })
-          .catch(() => askForLocationDetails(lat, lng, "Point personnalisé"));
+          .then(r => r.json()).then(data => {
+            const defaultName = data.display_name.split(',')[0] || "Lieu secret";
+            showKiffPopup(lat, lng, defaultName);
+          });
       });
 
       renderLocationList();
       mapInitialized = true;
     }
 
-    function askForLocationDetails(lat, lng, autoName) {
-      const name = prompt("Nom de l'établissement / lieu :", autoName);
-      if (name === null) return;
+    function showKiffPopup(lat, lng, name) {
+      tempRating = 5;
+      const content = `
+        <div class="popup-form">
+          <h4>Nouveau Kiff !</h4>
+          <input type="text" id="k-name" value="${name}" placeholder="Nom du lieu">
+          <select id="k-theme">
+            <option value="food">🍴 Food</option>
+            <option value="bar">🍹 Bar</option>
+            <option value="shop">🛍️ Shopping</option>
+            <option value="other">📍 Autre</option>
+          </select>
+          <div class="star-rating" id="k-stars">
+            ${[1,2,3,4,5].map(i => `<span onclick="setRating(${i})" class="star active" data-v="${i}">★</span>`).join('')}
+          </div>
+          <textarea id="k-comment" placeholder="Pourquoi tu kiffes ?"></textarea>
+          <button class="btn-save-kiff" onclick="saveKiff(${lat}, ${lng})">Sauvegarder</button>
+        </div>
+      `;
+      L.popup().setLatLng([lat, lng]).setContent(content).openOn(map);
+    }
+
+    window.setRating = function(v) {
+      tempRating = v;
+      document.querySelectorAll('.star').forEach(s => {
+        s.classList.toggle('active', s.dataset.v <= v);
+      });
+    };
+
+    window.saveKiff = function(lat, lng) {
+      const kiff = {
+        lat, lng,
+        name: document.getElementById('k-name').value,
+        theme: document.getElementById('k-theme').value,
+        rating: tempRating,
+        comment: document.getElementById('k-comment').value,
+        id: Date.now()
+      };
       
-      const note = prompt("Pourquoi tu kiffes cet endroit ? (Note/Commentaire)");
-      if (note === null) return;
-
-      saveLocation(lat, lng, name, note);
-      addMarkerToMap(lat, lng, name, note);
+      const kiffs = JSON.parse(localStorage.getItem('kiffLocations') || '[]');
+      kiffs.push(kiff);
+      localStorage.setItem('kiffLocations', JSON.stringify(kiffs));
+      
+      drawKiffMarker(kiff);
       renderLocationList();
-    }
+      map.closePopup();
+    };
 
-    function addMarkerToMap(lat, lng, name, note) {
-      L.marker([lat, lng]).addTo(map)
-        .bindPopup(`<b>${name}</b><br>${note}`)
-        .openPopup();
-    }
+    function drawKiffMarker(k) {
+      const color = themeData[k.theme].color;
+      const icon = L.divIcon({
+        className: 'custom-marker',
+        html: `<div style="background:${color}; width:16px; height:16px; border-radius:50%; border:2px solid white; box-shadow:0 2px 4px rgba(0,0,0,0.3);"></div>`,
+        iconSize: [16, 16]
+      });
 
-    function saveLocation(lat, lng, name, note) {
-      const locations = JSON.parse(localStorage.getItem('kiffLocations') || '[]');
-      locations.push({lat, lng, name, note});
-      localStorage.setItem('kiffLocations', JSON.stringify(locations));
+      L.marker([k.lat, k.lng], {icon}).addTo(map)
+        .bindPopup(`<b>${k.name}</b><br>${"★".repeat(k.rating)}<br>${k.comment}`);
     }
 
     function renderLocationList() {
       const list = document.getElementById('savedLocationsList');
-      const locations = JSON.parse(localStorage.getItem('kiffLocations') || '[]');
+      const kiffs = JSON.parse(localStorage.getItem('kiffLocations') || '[]');
       list.innerHTML = '';
-      locations.forEach(loc => {
+      kiffs.forEach(k => {
         const item = document.createElement('div');
         item.className = 'location-item';
-        item.innerHTML = `<b>📍 ${loc.name}</b><span>${loc.note}</span>`;
+        item.style.borderLeftColor = themeData[k.theme].color;
+        item.innerHTML = `
+          <div class="loc-header">
+            <b>${k.name}</b>
+            <span class="loc-tag" style="background:${themeData[k.theme].color}">${k.theme}</span>
+          </div>
+          <div class="loc-stars">${"★".repeat(k.rating)}${"☆".repeat(5-k.rating)}</div>
+          <span>${k.comment}</span>
+        `;
         list.prepend(item);
-        
-        // On réaffiche aussi les markers si on vient d'ouvrir la page
-        if (mapInitialized) {
-            L.marker([loc.lat, loc.lng]).addTo(map).bindPopup(`<b>${loc.name}</b><br>${loc.note}`);
-        }
+        if(mapInitialized) drawKiffMarker(k);
       });
     }
 
-    // OUVERTURE DE LA CARTE VIA LE LOGO DU TITRE "BUY LATER"
     document.getElementById('openMapBtn').addEventListener('click', function() {
-      // Masquer les autres sections
-      document.querySelectorAll('.section').forEach(sec => sec.classList.add('hidden'));
-      document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-      
-      // Afficher la map
+      document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
       document.getElementById('mapSection').classList.remove('hidden');
       initMap();
-      
-      // Correction bug d'affichage Leaflet
-      setTimeout(() => { map.invalidateSize(); }, 200);
+      setTimeout(() => map.invalidateSize(), 300);
     });
   </script>
 </body>
