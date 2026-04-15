@@ -17,18 +17,16 @@
     .title-icon-btn {
       margin-left: 15px;
       cursor: pointer;
-      color: #e91e63; /* Couleur rose/rouge pour ressortir */
+      color: #e91e63;
       font-size: 0.8em;
       transition: transform 0.2s;
     }
-    .title-icon-btn:hover {
-      transform: scale(1.2);
-    }
+    .title-icon-btn:hover { transform: scale(1.2); }
 
     /* Section Map */
     #mapSection { padding-bottom: 100px; }
     #map {
-      height: 400px;
+      height: 450px;
       width: 100%;
       border-radius: 15px;
       margin: 15px 0;
@@ -37,14 +35,25 @@
     }
     .location-item {
       background: white;
-      padding: 10px;
+      padding: 12px;
       border-radius: 8px;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
       box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      border-left: 4px solid #e91e63;
     }
+    .location-item b { color: #333; }
+    .location-item span { font-size: 0.9em; color: #666; margin-top: 4px; }
+    
     .hidden { display: none !important; }
+
+    /* Petit point bleu pour la position de l'utilisateur */
+    .user-pos {
+      background: #3498db;
+      border: 2px solid white;
+      border-radius: 50%;
+    }
   </style>
 
   <script>
@@ -83,7 +92,7 @@
 
   <div id="mapSection" class="section-container section hidden">
     <h2>Mes Endroits Kiffés 📍</h2>
-    <p>Clique sur la carte pour noter un lieu !</p>
+    <p>La carte zoome sur toi. Clique sur un commerce ou n'importe où pour noter !</p>
     <div id="map"></div>
     <h3>Lieux enregistrés</h3>
     <div id="savedLocationsList"></div>
@@ -96,15 +105,11 @@
             <label for="suggestionCategoryFilter">Filter by category:</label>
             <select id="suggestionCategoryFilter"></select>
         </div>
-        <button id="toggleDeleteModeBtn" title="Mode suppression">
-            <i class="fas fa-trash-can"></i>
-        </button>
+        <button id="toggleDeleteModeBtn" title="Mode suppression"><i class="fas fa-trash-can"></i></button>
     </div>
     <ul id="suggestionList"></ul>
     <div id="addSuggestionForm" class="add-form">
-        <label for="newSuggestionInput">Add a suggestion:</label>
         <input type="text" id="newSuggestionInput" placeholder="Suggest an item" />
-        <label for="newSuggestionCategorySelect">Category:</label>
         <select id="newSuggestionCategorySelect"></select>
         <button id="addSuggestionBtn">Add Suggestion</button>
     </div>
@@ -113,12 +118,10 @@
   <div id="categories" class="section-container section hidden">
     <h2>Manage Categories 📂</h2>
     <div id="addCategoryForm" class="add-form">
-        <label for="newCategoryInput">Add new category:</label>
         <input type="text" id="newCategoryInput" placeholder="New category" />
         <button id="addCategoryBtn">Add Category</button>
     </div>
     <ul id="categoryList"></ul>
-    <ul id="categoryOrderList" class="sortable-list"></ul>
   </div>
 
   <div id="settings" class="section-container section hidden">
@@ -127,33 +130,15 @@
     <hr>
     <input type="text" id="shareCodeInput" placeholder="Enter a share code" />
     <button id="loadShareCodeBtn">Load/Create List</button>
-    <hr>
-    <button id="changeShareCodeBtn">Change List / Disconnect</button>
   </div>
 
   <div class="bottom-nav">
-    <button id="toggleNavBtn" class="toggle-nav-button">
-      <i class="fas fa-chevron-down"></i> </button>
-    <div class="nav-item active" id="navShoppingList">
-      <i class="fas fa-shopping-basket"></i>
-      <span>My List</span>
-    </div>
-    <div class="nav-item" id="navBuyLater">
-      <i class="fas fa-clock"></i>
-      <span>Later</span>
-    </div>
-    <div class="nav-item" id="navSuggestions">
-      <i class="fas fa-lightbulb"></i>
-      <span>Suggestions</span>
-    </div>
-    <div class="nav-item" id="navCategories">
-      <i class="fas fa-folder"></i>
-      <span>Categories</span>
-    </div>
-    <div class="nav-item" id="navSettings">
-      <i class="fas fa-cog"></i>
-      <span>Settings</span>
-    </div>
+    <button id="toggleNavBtn" class="toggle-nav-button"><i class="fas fa-chevron-down"></i></button>
+    <div class="nav-item active" id="navShoppingList"><i class="fas fa-shopping-basket"></i><span>My List</span></div>
+    <div class="nav-item" id="navBuyLater"><i class="fas fa-clock"></i><span>Later</span></div>
+    <div class="nav-item" id="navSuggestions"><i class="fas fa-lightbulb"></i><span>Suggestions</span></div>
+    <div class="nav-item" id="navCategories"><i class="fas fa-folder"></i><span>Categories</span></div>
+    <div class="nav-item" id="navSettings"><i class="fas fa-cog"></i><span>Settings</span></div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -172,28 +157,72 @@
   <script>
     let map;
     let mapInitialized = false;
+    let userMarker;
 
     function initMap() {
       if (mapInitialized) return;
+      
+      // Initialisation par défaut
       map = L.map('map').setView([48.8566, 2.3522], 13);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-      map.locate({setView: true, maxZoom: 13});
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+      }).addTo(map);
 
-      map.on('click', function(e) {
-        const description = prompt("Nom de l'endroit ?");
-        if (description) {
-          L.marker([e.latlng.lat, e.latlng.lng]).addTo(map).bindPopup(description).openPopup();
-          saveLocation(e.latlng.lat, e.latlng.lng, description);
-          renderLocationList();
-        }
+      // Géolocalisation automatique : Zoom sur l'utilisateur
+      map.locate({setView: true, maxZoom: 16});
+
+      map.on('locationfound', function(e) {
+        if (userMarker) map.removeLayer(userMarker);
+        userMarker = L.circleMarker(e.latlng, {
+          radius: 8,
+          fillColor: "#3498db",
+          color: "#fff",
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.8
+        }).addTo(map).bindPopup("Tu es ici").openPopup();
       });
+
+      // Clic sur la carte
+      map.on('click', function(e) {
+        const lat = e.latlng.lat;
+        const lng = e.latlng.lng;
+
+        // Appel API gratuit pour deviner le nom du commerce/lieu (Reverse Geocoding)
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+          .then(res => res.json())
+          .then(data => {
+            const autoName = data.display_name.split(',')[0] || "Point personnalisé";
+            askForLocationDetails(lat, lng, autoName);
+          })
+          .catch(() => askForLocationDetails(lat, lng, "Point personnalisé"));
+      });
+
       renderLocationList();
       mapInitialized = true;
     }
 
-    function saveLocation(lat, lng, text) {
+    function askForLocationDetails(lat, lng, autoName) {
+      const name = prompt("Nom de l'établissement / lieu :", autoName);
+      if (name === null) return;
+      
+      const note = prompt("Pourquoi tu kiffes cet endroit ? (Note/Commentaire)");
+      if (note === null) return;
+
+      saveLocation(lat, lng, name, note);
+      addMarkerToMap(lat, lng, name, note);
+      renderLocationList();
+    }
+
+    function addMarkerToMap(lat, lng, name, note) {
+      L.marker([lat, lng]).addTo(map)
+        .bindPopup(`<b>${name}</b><br>${note}`)
+        .openPopup();
+    }
+
+    function saveLocation(lat, lng, name, note) {
       const locations = JSON.parse(localStorage.getItem('kiffLocations') || '[]');
-      locations.push({lat, lng, text});
+      locations.push({lat, lng, name, note});
       localStorage.setItem('kiffLocations', JSON.stringify(locations));
     }
 
@@ -204,18 +233,27 @@
       locations.forEach(loc => {
         const item = document.createElement('div');
         item.className = 'location-item';
-        item.innerHTML = `<span><b>📍</b> ${loc.text}</span>`;
+        item.innerHTML = `<b>📍 ${loc.name}</b><span>${loc.note}</span>`;
         list.prepend(item);
+        
+        // On réaffiche aussi les markers si on vient d'ouvrir la page
+        if (mapInitialized) {
+            L.marker([loc.lat, loc.lng]).addTo(map).bindPopup(`<b>${loc.name}</b><br>${loc.note}`);
+        }
       });
     }
 
-    // OUVERTURE DE LA CARTE VIA LE LOGO DU TITRE
+    // OUVERTURE DE LA CARTE VIA LE LOGO DU TITRE "BUY LATER"
     document.getElementById('openMapBtn').addEventListener('click', function() {
+      // Masquer les autres sections
       document.querySelectorAll('.section').forEach(sec => sec.classList.add('hidden'));
       document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
       
+      // Afficher la map
       document.getElementById('mapSection').classList.remove('hidden');
       initMap();
+      
+      // Correction bug d'affichage Leaflet
       setTimeout(() => { map.invalidateSize(); }, 200);
     });
   </script>
