@@ -34,19 +34,21 @@
       z-index: 1;
     }
 
-    /* Barre de recherche de ville */
-    .search-city-container {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 10px;
-    }
+    /* Barre de recherche et bouton position */
+    .map-controls { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
+    .search-city-container { display: flex; gap: 8px; }
     .search-city-container input { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #ccc; }
     .search-city-container button { padding: 8px 15px; background: #e91e63; color: white; border: none; border-radius: 8px; cursor: pointer; }
+    
+    #addAtCurrentPosBtn { 
+      padding: 10px; background: #3498db; color: white; border: none; border-radius: 8px; 
+      cursor: pointer; font-weight: bold; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
 
     /* Styles pour la Popup Form */
-    .popup-form { min-width: 180px; font-family: sans-serif; }
-    .popup-form b { display: block; margin-bottom: 5px; color: #333; }
-    .popup-form select, .popup-form textarea { width: 100%; margin-bottom: 8px; border: 1px solid #ddd; border-radius: 4px; padding: 4px; }
+    .popup-form { min-width: 200px; font-family: sans-serif; }
+    .popup-form label { font-size: 0.8em; color: #666; font-weight: bold; display: block; margin-top: 5px; }
+    .popup-form input, .popup-form select, .popup-form textarea { width: 100%; margin-bottom: 8px; border: 1px solid #ddd; border-radius: 4px; padding: 6px; box-sizing: border-box; }
     .star-rating { color: #f1c40f; margin-bottom: 10px; cursor: pointer; font-size: 1.2em; display: flex; justify-content: center; gap: 4px; }
     .popup-form button { width: 100%; background: #e91e63; color: white; border: none; padding: 8px; border-radius: 5px; font-weight: bold; cursor: pointer; }
 
@@ -70,13 +72,6 @@
     .location-item span { font-size: 0.9em; color: #666; margin-top: 4px; }
     
     .hidden { display: none !important; }
-
-    /* Petit point bleu pour la position de l'utilisateur */
-    .user-pos {
-      background: #3498db;
-      border: 2px solid white;
-      border-radius: 50%;
-    }
   </style>
 
   <script>
@@ -97,7 +92,7 @@
     <div id="addItemForm" class="add-form">
         <h3>Add an item</h3>
         <input type="text" id="newItemInput" placeholder="Add an item" />
-        <input type="number" id="newQuantityInput" placeholder="Quantity (optional)" value="1" min="1" />
+        <input type="number" id="newQuantityInput" placeholder="Quantity" value="1" min="1" />
         <select id="newCategorySelect"></select>
         <button id="addItemBtn">Add to list</button>
     </div>
@@ -116,9 +111,12 @@
   <div id="mapSection" class="section-container section hidden">
     <h2>My favorite places 📍</h2>
     
-    <div class="search-city-container">
-      <input type="text" id="citySearchInput" placeholder="Ta ville de cœur (ex: Paris, Bordeaux...)">
-      <button id="searchCityBtn"><i class="fas fa-search"></i></button>
+    <div class="map-controls">
+      <div class="search-city-container">
+        <input type="text" id="citySearchInput" placeholder="Chercher une ville...">
+        <button id="searchCityBtn"><i class="fas fa-search"></i></button>
+      </div>
+      <button id="addAtCurrentPosBtn"><i class="fas fa-location-arrow"></i> Noter là où je suis</button>
     </div>
 
     <div id="map"></div>
@@ -128,27 +126,11 @@
 
   <div id="suggestions" class="section-container section hidden">
     <h2 id="suggestionsTitle">Ideas 💡</h2>
-    <div class="filter-controls">
-        <div>
-            <label for="suggestionCategoryFilter">Filter by category:</label>
-            <select id="suggestionCategoryFilter"></select>
-        </div>
-        <button id="toggleDeleteModeBtn" title="Mode suppression"><i class="fas fa-trash-can"></i></button>
-    </div>
     <ul id="suggestionList"></ul>
-    <div id="addSuggestionForm" class="add-form">
-        <input type="text" id="newSuggestionInput" placeholder="Suggest an item" />
-        <select id="newSuggestionCategorySelect"></select>
-        <button id="addSuggestionBtn">Add Suggestion</button>
-    </div>
   </div>
 
   <div id="categories" class="section-container section hidden">
     <h2>Manage Categories 📂</h2>
-    <div id="addCategoryForm" class="add-form">
-        <input type="text" id="newCategoryInput" placeholder="New category" />
-        <button id="addCategoryBtn">Add Category</button>
-    </div>
     <ul id="categoryList"></ul>
   </div>
 
@@ -186,6 +168,7 @@
     let map;
     let mapInitialized = false;
     let userMarker;
+    let currentPos = null;
     let currentMarkers = [];
 
     const themeColors = {
@@ -206,6 +189,7 @@
       map.locate({setView: true, maxZoom: 16});
 
       map.on('locationfound', function(e) {
+        currentPos = e.latlng;
         if (userMarker) map.removeLayer(userMarker);
         userMarker = L.circleMarker(e.latlng, {
           radius: 8,
@@ -214,10 +198,19 @@
           weight: 2,
           opacity: 1,
           fillOpacity: 0.8
-        }).addTo(map).bindPopup("Tu es ici").openPopup();
+        }).addTo(map).bindPopup("Tu es ici");
       });
 
-      // Recherche de ville (Ville de coeur)
+      // Bouton "Noter là où je suis"
+      document.getElementById('addAtCurrentPosBtn').onclick = () => {
+        if (currentPos) {
+          map.setView(currentPos, 17);
+          fetchAddressAndOpenForm(currentPos.lat, currentPos.lng);
+        } else {
+          alert("Position non détectée. Vérifie tes paramètres GPS.");
+        }
+      };
+
       document.getElementById('searchCityBtn').onclick = function() {
         const city = document.getElementById('citySearchInput').value;
         if(city) {
@@ -229,27 +222,30 @@
         }
       };
 
-      // Clic sur la carte
       map.on('click', function(e) {
-        const { lat, lng } = e.latlng;
-        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-          .then(res => res.json())
-          .then(data => {
-            const autoName = data.display_name.split(',')[0] || "Point personnalisé";
-            openPopupForm(lat, lng, autoName);
-          })
-          .catch(() => openPopupForm(lat, lng, "Point personnalisé"));
+        fetchAddressAndOpenForm(e.latlng.lat, e.latlng.lng);
       });
 
       renderLocationList();
       mapInitialized = true;
     }
 
-    // Formulaire unique dans une popup Leaflet
+    function fetchAddressAndOpenForm(lat, lng) {
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+        .then(res => res.json())
+        .then(data => {
+          const autoName = data.display_name.split(',')[0] || "Point personnalisé";
+          openPopupForm(lat, lng, autoName);
+        })
+        .catch(() => openPopupForm(lat, lng, "Point personnalisé"));
+    }
+
     function openPopupForm(lat, lng, name) {
       const popupContent = `
         <div class="popup-form">
-          <b>${name}</b>
+          <label>Nom du lieu :</label>
+          <input type="text" id="popName" value="${name}">
+          <label>Catégorie :</label>
           <select id="popTheme">
             <option value="food">🍴 Food</option>
             <option value="bar">🍺 Bar / Café</option>
@@ -257,22 +253,25 @@
             <option value="other">📍 Autre</option>
           </select>
           <div class="star-rating" id="popStars">
-            <i class="far fa-star" data-v="1"></i><i class="far fa-star" data-v="2"></i><i class="far fa-star" data-v="3"></i><i class="far fa-star" data-v="4"></i><i class="far fa-star" data-v="5"></i>
+            <i class="fas fa-star" data-v="1"></i>
+            <i class="far fa-star" data-v="2"></i>
+            <i class="far fa-star" data-v="3"></i>
+            <i class="far fa-star" data-v="4"></i>
+            <i class="far fa-star" data-v="5"></i>
           </div>
-          <input type="hidden" id="popRating" value="0">
+          <input type="hidden" id="popRating" value="1">
           <textarea id="popNote" placeholder="Ton avis..."></textarea>
           <button id="popSubmit">Enregistrer</button>
         </div>
       `;
 
-      const popup = L.popup().setLatLng([lat, lng]).setContent(popupContent).openOn(map);
+      L.popup().setLatLng([lat, lng]).setContent(popupContent).openOn(map);
 
-      // Gestion des étoiles
       setTimeout(() => {
         const stars = document.querySelectorAll('#popStars i');
         stars.forEach(s => {
           s.onclick = (e) => {
-            const val = e.target.getAttribute('data-v');
+            const val = parseInt(e.target.getAttribute('data-v'));
             document.getElementById('popRating').value = val;
             stars.forEach((st, i) => {
               st.className = i < val ? 'fas fa-star' : 'far fa-star';
@@ -281,10 +280,11 @@
         });
 
         document.getElementById('popSubmit').onclick = () => {
+          const finalName = document.getElementById('popName').value || "Lieu sans nom";
           const theme = document.getElementById('popTheme').value;
           const rating = document.getElementById('popRating').value;
           const note = document.getElementById('popNote').value;
-          saveLocation(lat, lng, name, note, theme, rating);
+          saveLocation(lat, lng, finalName, note, theme, rating);
           map.closePopup();
         };
       }, 10);
@@ -316,14 +316,13 @@
       const locations = JSON.parse(localStorage.getItem('kiffLocations') || '[]');
       list.innerHTML = '';
       
-      // Nettoyer les markers existants
       currentMarkers.forEach(m => map.removeLayer(m));
       currentMarkers = [];
 
       locations.forEach(loc => {
         const item = document.createElement('div');
         item.className = `location-item theme-${loc.theme || 'other'}`;
-        const stars = '★'.repeat(loc.rating || 0);
+        const stars = '★'.repeat(loc.rating || 1);
         item.innerHTML = `<b>📍 ${loc.name} ${stars}</b><span>${loc.note}</span>`;
         list.prepend(item);
         
