@@ -8,54 +8,59 @@
   <link rel="apple-touch-icon" href="icon.png" />
   <link rel="stylesheet" href="style/style.css">
   <meta name="theme-color" content="#fcf2f2" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
   <style>
-    /* Style pour l'icône Map à côté du titre */
+    /* Icône Map */
     .title-icon-btn { margin-left: 15px; cursor: pointer; color: #e91e63; font-size: 0.8em; transition: transform 0.2s; }
     .title-icon-btn:hover { transform: scale(1.2); }
 
     /* Section Map */
     #mapSection { padding-bottom: 100px; }
-    #map { height: 450px; width: 100%; border-radius: 15px; margin: 15px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 1; }
+    #map { height: 400px; width: 100%; border-radius: 15px; margin: 15px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 1; border: 2px solid #fff; }
 
-    /* Barre de recherche et bouton position */
-    .map-controls { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
+    /* Contrôles Map */
+    .map-controls { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
     .search-city-container { display: flex; gap: 8px; }
-    .search-city-container input { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #ccc; }
-    .search-city-container button { padding: 8px 15px; background: #e91e63; color: white; border: none; border-radius: 8px; cursor: pointer; }
-    #addAtCurrentPosBtn { padding: 10px; background: #3498db; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .search-city-container input { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #ddd; }
+    .search-city-container button { padding: 10px 15px; background: #e91e63; color: white; border: none; border-radius: 10px; cursor: pointer; }
+    #addAtCurrentPosBtn { padding: 12px; background: #3498db; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
 
-    /* Styles pour la Popup Form */
+    /* Tris et Filtres */
+    .map-filters { display: flex; gap: 10px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
+    .map-filters select { padding: 8px; border-radius: 8px; border: 1px solid #ccc; background: white; font-size: 0.9em; min-width: 130px; }
+
+    /* Popup Form */
     .popup-form { min-width: 200px; font-family: sans-serif; }
     .popup-form label { font-size: 0.8em; color: #666; font-weight: bold; display: block; margin-top: 5px; }
     .popup-form input, .popup-form select, .popup-form textarea { width: 100%; margin-bottom: 8px; border: 1px solid #ddd; border-radius: 4px; padding: 6px; box-sizing: border-box; }
     .star-rating { color: #f1c40f; margin-bottom: 10px; cursor: pointer; font-size: 1.2em; display: flex; justify-content: center; gap: 4px; }
     .popup-form button { width: 100%; background: #e91e63; color: white; border: none; padding: 8px; border-radius: 5px; font-weight: bold; cursor: pointer; }
 
-    /* Thèmes de lieux */
-    .location-item { background: white; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; flex-direction: column; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #e91e63; }
-    .theme-food { border-left-color: #e67e22 !important; }
-    .theme-bar { border-left-color: #9b59b6 !important; }
-    .theme-shop { border-left-color: #2ecc71 !important; }
-    .theme-other { border-left-color: #95a5a6 !important; }
+    /* Liste des lieux améliorée */
+    .location-item { 
+      background: white; padding: 15px; border-radius: 12px; margin-bottom: 12px; 
+      display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(0,0,0,0.06); 
+      border-left: 6px solid #e91e63; cursor: pointer; transition: transform 0.1s;
+    }
+    .location-item:active { transform: scale(0.98); }
+    .location-item b { font-size: 1.1em; color: #333; display: flex; justify-content: space-between; align-items: center; }
+    .location-item .stars { color: #f1c40f; font-size: 0.9em; }
+    .location-item .note { font-size: 0.9em; color: #666; margin: 5px 0; line-height: 1.3; }
+    .location-item .meta { font-size: 0.75em; color: #aaa; display: flex; justify-content: space-between; margin-top: 5px; }
     
-    .location-item b { color: #333; }
-    .location-item span { font-size: 0.9em; color: #666; margin-top: 4px; }
+    /* Thèmes Google Maps Style */
+    .theme-food { border-left-color: #ea4335 !important; } /* Rouge */
+    .theme-bar { border-left-color: #9b59b6 !important; }  /* Violet */
+    .theme-shop { border-left-color: #4285f4 !important; } /* Bleu */
+    .theme-sport { border-left-color: #34a853 !important; } /* Vert */
+    .theme-nature { border-left-color: #27ae60 !important; }
+    .theme-culture { border-left-color: #fbbc05 !important; } /* Jaune */
+    .theme-other { border-left-color: #95a5a6 !important; }
+
     .hidden { display: none !important; }
   </style>
-
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js')
-          .then(reg => console.log('Service Worker registered:', reg.scope))
-          .catch(err => console.error('SW error:', err));
-      });
-    }
-  </script>
 </head>
 
 <body>
@@ -65,7 +70,7 @@
     <div id="addItemForm" class="add-form">
         <h3>Add an item</h3>
         <input type="text" id="newItemInput" placeholder="Add an item" />
-        <input type="number" id="newQuantityInput" placeholder="Quantity (optional)" value="1" min="1" />
+        <input type="number" id="newQuantityInput" placeholder="Quantity" value="1" min="1" />
         <select id="newCategorySelect"></select>
         <button id="addItemBtn">Add to list</button>
     </div>
@@ -85,12 +90,32 @@
     <h2>My favorite places 📍</h2>
     <div class="map-controls">
       <div class="search-city-container">
-        <input type="text" id="citySearchInput" placeholder="Ta ville de cœur...">
+        <input type="text" id="citySearchInput" placeholder="Rechercher une ville...">
         <button id="searchCityBtn"><i class="fas fa-search"></i></button>
       </div>
-      <button id="addAtCurrentPosBtn"><i class="fas fa-location-arrow"></i> Noter là où je suis</button>
+      <button id="addAtCurrentPosBtn"><i class="fas fa-location-arrow"></i> Noter ma position actuelle</button>
     </div>
+    
     <div id="map"></div>
+
+    <div class="map-filters">
+        <select id="filterType" onchange="renderLocationList()">
+            <option value="all">Tous les types</option>
+            <option value="food">🍴 Restaurant / Food</option>
+            <option value="bar">🍺 Bar / Café</option>
+            <option value="shop">🛍️ Shopping</option>
+            <option value="sport">⚽ Sport / Loisirs</option>
+            <option value="nature">🌳 Parc / Nature</option>
+            <option value="culture">🏛️ Culture / Musée</option>
+            <option value="other">📍 Autre</option>
+        </select>
+        <select id="sortOrder" onchange="renderLocationList()">
+            <option value="recent">Plus récents</option>
+            <option value="old">Plus anciens</option>
+            <option value="rating">Mieux notés</option>
+        </select>
+    </div>
+
     <h3>Lieux enregistrés</h3>
     <div id="savedLocationsList"></div>
   </div>
@@ -98,11 +123,8 @@
   <div id="suggestions" class="section-container section hidden">
     <h2 id="suggestionsTitle">Ideas 💡</h2>
     <div class="filter-controls">
-        <div>
-            <label for="suggestionCategoryFilter">Filter by category:</label>
-            <select id="suggestionCategoryFilter"></select>
-        </div>
-        <button id="toggleDeleteModeBtn" title="Mode suppression"><i class="fas fa-trash-can"></i></button>
+        <select id="suggestionCategoryFilter"></select>
+        <button id="toggleDeleteModeBtn"><i class="fas fa-trash-can"></i></button>
     </div>
     <ul id="suggestionList"></ul>
     <div id="addSuggestionForm" class="add-form">
@@ -119,24 +141,21 @@
         <button id="addCategoryBtn">Add Category</button>
     </div>
     <ul id="categoryList"></ul>
-    <h3>Category Order</h3>
-    <p class="empty-list-message">Drag categories to set their order.</p>
     <ul id="categoryOrderList" class="sortable-list"></ul>
   </div>
 
   <div id="settings" class="section-container section hidden">
     <h2>Settings ⚙️</h2>
     <p>Active list code: <strong id="activeShareCode">N/A</strong></p>
-    <hr>
-    <input type="text" id="shareCodeInput" placeholder="Enter a share code" />
-    <button id="loadShareCodeBtn">Load/Create List</button>
+    <input type="text" id="shareCodeInput" placeholder="Enter code" />
+    <button id="loadShareCodeBtn">Load List</button>
   </div>
 
   <div class="bottom-nav">
     <button id="toggleNavBtn" class="toggle-nav-button"><i class="fas fa-chevron-down"></i></button>
     <div class="nav-item active" id="navShoppingList"><i class="fas fa-shopping-basket"></i><span>My List</span></div>
     <div class="nav-item" id="navBuyLater"><i class="fas fa-clock"></i><span>Later</span></div>
-    <div class="nav-item" id="navSuggestions"><i class="fas fa-lightbulb"></i><span>Suggestions</span></div>
+    <div class="nav-item" id="navSuggestions"><i class="fas fa-lightbulb"></i><span>Ideas</span></div>
     <div class="nav-item" id="navCategories"><i class="fas fa-folder"></i><span>Categories</span></div>
     <div class="nav-item" id="navSettings"><i class="fas fa-cog"></i><span>Settings</span></div>
   </div>
@@ -152,7 +171,7 @@
   <script src="script/notifications.js"></script>
   <script src="script/ideas.js"></script>
   <script src="script/suggestions.js"></script>
-  <script src="script/category.js"></script>  
+  <script src="script/category.js"></script>
 
   <script>
     let map;
@@ -161,7 +180,10 @@
     let currentPos = null;
     let currentMarkers = [];
 
-    const themeColors = { food: '#e67e22', bar: '#9b59b6', shop: '#2ecc71', other: '#95a5a6' };
+    const themeColors = { 
+        food: '#ea4335', bar: '#9b59b6', shop: '#4285f4', 
+        sport: '#34a853', nature: '#27ae60', culture: '#fbbc05', other: '#95a5a6' 
+    };
 
     function initMap() {
       if (mapInitialized) return;
@@ -169,45 +191,37 @@
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
 
       map.locate({setView: true, maxZoom: 16});
-
-      map.on('locationfound', function(e) {
+      map.on('locationfound', (e) => {
         currentPos = e.latlng;
         if (userMarker) map.removeLayer(userMarker);
-        userMarker = L.circleMarker(e.latlng, {
-          radius: 8, fillColor: "#3498db", color: "#fff", weight: 2, opacity: 1, fillOpacity: 0.8
-        }).addTo(map).bindPopup("Tu es ici");
+        userMarker = L.circleMarker(e.latlng, { radius: 8, fillColor: "#3498db", color: "#fff", weight: 2, fillOpacity: 0.8 }).addTo(map);
       });
-
-      document.getElementById('addAtCurrentPosBtn').onclick = () => {
-        if (currentPos) {
-          map.setView(currentPos, 17);
-          fetchAddressAndOpenForm(currentPos.lat, currentPos.lng);
-        } else {
-          alert("Position non détectée.");
-        }
-      };
-
-      document.getElementById('searchCityBtn').onclick = function() {
-        const city = document.getElementById('citySearchInput').value;
-        if(city) {
-          fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${city}`)
-            .then(res => res.json()).then(data => {
-              if(data.length > 0) map.setView([data[0].lat, data[0].lon], 13);
-            });
-        }
-      };
 
       map.on('click', (e) => fetchAddressAndOpenForm(e.latlng.lat, e.latlng.lng));
       renderLocationList();
       mapInitialized = true;
     }
 
+    // Recherche Ville
+    document.getElementById('searchCityBtn').onclick = () => {
+      const city = document.getElementById('citySearchInput').value;
+      if(city) {
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${city}`)
+          .then(res => res.json()).then(data => { if(data.length > 0) map.setView([data[0].lat, data[0].lon], 13); });
+      }
+    };
+
+    document.getElementById('addAtCurrentPosBtn').onclick = () => {
+      if (currentPos) { map.setView(currentPos, 17); fetchAddressAndOpenForm(currentPos.lat, currentPos.lng); }
+      else alert("Position non détectée.");
+    };
+
     function fetchAddressAndOpenForm(lat, lng) {
       fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
         .then(res => res.json()).then(data => {
-          const name = data.display_name.split(',')[0] || "Point personnalisé";
+          const name = data.display_name.split(',')[0] || "Nouveau lieu";
           openPopupForm(lat, lng, name);
-        }).catch(() => openPopupForm(lat, lng, "Point personnalisé"));
+        }).catch(() => openPopupForm(lat, lng, "Nouveau lieu"));
     }
 
     function openPopupForm(lat, lng, name) {
@@ -220,20 +234,18 @@
             <option value="food">🍴 Food</option>
             <option value="bar">🍺 Bar / Café</option>
             <option value="shop">🛍️ Shopping</option>
+            <option value="sport">⚽ Sport</option>
+            <option value="nature">🌳 Nature</option>
+            <option value="culture">🏛️ Culture</option>
             <option value="other">📍 Autre</option>
           </select>
           <div class="star-rating" id="popStars">
-            <i class="fas fa-star" data-v="1"></i>
-            <i class="far fa-star" data-v="2"></i>
-            <i class="far fa-star" data-v="3"></i>
-            <i class="far fa-star" data-v="4"></i>
-            <i class="far fa-star" data-v="5"></i>
+            <i class="fas fa-star" data-v="1"></i><i class="far fa-star" data-v="2"></i><i class="far fa-star" data-v="3"></i><i class="far fa-star" data-v="4"></i><i class="far fa-star" data-v="5"></i>
           </div>
           <input type="hidden" id="popRating" value="1">
           <textarea id="popNote" placeholder="Ton avis..."></textarea>
           <button id="popSubmit">Enregistrer</button>
-        </div>
-      `;
+        </div>`;
 
       L.popup().setLatLng([lat, lng]).setContent(popupContent).openOn(map);
 
@@ -250,44 +262,69 @@
           saveLocation(lat, lng, document.getElementById('popName').value, document.getElementById('popNote').value, document.getElementById('popTheme').value, document.getElementById('popRating').value);
           map.closePopup();
         };
-      }, 10);
+      }, 50);
     }
 
     function saveLocation(lat, lng, name, note, theme, rating) {
       const locations = JSON.parse(localStorage.getItem('kiffLocations') || '[]');
-      locations.push({lat, lng, name, note, theme, rating});
+      locations.push({lat, lng, name, note, theme, rating: parseInt(rating), date: Date.now()});
       localStorage.setItem('kiffLocations', JSON.stringify(locations));
       renderLocationList();
     }
 
     function renderLocationList() {
       const list = document.getElementById('savedLocationsList');
-      const locations = JSON.parse(localStorage.getItem('kiffLocations') || '[]');
+      const filter = document.getElementById('filterType').value;
+      const sort = document.getElementById('sortOrder').value;
+      let locations = JSON.parse(localStorage.getItem('kiffLocations') || '[]');
+
+      // Filtrage
+      if(filter !== 'all') locations = locations.filter(l => l.theme === filter);
+
+      // Tri
+      if(sort === 'recent') locations.sort((a,b) => b.date - a.date);
+      else if(sort === 'old') locations.sort((a,b) => a.date - b.date);
+      else if(sort === 'rating') locations.sort((a,b) => b.rating - a.rating);
+
       list.innerHTML = '';
       currentMarkers.forEach(m => map.removeLayer(m));
       currentMarkers = [];
 
-      locations.forEach(loc => {
+      locations.forEach((loc, index) => {
         const item = document.createElement('div');
         item.className = `location-item theme-${loc.theme || 'other'}`;
-        item.innerHTML = `<b>📍 ${loc.name} ${'★'.repeat(loc.rating || 1)}</b><span>${loc.note}</span>`;
-        list.prepend(item);
+        const dateStr = new Date(loc.date).toLocaleDateString();
+        
+        item.innerHTML = `
+          <b>${loc.name} <span class="stars">${'★'.repeat(loc.rating)}${'☆'.repeat(5-loc.rating)}</span></b>
+          <span class="note">${loc.note || 'Aucune note'}</span>
+          <div class="meta"><span>#${loc.theme}</span> <span>${dateStr}</span></div>
+        `;
+
+        // Action clic liste -> Map
+        item.onclick = () => {
+            map.setView([loc.lat, loc.lng], 17);
+            currentMarkers[index].openPopup();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        list.appendChild(item);
         
         const color = themeColors[loc.theme] || '#95a5a6';
         const marker = L.marker([loc.lat, loc.lng], {
           icon: L.divIcon({
             className: 'custom-icon',
-            html: `<div style="background-color:${color}; width:12px; height:12px; border:2px solid white; border-radius:50%;"></div>`,
-            iconSize: [12, 12], iconAnchor: [6, 6]
+            html: `<div style="background-color:${color}; width:14px; height:14px; border:2px solid white; border-radius:50%; box-shadow:0 2px 5px rgba(0,0,0,0.2)"></div>`,
+            iconSize: [14, 14], iconAnchor: [7, 7]
           })
-        }).addTo(map).bindPopup(`<b>${loc.name}</b><br>${'★'.repeat(loc.rating)}<br>${loc.note}`);
+        }).addTo(map).bindPopup(`<b>${loc.name}</b><br>${loc.note}`);
         currentMarkers.push(marker);
       });
     }
 
+    // Switch section Map
     document.getElementById('openMapBtn').addEventListener('click', function() {
       document.querySelectorAll('.section').forEach(sec => sec.classList.add('hidden'));
-      document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
       document.getElementById('mapSection').classList.remove('hidden');
       initMap();
       setTimeout(() => { map.invalidateSize(); }, 200);
