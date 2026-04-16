@@ -130,11 +130,15 @@
             <label for="suggestionCategoryFilter">Filter by category:</label>
             <select id="suggestionCategoryFilter"></select>
         </div>
-        <button id="toggleDeleteModeBtn" title="Mode suppression"><i class="fas fa-trash-can"></i></button>
+        <button id="toggleDeleteModeBtn" title="Mode suppression">
+            <i class="fas fa-trash-can"></i>
+        </button>
     </div>
     <ul id="suggestionList"></ul>
     <div id="addSuggestionForm" class="add-form">
+        <label for="newSuggestionInput">Add a suggestion:</label>
         <input type="text" id="newSuggestionInput" placeholder="Suggest an item" />
+        <label for="newSuggestionCategorySelect">Category:</label>
         <select id="newSuggestionCategorySelect"></select>
         <button id="addSuggestionBtn">Add Suggestion</button>
     </div>
@@ -143,9 +147,11 @@
   <div id="categories" class="section-container section hidden">
     <h2>Manage Categories 📂</h2>
     <div id="addCategoryForm" class="add-form">
+        <label for="newCategoryInput">Add new category:</label>
         <input type="text" id="newCategoryInput" placeholder="New category" />
         <button id="addCategoryBtn">Add Category</button>
     </div>
+    <h3>Your Categories</h3>
     <ul id="categoryList"></ul>
     <h3>Category Order</h3>
     <p class="empty-list-message">Drag categories to set their order.</p>
@@ -156,8 +162,27 @@
     <h2>Settings ⚙️</h2>
     <p>Active list code: <strong id="activeShareCode">N/A</strong></p>
     <hr>
+    <h3>Load / Create a List</h3>
     <input type="text" id="shareCodeInput" placeholder="Enter a share code" />
     <button id="loadShareCodeBtn">Load/Create List</button>
+    <hr>
+    <button id="changeShareCodeBtn">Change List / Disconnect</button>
+  </div>
+
+  <div id="notificationModal" class="modal-overlay">
+    <div class="modal-content">
+      <button class="modal-close-btn" id="closeNotificationModalBtn">&times;</button>
+      <h3>Send Notification</h3>
+      <textarea id="notificationMessageInput" placeholder="Write your message here..."></textarea>
+      <div class="modal-buttons">
+        <button id="sendNotificationBtn">Send Notification</button>
+        <button id="saveMessageBtn">Save Message</button>
+      </div>
+
+      <h4>Saved Messages</h4>
+      <p id="emptySavedMessages" class="empty-list-message">No saved messages.</p>
+      <ul id="savedMessagesList"></ul>
+    </div>
   </div>
 
   <div class="bottom-nav">
