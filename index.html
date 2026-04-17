@@ -22,12 +22,49 @@
     #map { height: 450px; width: 100%; border-radius: 15px; margin: 15px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 1; }
 
     /* Barre de recherche et bouton position */
-    .map-controls { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
-    .search-city-container { display: flex; gap: 8px; }
-    .search-city-container input { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #ccc; }
-    .search-city-container button { padding: 8px 15px; background: #e91e63; color: white; border: none; border-radius: 8px; cursor: pointer; }
-    #addAtCurrentPosBtn { padding: 10px; background: #3498db; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .map-controls { 
+      display: flex; 
+      flex-direction: row; /* Aligne tout sur une ligne */
+      gap: 8px; 
+      margin-bottom: 10px; 
+      align-items: center;
+    }
 
+    /* Le champ de recherche prend tout l'espace restant */
+    #citySearchInput { 
+      flex: 1; 
+      padding: 10px; 
+      border-radius: 8px; 
+      border: 1px solid #ccc; 
+      font-size: 0.9em;
+    }
+
+    /* Bouton de recherche (Petit carré rouge) */
+    #searchCityBtn { 
+      width: 40px; 
+      height: 40px; 
+      background: #e91e63; 
+      color: white; 
+      border: none; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      flex-shrink: 0; /* Empêche le bouton de rétrécir */
+    }
+
+    /* Bouton position (Bleu) */
+    #addAtCurrentPosBtn { 
+      width: 40px; 
+      height: 40px; 
+      background: #3498db; 
+      color: white; 
+      border: none; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      flex-shrink: 0;
+    }
     /* Nouveau : Filtres de la liste */
     .map-filters { display: flex; gap: 8px; margin-bottom: 10px; overflow-x: auto; white-space: nowrap; padding-bottom: 5px; }
     .map-filters select { padding: 8px; border-radius: 8px; border: 1px solid #ddd; background: #fff; font-size: 0.85em; }
@@ -93,11 +130,15 @@
   <div id="mapSection" class="section-container section hidden">
     <h2>My favorite places 📍</h2>
     <div class="map-controls">
-      <div class="search-city-container">
-        <input type="text" id="citySearchInput" placeholder="Ta ville de cœur...">
-        <button id="searchCityBtn"><i class="fas fa-search"></i></button>
-      </div>
-      <button id="addAtCurrentPosBtn"><i class="fas fa-location-arrow"></i> Noter là où je suis</button>
+      <button id="addAtCurrentPosBtn" title="Ma position actuelle">
+        <i class="fas fa-location-arrow"></i>
+      </button>
+      
+      <input type="text" id="citySearchInput" placeholder="Rechercher une ville...">
+      
+      <button id="searchCityBtn">
+        <i class="fas fa-search"></i>
+      </button>
     </div>
     
     <div id="map"></div>
