@@ -302,12 +302,15 @@
     function fetchAddressAndOpenForm(lat, lng) {
       fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
         .then(res => res.json()).then(data => {
-          const name = data.display_name.split(',')[0] || "Point personnalisé";
-          openPopupForm(lat, lng, name);
-        }).catch(() => openPopupForm(lat, lng, "Point personnalisé"));
+          const fullAddress = data.display_name; // L'adresse complète pour Google Maps
+          const name = fullAddress.split(',')[0] || "Point personnalisé";
+          openPopupForm(lat, lng, name, fullAddress); // On passe l'adresse ici
+        }).catch(() => openPopupForm(lat, lng, "Point personnalisé", ""));
     }
 
-    function openPopupForm(lat, lng, name) {
+    function openPopupForm(lat, lng, name, address = "") {
+      const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+      
       const popupContent = `
         <div class="popup-form">
           <label>Nom du lieu :</label>
@@ -327,6 +330,11 @@
           </div>
           <input type="hidden" id="popRating" value="1">
           <textarea id="popNote" placeholder="Ton avis..."></textarea>
+          
+          <a href="${googleMapsUrl}" target="_blank" style="display:block; text-align:center; margin-bottom:10px; color:#3498db; text-decoration:none; font-size:0.85em;">
+            <i class="fas fa-directions"></i> Voir sur Google Maps
+          </a>
+
           <button id="popSubmit">Enregistrer</button>
         </div>
       `;
@@ -393,13 +401,22 @@
         list.appendChild(item);
         
         const color = themeColors[loc.theme] || '#95a5a6';
+        const gMapsLink = `https://www.google.com/maps/search/?api=1&query=${loc.lat},${loc.lng}`;
+
         const marker = L.marker([loc.lat, loc.lng], {
           icon: L.divIcon({
             className: 'custom-icon',
             html: `<div style="background-color:${color}; width:14px; height:14px; border:2px solid white; border-radius:50%; box-shadow: 0 2px 4px rgba(0,0,0,0.3)"></div>`,
             iconSize: [14, 14], iconAnchor: [7, 7]
           })
-        }).addTo(map).bindPopup(`<b>${loc.name}</b><br>${'★'.repeat(loc.rating)}<br>${loc.note}`);
+        }).addTo(map).bindPopup(`
+            <b>${loc.name}</b><br>
+            ${'★'.repeat(loc.rating)}<br>
+            <p style="margin:5px 0;">${loc.note}</p>
+            <a href="${gMapsLink}" target="_blank" style="color:#3498db; text-decoration:none; font-weight:bold;">
+                <i class="fas fa-map-marker-alt"></i> Y aller
+            </a>
+        `);
         currentMarkers.push(marker);
       });
     }
