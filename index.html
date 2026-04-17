@@ -364,6 +364,20 @@
       renderLocationList();
     }
 
+    function updatePopupLink(lat, lng) {
+      const newName = document.getElementById('popName').value;
+      const link = document.getElementById('dynamicGMapsLink');
+      if(link) {
+          link.href = getGoogleMapsUrl(newName, lat, lng);
+          link.innerHTML = `<i class="fas fa-directions"></i> Voir "${newName}" sur Google Maps`;
+      }
+    }
+    function getGoogleMapsUrl(name, lat, lng) {
+      // On combine le nom et les coordonnées pour être ultra précis
+      // encodeURIComponent permet de gérer les espaces et caractères spéciaux
+      const query = encodeURIComponent(`${name}, ${lat},${lng}`);
+      return `https://www.google.com/maps/search/?api=1&query=${query}`;
+  }
     function renderLocationList() {
       const list = document.getElementById('savedLocationsList');
       const themeFilter = document.getElementById('filterTheme').value;
@@ -401,8 +415,7 @@
         list.appendChild(item);
         
         const color = themeColors[loc.theme] || '#95a5a6';
-        const gMapsLink = `https://www.google.com/maps/search/?api=1&query=${loc.lat},${loc.lng}`;
-
+        const gMapsLink = getGoogleMapsUrl(loc.name, loc.lat, loc.lng);
         const marker = L.marker([loc.lat, loc.lng], {
           icon: L.divIcon({
             className: 'custom-icon',
@@ -414,7 +427,7 @@
             ${'★'.repeat(loc.rating)}<br>
             <p style="margin:5px 0;">${loc.note}</p>
             <a href="${gMapsLink}" target="_blank" style="color:#3498db; text-decoration:none; font-weight:bold;">
-                <i class="fas fa-map-marker-alt"></i> Y aller
+                <i class="fas fa-map-marker-alt"></i> Ouvrir dans Google Maps
             </a>
         `);
         currentMarkers.push(marker);
