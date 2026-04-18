@@ -1,0 +1,78 @@
+/* Style pour l'icône Map à côté du titre */
+.title-icon-btn { margin-left: 15px; cursor: pointer; color: #e91e63; font-size: 0.8em; transition: transform 0.2s; }
+.title-icon-btn:hover { transform: scale(1.2); }
+
+/* Section Map */
+#mapSection { padding-bottom: 100px; }
+#map { height: 450px; width: 100%; border-radius: 15px; margin: 15px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 1; }
+
+/* Barre de recherche et bouton position */
+.map-controls { 
+    display: flex; 
+    flex-direction: row; /* Aligne tout sur une ligne */
+    gap: 8px; 
+    margin-bottom: 10px; 
+    align-items: center;
+}
+
+/* Le champ de recherche prend tout l'espace restant */
+#citySearchInput { 
+    flex: 1; 
+    padding: 10px; 
+    border-radius: 8px; 
+    border: 1px solid #ccc; 
+    font-size: 0.9em;
+}
+
+/* Bouton de recherche (Petit carré rouge) */
+#searchCityBtn { 
+    width: 40px; 
+    height: 40px; 
+    background: #e91e63; 
+    color: white; 
+    border: none; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    flex-shrink: 0; /* Empêche le bouton de rétrécir */
+}
+
+/* Bouton position (Bleu) */
+#addAtCurrentPosBtn { 
+    width: 40px; 
+    height: 40px; 
+    background: #3498db; 
+    color: white; 
+    border: none; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    flex-shrink: 0;
+}
+/* Nouveau : Filtres de la liste */
+.map-filters { display: flex; gap: 8px; margin-bottom: 10px; overflow-x: auto; white-space: nowrap; padding-bottom: 5px; }
+.map-filters select { padding: 8px; border-radius: 8px; border: 1px solid #ddd; background: #fff; font-size: 0.85em; }
+
+/* Styles pour la Popup Form */
+.popup-form { min-width: 200px; font-family: sans-serif; }
+.popup-form label { font-size: 0.8em; color: #666; font-weight: bold; display: block; margin-top: 5px; }
+.popup-form input, .popup-form select, .popup-form textarea { width: 100%; margin-bottom: 8px; border: 1px solid #ddd; border-radius: 4px; padding: 6px; box-sizing: border-box; }
+.star-rating { color: #f1c40f; margin-bottom: 10px; cursor: pointer; font-size: 1.2em; display: flex; justify-content: center; gap: 4px; }
+.popup-form button { width: 100%; background: #e91e63; color: white; border: none; padding: 8px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+
+/* Thèmes de lieux (Mis à jour avec plus de couleurs) */
+.location-item { background: white; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; flex-direction: column; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #e91e63; cursor: pointer; }
+.theme-food { border-left-color: #ea4335 !important; }
+.theme-bar { border-left-color: #9b59b6 !important; }
+.theme-shop { border-left-color: #4285f4 !important; }
+.theme-sport { border-left-color: #34a853 !important; }
+.theme-nature { border-left-color: #27ae60 !important; }
+.theme-culture { border-left-color: #fbbc05 !important; }
+.theme-other { border-left-color: #95a5a6 !important; }
+
+.location-item b { color: #333; display: flex; justify-content: space-between; }
+.location-item span { font-size: 0.9em; color: #666; margin-top: 4px; }
+.location-item .date-info { font-size: 0.7em; color: #bbb; align-self: flex-end; }
+
+.hidden { display: none !important; }
