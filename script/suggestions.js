@@ -124,18 +124,8 @@ async function deleteSuggestion(suggestionId) {
 async function loadSuggestions() {
     let suggestions = getSuggestions();
     const list = document.getElementById('suggestionList');
-    const container = document.getElementById('suggestions'); // Le parent
-    
     list.innerHTML = '';
 
-    // Gestion de la classe visuelle sur le conteneur
-    if (isDeleteMode) {
-        container.classList.add('delete-mode-active');
-    } else {
-        container.classList.remove('delete-mode-active');
-    }
-
-    // Filtrage (code existant)
     const selectedCategory = suggestionCategoryFilter.value;
     let filteredSuggestions = selectedCategory === 'all'
         ? suggestions
@@ -143,19 +133,25 @@ async function loadSuggestions() {
 
     filteredSuggestions.forEach(sug => {
         const li = document.createElement('li');
-        li.innerHTML = `<span class="name">${sug.name}</span>`;
-        if (sug.image) {
+        
+        // Vérification et application de l'image
+        if (sug.image && sug.image !== "data:,") { // "data:," est un canvas vide
             li.style.backgroundImage = `url(${sug.image})`;
+            li.style.backgroundSize = 'cover';
+            li.style.backgroundPosition = 'center';
+            li.style.backgroundRepeat = 'no-repeat';
+        } else {
+            li.style.backgroundColor = '#f0f0f0'; // Fond gris clair si pas de dessin
         }
+
         li.innerHTML = `<span class="name">${sug.name}</span>`;
+        
         li.onclick = () => {
             if (isDeleteMode) {
                 deleteSuggestion(sug.id);
                 loadSuggestions(); 
             } else {
-                // ACTION D'AJOUT CLASSIQUE
                 addItem(sug.name, 1, sug.category, currentListId);
-                // Feedback visuel rapide d'ajout
                 li.style.transform = "scale(0.95)";
                 setTimeout(() => li.style.transform = "scale(1)", 100);
             }
