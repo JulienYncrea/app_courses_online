@@ -11,7 +11,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
   <style>
     /* Style pour l'icône Map à côté du titre */
     .title-icon-btn { margin-left: 15px; cursor: pointer; color: #e91e63; font-size: 0.8em; transition: transform 0.2s; }
@@ -247,14 +248,14 @@
   <script src="script/later.js"></script>
   <script src="script/suggestions.js"></script>
   <script src="script/category.js"></script>  
-
+  <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
   <script>
     let map;
     let mapInitialized = false;
     let userMarker;
     let currentPos = null;
     let currentMarkers = [];
-
+    let markerClusterGroup;
     const themeColors = { 
         food: '#ea4335', bar: '#9b59b6', shop: '#4285f4', 
         sport: '#34a853', nature: '#27ae60', culture: '#fbbc05', other: '#95a5a6' 
@@ -264,7 +265,8 @@
       if (mapInitialized) return;
       map = L.map('map').setView([48.8566, 2.3522], 13);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
-
+      markerClusterGroup = L.markerClusterGroup();
+      map.addLayer(markerClusterGroup);
       map.locate({setView: true, maxZoom: 16});
 
       map.on('locationfound', function(e) {
@@ -399,6 +401,8 @@
       const query = encodeURIComponent(`${name}, ${lat},${lng}`);
       return `https://www.google.com/maps/search/?api=1&query=${query}`;
   }
+    let currentPage = 1; // Variable pour suivre la page actuelle
+    const itemsPerPage = 20; // Limite stricte de 20 par page
     async function renderLocationList() {
       if (!currentListId) return;
 
@@ -407,36 +411,31 @@
       const sortVal = document.getElementById('sortLocations').value;
 
       try {
-        // 1. Récupération des données depuis Supabase
-        let query = supabaseClient
-          .from('map_locations')
-          .select('*')
-          .eq('list_id', currentListId);
-
+        let query = supabaseClient.from('map_locations').select('*').eq('list_id', currentListId);
         const { data: locations, error } = await query;
         if (error) throw error;
 
         let filteredLocations = [...locations];
 
-        // 2. Filtrage (Local pour plus de fluidité)
-        if (themeFilter !== 'all') {
-          filteredLocations = filteredLocations.filter(l => l.theme === themeFilter);
-        }
-
-        // 3. Tri
+        // 1. Filtrage et Tri habituel
+        if (themeFilter !== 'all') filteredLocations = filteredLocations.filter(l => l.theme === themeFilter);
         if (sortVal === 'new') {
           filteredLocations.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         } else {
           filteredLocations.sort((a, b) => b.rating - a.rating);
         }
 
-        // 4. Rendu visuel
+        // 2. Nettoyage de la carte et des clusters
         listContainer.innerHTML = '';
-        currentMarkers.forEach(m => map.removeLayer(m));
-        currentMarkers = [];
+        markerClusterGroup.clearLayers(); // On vide les clusters au lieu de removeLayer un par un
 
-        filteredLocations.forEach(loc => {
-          // --- Création de l'item dans la liste ---
+        // 3. Logique de Pagination pour la LISTE uniquement
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const paginatedLocations = filteredLocations.slice(startIndex, endIndex);
+
+        // 4. Rendu de la LISTE (Limitée à 20)
+        paginatedLocations.forEach(loc => {
           const item = document.createElement('div');
           item.className = `location-item theme-${loc.theme || 'other'}`;
           item.innerHTML = `
@@ -449,8 +448,13 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
           };
           listContainer.appendChild(item);
+        });
 
-          // --- Création du marqueur sur la carte ---
+        // 5. Ajout des contrôles de pagination (Suivant/Précédent)
+        renderPaginationControls(filteredLocations.length, listContainer);
+
+        // 6. Rendu des MARQUEURS (On met TOUS les points filtrés dans les clusters, pas juste 20)
+        filteredLocations.forEach(loc => {
           const color = themeColors[loc.theme] || '#95a5a6';
           const gMapsLink = getGoogleMapsUrl(loc.name, loc.lat, loc.lng);
           
@@ -460,7 +464,7 @@
               html: `<div style="background-color:${color}; width:14px; height:14px; border:2px solid white; border-radius:50%; box-shadow: 0 2px 4px rgba(0,0,0,0.3)"></div>`,
               iconSize: [14, 14], iconAnchor: [7, 7]
             })
-          }).addTo(map).bindPopup(`
+          }).bindPopup(`
               <b>${loc.name}</b><br>
               ${'★'.repeat(loc.rating)}<br>
               <p style="margin:5px 0;">${loc.note || ''}</p>
@@ -468,12 +472,37 @@
                   <i class="fas fa-map-marker-alt"></i> Ouvrir dans Google Maps
               </a>
           `);
-          currentMarkers.push(marker);
+          markerClusterGroup.addLayer(marker); // On ajoute au groupe de clusters
         });
 
       } catch (error) {
-        console.error("Erreur lors du rendu de la carte:", error);
+        console.error("Erreur lors du rendu :", error);
       }
+    }
+
+    // Fonction utilitaire pour les boutons de page
+    function renderPaginationControls(totalItems, container) {
+      const totalPages = Math.ceil(totalItems / itemsPerPage);
+      if (totalPages <= 1) return;
+
+      const nav = document.createElement('div');
+      nav.style.display = 'flex';
+      nav.style.justifyContent = 'space-between';
+      nav.style.padding = '15px 0';
+
+      const prevBtn = document.createElement('button');
+      prevBtn.innerText = "Précédent";
+      prevBtn.disabled = currentPage === 1;
+      prevBtn.onclick = () => { currentPage--; renderLocationList(); };
+
+      const nextBtn = document.createElement('button');
+      nextBtn.innerText = "Suivant";
+      nextBtn.disabled = currentPage === totalPages;
+      nextBtn.onclick = () => { currentPage++; renderLocationList(); };
+
+      nav.appendChild(prevBtn);
+      nav.appendChild(nextBtn);
+      container.appendChild(nav);
     }
 
     document.getElementById('openMapBtn').addEventListener('click', function() {
