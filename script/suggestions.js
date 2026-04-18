@@ -6,7 +6,27 @@ const addSuggestionBtn = document.getElementById('addSuggestionBtn');
 const suggestionList = document.getElementById('suggestionList');
 let isDeleteMode = false;
 let currentListId = localStorage.getItem('current_list_id'); // Assure-toi que c'est bien récupéré
-
+function toggleDeleteMode() {
+    isDeleteMode = !isDeleteMode;
+    const btn = document.getElementById('toggleDeleteModeBtn');
+    if (isDeleteMode){
+        if (confirm(`You have activate the delete mode, tape yes for continue or cancel for desactivate delete mode. You can deactivate delete mode with click to the trash icon back`)) {
+                isDeleteMode = true;
+            }
+        else {
+            isDeleteMode = false;
+        }
+    }
+    if (isDeleteMode) {
+        btn.style.backgroundColor = "#000000"; // Bouton devient rouge
+        btn.style.color = "white";
+    } else {
+        btn.style.backgroundColor = "#ff4d4d"; // Retour au style d'origine
+        btn.style.color = "white";
+    }
+    
+    loadSuggestions(); // Relance le rendu avec la nouvelle couleur de liste
+}
 function getSuggestions() {
     return JSON.parse(localStorage.getItem('shopping_suggestions') || '[]');
 }
@@ -156,24 +176,3 @@ async function deleteSuggestion(suggestionId) {
     }
 }
 
-function toggleDeleteMode() {
-    isDeleteMode = !isDeleteMode;
-    const btn = document.getElementById('toggleDeleteModeBtn');
-    if (isDeleteMode){
-        if (confirm(`You have activate the delete mode, tape yes for continue or cancel for desactivate delete mode. You can deactivate delete mode with click to the trash icon back`)) {
-                isDeleteMode = true;
-            }
-        else {
-            isDeleteMode = false;
-        }
-    }
-    if (isDeleteMode) {
-        btn.style.backgroundColor = "#000000"; // Bouton devient rouge
-        btn.style.color = "white";
-    } else {
-        btn.style.backgroundColor = "#ff4d4d"; // Retour au style d'origine
-        btn.style.color = "white";
-    }
-    
-    loadSuggestions(); // Relance le rendu avec la nouvelle couleur de liste
-}
