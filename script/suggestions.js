@@ -5,7 +5,44 @@ const newSuggestionCategorySelect = document.getElementById('newSuggestionCatego
 const addSuggestionBtn = document.getElementById('addSuggestionBtn');
 const suggestionList = document.getElementById('suggestionList');
 let isDeleteMode = false;
+const canvas = document.getElementById('drawingCanvas');
+const ctx = canvas.getContext('2d');
+let drawing = false;
 
+// Paramètres du trait
+ctx.lineWidth = 3;
+ctx.lineCap = 'round';
+ctx.strokeStyle = '#333';
+
+canvas.addEventListener('mousedown', () => drawing = true);
+canvas.addEventListener('mouseup', () => { drawing = false; ctx.beginPath(); });
+canvas.addEventListener('mousemove', draw);
+
+// Support Tactile
+canvas.addEventListener('touchstart', (e) => { drawing = true; e.preventDefault(); });
+canvas.addEventListener('touchend', () => { drawing = false; ctx.beginPath(); });
+canvas.addEventListener('touchmove', (e) => {
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    draw({ clientX: touch.clientX, clientY: touch.clientY });
+    e.preventDefault();
+});
+
+function draw(e) {
+    if (!drawing) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX || e.touches[0].clientX) - rect.left;
+    const y = (e.clientY || e.touches[0].clientY) - rect.top;
+
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+}
+
+document.getElementById('clearCanvasBtn').addEventListener('click', () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+});
 function toggleDeleteMode() {
     isDeleteMode = !isDeleteMode;
     const btn = document.getElementById('toggleDeleteModeBtn');
@@ -42,7 +79,9 @@ async function addSuggestion(name, category) {
         alert("Please enter a name and choose a category for the suggestion.");
         return;
     }
+    const imageData = canvas.toDataURL();
     const suggestions = getSuggestions();
+    
     // Check for existing suggestion
     if (suggestions.some(sug => sug.name.toLowerCase() === name.trim().toLowerCase() && sug.category.toLowerCase() === category.toLowerCase())) {
         alert(`"${name.trim()}" is already a suggestion in category "${category}"!`);
@@ -50,13 +89,15 @@ async function addSuggestion(name, category) {
     }
 
     const newSuggestion = {
-        id: Date.now(), // Simple unique ID
+        id: Date.now(),
         name: name.trim(),
-        category: category
+        category: category,
+        image: imageData // On stocke l'image ici
     };
     suggestions.push(newSuggestion);
     saveSuggestions(suggestions);
     newSuggestionInput.value = '';
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     loadSuggestions(); // Refresh the list
 }
 
@@ -103,7 +144,10 @@ async function loadSuggestions() {
     filteredSuggestions.forEach(sug => {
         const li = document.createElement('li');
         li.innerHTML = `<span class="name">${sug.name}</span>`;
-        
+        if (sug.image) {
+            li.style.backgroundImage = `url(${sug.image})`;
+        }
+        li.innerHTML = `<span class="name">${sug.name}</span>`;
         li.onclick = () => {
             if (isDeleteMode) {
                 deleteSuggestion(sug.id);

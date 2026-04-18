@@ -100,11 +100,16 @@
     </div>
     <ul id="suggestionList"></ul>
     <div id="addSuggestionForm" class="add-form">
-        <label for="newSuggestionInput">Add a suggestion:</label>
-        <input type="text" id="newSuggestionInput" placeholder="Suggest an item" />
-        <label for="newSuggestionCategorySelect">Category:</label>
-        <select id="newSuggestionCategorySelect"></select>
-        <button id="addSuggestionBtn">Add Suggestion</button>
+      <label for="newSuggestionInput">Add a suggestion:</label>
+      <input type="text" id="newSuggestionInput" placeholder="Nom de l'item" />
+      
+      <label>Dessinez l'icône :</label>
+      <canvas id="drawingCanvas" width="100" height="100" style="border: 1px solid #ccc; border-radius: 8px; cursor: crosshair; background: white;"></canvas>
+      <button type="button" id="clearCanvasBtn" style="font-size: 0.8em; padding: 5px;">Effacer le dessin</button>
+
+      <label for="newSuggestionCategorySelect">Category:</label>
+      <select id="newSuggestionCategorySelect"></select>
+      <button id="addSuggestionBtn">Add Suggestion</button>
     </div>
   </div>
 

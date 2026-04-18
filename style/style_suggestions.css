@@ -1,0 +1,48 @@
+#suggestionList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 15px;
+    padding: 15px;
+    list-style: none;
+}
+
+#suggestionList li {
+    aspect-ratio: 1 / 1; /* Force le carré */
+    background-color: #fff;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end; /* Texte en bas */
+    padding: 10px;
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    cursor: pointer;
+    background-size: cover; /* Pour afficher le dessin en fond */
+    background-position: center;
+    transition: transform 0.2s;
+    overflow: hidden;
+}
+
+#suggestionList li .name {
+    background: rgba(255, 255, 255, 0.8);
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+    font-size: 0.9em;
+    padding: 2px 0;
+    border-radius: 0 0 8px 8px;
+}
+
+/* Style spécifique pour le mode suppression */
+.delete-mode-active #suggestionList li {
+    border: 2px dashed #ff4d4d;
+    animation: shake 0.5s infinite;
+}
+
+@keyframes shake {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(1deg); }
+    75% { transform: rotate(-1deg); }
+    100% { transform: rotate(0deg); }
+}
