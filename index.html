@@ -357,11 +357,32 @@
       }, 10);
     }
 
-    function saveLocation(lat, lng, name, note, theme, rating) {
-      const locations = JSON.parse(localStorage.getItem('kiffLocations') || '[]');
-      locations.push({lat, lng, name, note, theme, rating: parseInt(rating), date: Date.now()});
-      localStorage.setItem('kiffLocations', JSON.stringify(locations));
-      renderLocationList();
+    async function saveLocation(lat, lng, name, note, theme, rating) {
+      if (!currentListId) {
+        alert("Veuillez d'abord charger une liste.");
+        return;
+      }
+
+      try {
+        const { data, error } = await supabaseClient
+          .from('map_locations')
+          .insert([{
+            list_id: currentListId,
+            name: name,
+            lat: lat,
+            lng: lng,
+            note: note,
+            theme: theme,
+            rating: parseInt(rating)
+          }]);
+
+        if (error) throw error;
+        
+        // On recharge la liste pour afficher le nouveau point
+        renderLocationList();
+      } catch (error) {
+        console.error("Erreur lors de l'enregistrement du lieu:", error);
+      }
     }
 
     function updatePopupLink(lat, lng) {
@@ -378,60 +399,81 @@
       const query = encodeURIComponent(`${name}, ${lat},${lng}`);
       return `https://www.google.com/maps/search/?api=1&query=${query}`;
   }
-    function renderLocationList() {
-      const list = document.getElementById('savedLocationsList');
+    async function renderLocationList() {
+      if (!currentListId) return;
+
+      const listContainer = document.getElementById('savedLocationsList');
       const themeFilter = document.getElementById('filterTheme').value;
       const sortVal = document.getElementById('sortLocations').value;
-      let locations = JSON.parse(localStorage.getItem('kiffLocations') || '[]');
-      
-      // Filtrage
-      if(themeFilter !== 'all') {
-          locations = locations.filter(l => l.theme === themeFilter);
-      }
 
-      // Tri
-      if(sortVal === 'new') locations.sort((a,b) => b.date - a.date);
-      else locations.sort((a,b) => b.rating - a.rating);
+      try {
+        // 1. Récupération des données depuis Supabase
+        let query = supabaseClient
+          .from('map_locations')
+          .select('*')
+          .eq('list_id', currentListId);
 
-      list.innerHTML = '';
-      currentMarkers.forEach(m => map.removeLayer(m));
-      currentMarkers = [];
+        const { data: locations, error } = await query;
+        if (error) throw error;
 
-      locations.forEach(loc => {
-        const item = document.createElement('div');
-        item.className = `location-item theme-${loc.theme || 'other'}`;
-        item.innerHTML = `
-            <b>📍 ${loc.name} <span>${'★'.repeat(loc.rating || 1)}</span></b>
-            <span>${loc.note}</span>
-            <div class="date-info">${new Date(loc.date || Date.now()).toLocaleDateString()}</div>
-        `;
-        
-        // Clic sur la liste pour centrer la carte
-        item.onclick = () => {
+        let filteredLocations = [...locations];
+
+        // 2. Filtrage (Local pour plus de fluidité)
+        if (themeFilter !== 'all') {
+          filteredLocations = filteredLocations.filter(l => l.theme === themeFilter);
+        }
+
+        // 3. Tri
+        if (sortVal === 'new') {
+          filteredLocations.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        } else {
+          filteredLocations.sort((a, b) => b.rating - a.rating);
+        }
+
+        // 4. Rendu visuel
+        listContainer.innerHTML = '';
+        currentMarkers.forEach(m => map.removeLayer(m));
+        currentMarkers = [];
+
+        filteredLocations.forEach(loc => {
+          // --- Création de l'item dans la liste ---
+          const item = document.createElement('div');
+          item.className = `location-item theme-${loc.theme || 'other'}`;
+          item.innerHTML = `
+              <b>📍 ${loc.name} <span>${'★'.repeat(loc.rating || 1)}</span></b>
+              <span>${loc.note || ''}</span>
+              <div class="date-info">${new Date(loc.created_at).toLocaleDateString()}</div>
+          `;
+          item.onclick = () => {
             map.setView([loc.lat, loc.lng], 17);
             window.scrollTo({ top: 0, behavior: 'smooth' });
-        };
+          };
+          listContainer.appendChild(item);
 
-        list.appendChild(item);
-        
-        const color = themeColors[loc.theme] || '#95a5a6';
-        const gMapsLink = getGoogleMapsUrl(loc.name, loc.lat, loc.lng);
-        const marker = L.marker([loc.lat, loc.lng], {
-          icon: L.divIcon({
-            className: 'custom-icon',
-            html: `<div style="background-color:${color}; width:14px; height:14px; border:2px solid white; border-radius:50%; box-shadow: 0 2px 4px rgba(0,0,0,0.3)"></div>`,
-            iconSize: [14, 14], iconAnchor: [7, 7]
-          })
-        }).addTo(map).bindPopup(`
-            <b>${loc.name}</b><br>
-            ${'★'.repeat(loc.rating)}<br>
-            <p style="margin:5px 0;">${loc.note}</p>
-            <a href="${gMapsLink}" target="_blank" style="color:#3498db; text-decoration:none; font-weight:bold;">
-                <i class="fas fa-map-marker-alt"></i> Ouvrir dans Google Maps
-            </a>
-        `);
-        currentMarkers.push(marker);
-      });
+          // --- Création du marqueur sur la carte ---
+          const color = themeColors[loc.theme] || '#95a5a6';
+          const gMapsLink = getGoogleMapsUrl(loc.name, loc.lat, loc.lng);
+          
+          const marker = L.marker([loc.lat, loc.lng], {
+            icon: L.divIcon({
+              className: 'custom-icon',
+              html: `<div style="background-color:${color}; width:14px; height:14px; border:2px solid white; border-radius:50%; box-shadow: 0 2px 4px rgba(0,0,0,0.3)"></div>`,
+              iconSize: [14, 14], iconAnchor: [7, 7]
+            })
+          }).addTo(map).bindPopup(`
+              <b>${loc.name}</b><br>
+              ${'★'.repeat(loc.rating)}<br>
+              <p style="margin:5px 0;">${loc.note || ''}</p>
+              <a href="${gMapsLink}" target="_blank" style="color:#3498db; text-decoration:none; font-weight:bold;">
+                  <i class="fas fa-map-marker-alt"></i> Ouvrir dans Google Maps
+              </a>
+          `);
+          currentMarkers.push(marker);
+        });
+
+      } catch (error) {
+        console.error("Erreur lors du rendu de la carte:", error);
+      }
     }
 
     document.getElementById('openMapBtn').addEventListener('click', function() {
