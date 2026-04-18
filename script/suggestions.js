@@ -143,32 +143,31 @@ async function loadSuggestions() {
         : suggestions.filter(sug => sug.category === selectedCategory);
 
     filteredSuggestions.forEach(sug => {
-        const li = document.createElement('li');
-        
-        // Vérification et application de l'image
-        if (sug.image && sug.image !== "data:,") { // "data:," est un canvas vide
-            li.style.backgroundImage = `url(${sug.image})`;
-            li.style.backgroundSize = 'cover';
-            li.style.backgroundPosition = 'center';
-            li.style.backgroundRepeat = 'no-repeat';
+    const li = document.createElement('li');
+
+    if (sug.image && sug.image.startsWith("data:image")) {
+        li.style.backgroundImage = `url("${sug.image}")`; // 👈 important les guillemets
+        li.style.backgroundSize = 'cover';
+        li.style.backgroundPosition = 'center';
+        li.style.backgroundRepeat = 'no-repeat';
+    } else {
+        li.style.backgroundColor = '#f0f0f0';
+    }
+
+    li.innerHTML = `<span class="name">${sug.name}</span>`;
+
+    li.onclick = () => {
+        if (isDeleteMode) {
+            deleteSuggestion(sug.id);
+            loadSuggestions(); 
         } else {
-            li.style.backgroundColor = '#f0f0f0'; // Fond gris clair si pas de dessin
+            addItem(sug.name, 1, sug.category, currentListId);
+            li.style.transform = "scale(0.95)";
+            setTimeout(() => li.style.transform = "scale(1)", 100);
         }
+    };
 
-        li.innerHTML = `<span class="name">${sug.name}</span>`;
-        
-        li.onclick = () => {
-            if (isDeleteMode) {
-                deleteSuggestion(sug.id);
-                loadSuggestions(); 
-            } else {
-                addItem(sug.name, 1, sug.category, currentListId);
-                li.style.transform = "scale(0.95)";
-                setTimeout(() => li.style.transform = "scale(1)", 100);
-            }
-        };
-
-        list.appendChild(li);
+    list.appendChild(li);
     });
 }
 document.getElementById('toggleDeleteModeBtn').addEventListener('click', toggleDeleteMode);
