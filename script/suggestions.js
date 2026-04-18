@@ -100,14 +100,13 @@ async function addSuggestion(name, category) {
         category: category,
         image: imageData
     };
-
+    console.log(imageData);
     suggestions.push(newSuggestion);
     saveSuggestions(suggestions);
 
     newSuggestionInput.value = '';
 
-    // 👉 Reset canvas (SANS fond blanc = transparence conservée)
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     loadSuggestions();
 }
