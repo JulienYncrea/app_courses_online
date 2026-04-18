@@ -42,8 +42,6 @@ function draw(e) {
 
 document.getElementById('clearCanvasBtn').addEventListener('click', () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "white"; // On remet le blanc
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
 });
 function toggleDeleteMode() {
     isDeleteMode = !isDeleteMode;
@@ -82,47 +80,35 @@ async function addSuggestion(name, category) {
         return;
     }
 
-    // On crée un canvas temporaire pour fusionner le fond blanc et le dessin
-    // Cela garantit que l'image sauvegardée n'est jamais transparente
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = canvas.width;
-    tempCanvas.height = canvas.height;
-    const tempCtx = tempCanvas.getContext('2d');
-
-    // 1. Remplir le fond en blanc
-    tempCtx.fillStyle = "white";
-    tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-
-    // 2. Dessiner le contenu de ton canvas par-dessus
-    tempCtx.drawImage(canvas, 0, 0);
-
-    // 3. Récupérer l'image finale
-    const imageData = tempCanvas.toDataURL("image/jpeg", 0.8); // JPEG est plus léger et ne gère pas la transparence
-
     const suggestions = getSuggestions();
-    
-    if (suggestions.some(sug => sug.name.toLowerCase() === name.trim().toLowerCase() && sug.category.toLowerCase() === category.toLowerCase())) {
+
+    if (suggestions.some(sug => 
+        sug.name.toLowerCase() === name.trim().toLowerCase() &&
+        sug.category.toLowerCase() === category.toLowerCase()
+    )) {
         alert(`"${name.trim()}" is already a suggestion in category "${category}"!`);
         return;
     }
+
+    // 👉 Export direct en WebP (léger + transparence)
+    const imageData = canvas.toDataURL("image/webp", 0.7); 
+    // 0.7 = bon compromis qualité / poids (tu peux descendre à 0.5 si besoin)
 
     const newSuggestion = {
         id: Date.now(),
         name: name.trim(),
         category: category,
-        image: imageData 
+        image: imageData
     };
 
     suggestions.push(newSuggestion);
     saveSuggestions(suggestions);
-    
+
     newSuggestionInput.value = '';
-    
-    // Nettoyer et remettre le fond blanc pour le prochain dessin
+
+    // 👉 Reset canvas (SANS fond blanc = transparence conservée)
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "white";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
+
     loadSuggestions();
 }
 
