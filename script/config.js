@@ -23,7 +23,10 @@ async function setupRealtimeListener() {
         console.warn("No currentListId defined, cannot set up Realtime listener.");
         return;
     }
-
+    if (window.supabaseSuggestionsChannel) {
+        await supabaseClient.removeChannel(window.supabaseSuggestionsChannel);
+        window.supabaseSuggestionsChannel = null;
+    }
     // 2. CONFIGURATION DU CANAL PRINCIPAL (list_items)
     window.supabaseChannel = supabaseClient.channel(`list_items_changes:${currentListId}`)
         .on('postgres_changes', {
@@ -81,7 +84,19 @@ async function setupRealtimeListener() {
         .subscribe((status) => {
             if (status !== 'SUBSCRIBED') console.warn("Buy Later channel status:", status);
         });
-
+        window.supabaseSuggestionsChannel = supabaseClient.channel(`suggestions_changes:${currentListId}`)
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'suggestions',
+                filter: `list_id=eq.${currentListId}`
+            }, (payload) => {
+                console.log('Suggestions change detected:', payload);
+                loadSuggestions(); // 🔥 IMPORTANT
+            })
+            .subscribe((status) => {
+                if (status !== 'SUBSCRIBED') console.warn("Suggestions channel status:", status);
+            });
     console.log(`Realtime listeners configured for list_id: ${currentListId}`);
 }
 
