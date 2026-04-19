@@ -30,7 +30,6 @@ const sizeSlider = document.getElementById('sizeSlider');
 
 let isErasing = false;
 const eraserBtn = document.getElementById('eraserBtn');
-const eraserSizeInput = document.getElementById('eraserSize');
 const textLayer = document.getElementById('textLayer');
 let mode = "draw"; // "draw" | "text"
 let selectedBox = null;
@@ -171,10 +170,7 @@ eraserBtn.addEventListener('click', () => {
     bigCtx.lineWidth = brushSize; // 👈 même valeur
 });
 
-eraserSizeInput.addEventListener('input', (e) => {
-    eraserSize = e.target.value;
-    if (isErasing) bigCtx.lineWidth = eraserSize;
-});
+
 document.getElementById('colorPicker').addEventListener('change', (e) => {
     bigCtx.strokeStyle = e.target.value;
 });
