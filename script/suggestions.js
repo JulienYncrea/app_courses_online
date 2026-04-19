@@ -67,38 +67,55 @@ function toggleDeleteMode() {
 
 
 async function addSuggestion(name, category) {
-    if (!name.trim() || !category) return;
+    if (!name.trim() || !category) {
+        alert("Please enter a name and choose a category for the suggestion.");
+        return;
+    }
 
-    // 1. canvas → blob
+    // 1. Vérifier si existe déjà (comme avant)
+    const { data: existing, error: checkError } = await supabase
+        .from('suggestions')
+        .select('*')
+        .eq('name', name.trim())
+        .eq('category', category)
+        .eq('list_id', currentListId);
+
+    if (checkError) {
+        console.error(checkError);
+        return;
+    }
+
+    if (existing.length > 0) {
+        alert(`"${name.trim()}" already exists in "${category}"`);
+        return;
+    }
+
+    // 2. Canvas → image
     const dataURL = canvas.toDataURL("image/webp", 0.7);
 
-    if (dataURL === "data:,") {
-        alert("Draw something");
-        return;
+    let imageUrl = null;
+
+    if (dataURL !== "data:,") {
+        const blob = await (await fetch(dataURL)).blob();
+        const fileName = `suggestion_${Date.now()}.webp`;
+
+        const { error: uploadError } = await supabase.storage
+            .from('suggestion-images')
+            .upload(fileName, blob);
+
+        if (uploadError) {
+            console.error(uploadError);
+            return;
+        }
+
+        const { data } = supabase.storage
+            .from('suggestion-images')
+            .getPublicUrl(fileName);
+
+        imageUrl = data.publicUrl;
     }
 
-    const blob = await (await fetch(dataURL)).blob();
-
-    // 2. upload image
-    const fileName = `suggestion_${Date.now()}.webp`;
-
-    const { error: uploadError } = await supabase.storage
-        .from('suggestion-images')
-        .upload(fileName, blob);
-
-    if (uploadError) {
-        console.error(uploadError);
-        return;
-    }
-
-    // 3. get public URL
-    const { data } = supabase.storage
-        .from('suggestion-images')
-        .getPublicUrl(fileName);
-
-    const imageUrl = data.publicUrl;
-
-    // 4. insert DB
+    // 3. Insert (comme ton ancien push)
     const { error: insertError } = await supabase
         .from('suggestions')
         .insert([{
@@ -114,21 +131,22 @@ async function addSuggestion(name, category) {
     }
 
     // reset
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
     newSuggestionInput.value = '';
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     loadSuggestions();
 }
 
-async function deleteSuggestion(id) {
+async function deleteSuggestion(suggestionId) {
 
-    // récupérer image
+    // 1. récupérer image
     const { data } = await supabase
         .from('suggestions')
         .select('image_url')
-        .eq('id', id)
+        .eq('id', suggestionId)
         .single();
 
+    // 2. supprimer image storage
     if (data?.image_url) {
         const fileName = data.image_url.split('/').pop();
 
@@ -137,20 +155,35 @@ async function deleteSuggestion(id) {
             .remove([fileName]);
     }
 
-    // delete DB
-    await supabase
+    // 3. supprimer DB (équivalent filter)
+    const { error } = await supabase
         .from('suggestions')
         .delete()
-        .eq('id', id);
+        .eq('id', suggestionId);
+
+    if (error) {
+        console.error(error);
+        return;
+    }
 
     loadSuggestions();
 }
 
 async function loadSuggestions() {
     const list = document.getElementById('suggestionList');
+    const container = document.getElementById('suggestions');
+
     list.innerHTML = '';
 
-    const { data, error } = await supabase
+    // delete mode visuel (inchangé)
+    if (isDeleteMode) {
+        container.classList.add('delete-mode-active');
+    } else {
+        container.classList.remove('delete-mode-active');
+    }
+
+    // récupérer depuis Supabase (remplace localStorage)
+    const { data: suggestions, error } = await supabase
         .from('suggestions')
         .select('*')
         .eq('list_id', currentListId);
@@ -160,13 +193,22 @@ async function loadSuggestions() {
         return;
     }
 
-    data.forEach(sug => {
+    // filtrage (inchangé)
+    const selectedCategory = suggestionCategoryFilter.value;
+
+    let filteredSuggestions = selectedCategory === 'all'
+        ? suggestions
+        : suggestions.filter(sug => sug.category === selectedCategory);
+
+    filteredSuggestions.forEach(sug => {
         const li = document.createElement('li');
 
+        // 👉 IMAGE (nouveau)
         if (sug.image_url) {
             li.style.backgroundImage = `url("${sug.image_url}")`;
             li.style.backgroundSize = 'cover';
             li.style.backgroundPosition = 'center';
+            li.style.backgroundRepeat = 'no-repeat';
         } else {
             li.style.backgroundColor = '#f0f0f0';
         }
@@ -178,6 +220,8 @@ async function loadSuggestions() {
                 deleteSuggestion(sug.id);
             } else {
                 addItem(sug.name, 1, sug.category, currentListId);
+                li.style.transform = "scale(0.95)";
+                setTimeout(() => li.style.transform = "scale(1)", 100);
             }
         };
 
