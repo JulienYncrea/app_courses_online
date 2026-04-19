@@ -11,6 +11,7 @@ let drawing = false;
 const modal = document.getElementById('drawingModal');
 const bigCanvas = document.getElementById('bigCanvas');
 const bigCtx = bigCanvas.getContext('2d');
+const brushSizeInput = document.getElementById('brushSize');
 
 // Paramètres du trait
 ctx.lineWidth = 3;
@@ -19,7 +20,15 @@ ctx.strokeStyle = '#333';
 let drawingBig = false;
 bigCtx.lineWidth = 3;
 bigCtx.lineCap = 'round';
+bigCtx.lineWidth = 6; // valeur par défaut plus élevée
+bigCtx.lineCap = 'round';
+bigCtx.lineJoin = 'round'; // 🔥 évite les effets pointillés
 // OUVRIR
+
+const emojiSizeInput = document.getElementById('emojiSize');
+let currentEmojiSize = 40;
+
+
 canvas.addEventListener('click', () => {
     modal.classList.remove('hidden');
 
@@ -29,12 +38,23 @@ canvas.addEventListener('click', () => {
     // copier le petit dessin dans le grand
     bigCtx.drawImage(canvas, 0, 0, bigCanvas.width, bigCanvas.height);
 });
-bigCanvas.addEventListener('mousedown', () => drawingBig = true);
+bigCanvas.addEventListener('mousedown', (e) => {
+    drawingBig = true;
+
+    const rect = bigCanvas.getBoundingClientRect();
+    bigCtx.beginPath();
+    bigCtx.moveTo(
+        e.clientX - rect.left,
+        e.clientY - rect.top
+    );
+});
 bigCanvas.addEventListener('mouseup', () => {
     drawingBig = false;
     bigCtx.beginPath();
 });
-
+emojiSizeInput.addEventListener('input', (e) => {
+    currentEmojiSize = e.target.value;
+});
 bigCanvas.addEventListener('mousemove', (e) => {
     if (!drawingBig) return;
 
@@ -44,35 +64,43 @@ bigCanvas.addEventListener('mousemove', (e) => {
 
     bigCtx.lineTo(x, y);
     bigCtx.stroke();
-    bigCtx.beginPath();
-    bigCtx.moveTo(x, y);
 });
 document.getElementById('colorPicker').addEventListener('change', (e) => {
     bigCtx.strokeStyle = e.target.value;
 });
 document.getElementById('emojiBtn').addEventListener('click', () => {
-    const emoji = prompt("Enter emoji (ex: 😊🔥❤️)");
+    const emoji = prompt("Enter emoji (😊🔥❤️)");
 
     if (!emoji) return;
 
-    bigCanvas.addEventListener('click', function placeEmoji(e) {
+    function placeEmoji(e) {
         const rect = bigCanvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
 
-        bigCtx.font = "30px Arial";
+        bigCtx.font = `${currentEmojiSize}px Arial`;
         bigCtx.fillText(emoji, x, y);
 
         bigCanvas.removeEventListener('click', placeEmoji);
-    });
+    }
+
+    bigCanvas.addEventListener('click', placeEmoji);
 });
 document.getElementById('closeDrawing').addEventListener('click', () => {
     modal.classList.add('hidden');
 
     // copier le grand vers le petit
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.imageSmoothingEnabled = true;
     ctx.drawImage(bigCanvas, 0, 0, canvas.width, canvas.height);
 });
+
+
+brushSizeInput.addEventListener('input', (e) => {
+    bigCtx.lineWidth = e.target.value;
+});
+
+
 canvas.addEventListener('mousedown', () => drawing = true);
 canvas.addEventListener('mouseup', () => { drawing = false; ctx.beginPath(); });
 canvas.addEventListener('mousemove', draw);

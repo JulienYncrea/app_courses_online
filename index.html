@@ -115,10 +115,17 @@
         <div class="drawing-container">
 
             <div class="toolbar">
-                <input type="color" id="colorPicker" value="#333333">
-                <button id="emojiBtn">😊</button>
-                <button id="closeDrawing">✖</button>
-            </div>
+              <input type="color" id="colorPicker" value="#333333">
+
+              <label>Size</label>
+              <input type="range" id="brushSize" min="2" max="30" value="6">
+
+              <label>Emoji</label>
+              <input type="range" id="emojiSize" min="20" max="100" value="40">
+
+              <button id="emojiBtn">😊</button>
+              <button id="closeDrawing">✖</button>
+          </div>
 
             <canvas id="bigCanvas"></canvas>
         </div>
