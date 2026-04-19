@@ -14,25 +14,28 @@ const bigCtx = bigCanvas.getContext('2d');
 const brushSizeInput = document.getElementById('brushSize');
 const colorPicker = document.getElementById('colorPicker');
 let brushSize = 6;
-let eraserSize = 20;
+let eraserSize = 6;
+
 // Paramètres du trait
 ctx.lineWidth = 3;
 ctx.lineCap = 'round';
 ctx.strokeStyle = '#333';
 let drawingBig = false;
-bigCtx.lineWidth = 3;
 bigCtx.lineCap = 'round';
-bigCtx.lineWidth = 6; // valeur par défaut plus élevée
+bigCtx.lineWidth = brushSize;
 bigCtx.lineCap = 'round';
 bigCtx.lineJoin = 'round'; // 🔥 évite les effets pointillés
 // OUVRIR
+const sizeSlider = document.getElementById('sizeSlider');
+
 let isErasing = false;
 const emojiSizeInput = document.getElementById('emojiSize');
 let currentEmojiSize = 40;
 const eraserBtn = document.getElementById('eraserBtn');
 const eraserSizeInput = document.getElementById('eraserSize');
 const textLayer = document.getElementById('textLayer');
-
+let mode = "draw"; // "draw" | "text"
+let selectedBox = null;
 document.getElementById('textBtn').addEventListener('click', () => {
     const box = document.createElement('div');
     box.style.top = (bigCanvas.height - 60) + "px";
@@ -53,7 +56,15 @@ document.getElementById('textBtn').addEventListener('click', () => {
     enableDrag(box);
     enableResize(box);
 });
+sizeSlider.addEventListener('input', (e) => {
+    brushSize = e.target.value;
 
+    if (isErasing) {
+        bigCtx.lineWidth = brushSize;
+    } else {
+        bigCtx.lineWidth = brushSize;
+    }
+});
 bigCanvas.addEventListener('mousedown', (e) => {
     drawingBig = true;
 
@@ -86,19 +97,96 @@ colorPicker.addEventListener('input', (e) => {
     bigCtx.globalCompositeOperation = 'source-over';
     bigCtx.strokeStyle = e.target.value;
 });
+bigCanvas.addEventListener('pointerdown', (e) => {
+    if (mode !== "text") return;
+
+    const box = document.createElement('div');
+
+    box.contentEditable = true;
+    box.innerText = "Aa";
+
+    box.style.position = "absolute";
+    box.style.left = e.offsetX + "px";
+    box.style.top = e.offsetY + "px";
+    box.style.fontSize = "24px";
+    box.style.background = "rgba(255,255,255,0.5)";
+    box.style.padding = "4px";
+    box.style.border = "1px dashed #aaa";
+    box.style.pointerEvents = "auto";
+
+    document.getElementById('textLayer').appendChild(box);
+
+    enableDrag(box);
+});
+bigCanvas.addEventListener('pointerdown', (e) => {
+    if (mode !== "draw") return;
+
+    drawingBig = true;
+
+    const rect = bigCanvas.getBoundingClientRect();
+
+    bigCtx.beginPath();
+    bigCtx.moveTo(
+        e.clientX - rect.left,
+        e.clientY - rect.top
+    );
+});
+bigCanvas.addEventListener('pointermove', (e) => {
+    if (!drawingBig || mode !== "draw") return;
+
+    const rect = bigCanvas.getBoundingClientRect();
+
+    bigCtx.lineTo(
+        e.clientX - rect.left,
+        e.clientY - rect.top
+    );
+
+    bigCtx.stroke();
+});
+bigCanvas.addEventListener('pointerup', () => {
+    drawingBig = false;
+    bigCtx.beginPath();
+});
+function enableDrag(el) {
+    let offsetX, offsetY;
+
+    el.addEventListener('pointerdown', (e) => {
+        e.stopPropagation();
+
+        selectedBox = el;
+
+        offsetX = e.clientX - el.offsetLeft;
+        offsetY = e.clientY - el.offsetTop;
+
+        function move(e) {
+            el.style.left = (e.clientX - offsetX) + "px";
+            el.style.top = (e.clientY - offsetY) + "px";
+        }
+
+        document.addEventListener('pointermove', move);
+
+        document.addEventListener('pointerup', () => {
+            document.removeEventListener('pointermove', move);
+        }, { once: true });
+    });
+
+    // suppression rapide
+    el.addEventListener('dblclick', () => el.remove());
+}
+
 
 eraserBtn.addEventListener('click', () => {
     isErasing = !isErasing;
 
-    if (isErasing) {
-        bigCtx.globalCompositeOperation = 'destination-out';
-        bigCtx.lineWidth = eraserSize;
-    } else {
-        bigCtx.globalCompositeOperation = 'source-over';
-        bigCtx.lineWidth = brushSize;
-    }
-});
+    bigCtx.globalCompositeOperation = isErasing
+        ? 'destination-out'
+        : 'source-over';
 
+    bigCtx.lineWidth = brushSize; // 👈 même valeur
+});
+document.getElementById('textModeBtn').addEventListener('click', () => {
+    mode = mode === "text" ? "draw" : "text";
+});
 eraserSizeInput.addEventListener('input', (e) => {
     eraserSize = e.target.value;
     if (isErasing) bigCtx.lineWidth = eraserSize;

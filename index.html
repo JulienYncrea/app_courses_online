@@ -112,26 +112,23 @@
       <button id="addSuggestionBtn">Add Suggestion</button>
     </div>
     <div id="drawingModal" class="hidden">
-        <div class="drawing-container">
-
-            <div class="toolbar">
+      <div class="drawing-container">
+          <div class="toolbar">
               <input type="color" id="colorPicker" value="#333333">
-              <div id="textLayer"></div>
-              <button id="textBtn">T</button>
               <label>Size</label>
-              <input type="range" id="brushSize" min="2" max="30" value="6">
+              <input type="range" id="sizeSlider" min="2" max="40" value="6">
               <button id="eraserBtn">🧽</button>
-              <input type="range" id="eraserSize" min="5" max="50" value="20">
-              <label>Emoji</label>
-              <input type="range" id="emojiSize" min="20" max="100" value="40">
-
-              <button id="emojiBtn">😊</button>
+              <button id="textModeBtn">T</button>
               <button id="closeDrawing">✖</button>
           </div>
+          <div class="canvas-wrapper" style="position: relative; width: 100%; height: 100%;">
+              <canvas id="bigCanvas"></canvas>
+              <div id="textLayer"></div>
 
-            <canvas id="bigCanvas"></canvas>
-        </div>
-    </div>
+          </div>
+
+      </div>
+  </div>
   </div>
 
   <div id="categories" class="section-container section hidden">
