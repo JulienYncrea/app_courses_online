@@ -11,7 +11,6 @@ let drawing = false;
 const modal = document.getElementById('drawingModal');
 const bigCanvas = document.getElementById('bigCanvas');
 const bigCtx = bigCanvas.getContext('2d');
-const brushSizeInput = document.getElementById('brushSize');
 const colorPicker = document.getElementById('colorPicker');
 let brushSize = 6;
 let eraserSize = 6;
@@ -226,10 +225,6 @@ document.getElementById('closeDrawing').addEventListener('click', () => {
 });
 
 
-brushSizeInput.addEventListener('input', (e) => {
-    brushSize = e.target.value;
-    if (!isErasing) bigCtx.lineWidth = brushSize;
-});
 canvas.addEventListener('mousedown', (e) => {
     e.preventDefault();
 });
