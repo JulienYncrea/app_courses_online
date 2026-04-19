@@ -7,7 +7,7 @@ const VAPID_PUBLIC_KEY = "BHvMEhklZrgvkLnopsv7GlF-nm7e-OSTzur56Cu6twTpHWjHu6YdPu
 // --- Global Variables ---
 let currentShareCode = null;
 let currentListId = null;
-
+isUpdatingLocally = true;
 async function setupRealtimeListener() {
     // 1. NETTOYAGE COMPLET des deux canaux avant de commencer
     if (window.supabaseChannel) {
