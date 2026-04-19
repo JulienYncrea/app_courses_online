@@ -12,7 +12,9 @@ const modal = document.getElementById('drawingModal');
 const bigCanvas = document.getElementById('bigCanvas');
 const bigCtx = bigCanvas.getContext('2d');
 const brushSizeInput = document.getElementById('brushSize');
-
+const colorPicker = document.getElementById('colorPicker');
+let brushSize = 6;
+let eraserSize = 20;
 // Paramètres du trait
 ctx.lineWidth = 3;
 ctx.lineCap = 'round';
@@ -24,20 +26,12 @@ bigCtx.lineWidth = 6; // valeur par défaut plus élevée
 bigCtx.lineCap = 'round';
 bigCtx.lineJoin = 'round'; // 🔥 évite les effets pointillés
 // OUVRIR
-
+let isErasing = false;
 const emojiSizeInput = document.getElementById('emojiSize');
 let currentEmojiSize = 40;
+const eraserBtn = document.getElementById('eraserBtn');
+const eraserSizeInput = document.getElementById('eraserSize');
 
-
-canvas.addEventListener('click', () => {
-    modal.classList.remove('hidden');
-
-    bigCanvas.width = window.innerWidth * 0.9;
-    bigCanvas.height = window.innerHeight * 0.8;
-
-    // copier le petit dessin dans le grand
-    bigCtx.drawImage(canvas, 0, 0, bigCanvas.width, bigCanvas.height);
-});
 bigCanvas.addEventListener('mousedown', (e) => {
     drawingBig = true;
 
@@ -65,6 +59,28 @@ bigCanvas.addEventListener('mousemove', (e) => {
     bigCtx.lineTo(x, y);
     bigCtx.stroke();
 });
+colorPicker.addEventListener('input', (e) => {
+    isErasing = false;
+    bigCtx.globalCompositeOperation = 'source-over';
+    bigCtx.strokeStyle = e.target.value;
+});
+
+eraserBtn.addEventListener('click', () => {
+    isErasing = !isErasing;
+
+    if (isErasing) {
+        bigCtx.globalCompositeOperation = 'destination-out';
+        bigCtx.lineWidth = eraserSize;
+    } else {
+        bigCtx.globalCompositeOperation = 'source-over';
+        bigCtx.lineWidth = brushSize;
+    }
+});
+
+eraserSizeInput.addEventListener('input', (e) => {
+    eraserSize = e.target.value;
+    if (isErasing) bigCtx.lineWidth = eraserSize;
+});
 document.getElementById('colorPicker').addEventListener('change', (e) => {
     bigCtx.strokeStyle = e.target.value;
 });
@@ -89,31 +105,36 @@ document.getElementById('emojiBtn').addEventListener('click', () => {
 document.getElementById('closeDrawing').addEventListener('click', () => {
     modal.classList.add('hidden');
 
-    // copier le grand vers le petit
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.imageSmoothingEnabled = true;
     ctx.drawImage(bigCanvas, 0, 0, canvas.width, canvas.height);
+
+    isErasing = false;
+    bigCtx.globalCompositeOperation = 'source-over';
 });
 
 
 brushSizeInput.addEventListener('input', (e) => {
-    bigCtx.lineWidth = e.target.value;
+    brushSize = e.target.value;
+    if (!isErasing) bigCtx.lineWidth = brushSize;
 });
-
-
-canvas.addEventListener('mousedown', () => drawing = true);
-canvas.addEventListener('mouseup', () => { drawing = false; ctx.beginPath(); });
-canvas.addEventListener('mousemove', draw);
-
-// Support Tactile
-canvas.addEventListener('touchstart', (e) => { drawing = true; e.preventDefault(); });
-canvas.addEventListener('touchend', () => { drawing = false; ctx.beginPath(); });
-canvas.addEventListener('touchmove', (e) => {
-    const touch = e.touches[0];
-    const rect = canvas.getBoundingClientRect();
-    draw({ clientX: touch.clientX, clientY: touch.clientY });
+canvas.addEventListener('mousedown', (e) => {
     e.preventDefault();
 });
+
+canvas.addEventListener('mousemove', (e) => {
+    e.preventDefault();
+});
+
+canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+});
+
+canvas.addEventListener('click', () => {
+    openDrawingModal();
+});
+// Support Tactile
+
 
 function draw(e) {
     if (!drawing) return;
@@ -152,7 +173,19 @@ function toggleDeleteMode() {
     loadSuggestions(); // Relance le rendu avec la nouvelle couleur de liste
 }
 
+function openDrawingModal() {
+    modal.classList.remove('hidden');
 
+    bigCanvas.width = window.innerWidth * 0.9;
+    bigCanvas.height = window.innerHeight * 0.8;
+
+    bigCtx.lineWidth = 6;
+    bigCtx.lineCap = 'round';
+    bigCtx.lineJoin = 'round';
+    bigCtx.strokeStyle = "#333";
+
+    bigCtx.drawImage(canvas, 0, 0, bigCanvas.width, bigCanvas.height);
+}
 async function addSuggestion(name, category) {
     if (!name.trim() || !category) {
         alert("Please enter a name and choose a category for the suggestion.");
