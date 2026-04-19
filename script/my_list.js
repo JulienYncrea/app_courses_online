@@ -104,7 +104,7 @@ async function addItem(name, quantity, category, listId) {
             if (insertError) throw insertError;
             console.log(`Item '${name}' added to list.`);
         }
-
+        loadShoppingList();
         // Add category to local storage if it doesn't exist
         if (category) {
             const currentCategories = getCategories();
