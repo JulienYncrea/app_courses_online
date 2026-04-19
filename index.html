@@ -111,6 +111,18 @@
       <select id="newSuggestionCategorySelect"></select>
       <button id="addSuggestionBtn">Add Suggestion</button>
     </div>
+    <div id="drawingModal" class="hidden">
+        <div class="drawing-container">
+
+            <div class="toolbar">
+                <input type="color" id="colorPicker" value="#333333">
+                <button id="emojiBtn">😊</button>
+                <button id="closeDrawing">✖</button>
+            </div>
+
+            <canvas id="bigCanvas"></canvas>
+        </div>
+    </div>
   </div>
 
   <div id="categories" class="section-container section hidden">
