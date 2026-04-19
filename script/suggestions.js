@@ -73,7 +73,7 @@ async function addSuggestion(name, category) {
     }
 
     // 1. Vérifier si existe déjà (comme avant)
-    const { data: existing, error: checkError } = await supabase
+    const { data: existing, error: checkError } = await supabaseClient
         .from('suggestions')
         .select('*')
         .eq('name', name.trim())
@@ -99,7 +99,7 @@ async function addSuggestion(name, category) {
         const blob = await (await fetch(dataURL)).blob();
         const fileName = `suggestion_${Date.now()}.webp`;
 
-        const { error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabaseClient.storage
             .from('suggestion-images')
             .upload(fileName, blob);
 
@@ -108,7 +108,7 @@ async function addSuggestion(name, category) {
             return;
         }
 
-        const { data } = supabase.storage
+        const { data } = supabaseClient.storage
             .from('suggestion-images')
             .getPublicUrl(fileName);
 
@@ -116,7 +116,7 @@ async function addSuggestion(name, category) {
     }
 
     // 3. Insert (comme ton ancien push)
-    const { error: insertError } = await supabase
+    const { error: insertError } = await supabaseClient
         .from('suggestions')
         .insert([{
             name: name.trim(),
@@ -140,7 +140,7 @@ async function addSuggestion(name, category) {
 async function deleteSuggestion(suggestionId) {
 
     // 1. récupérer image
-    const { data } = await supabase
+    const { data } = await supabaseClient
         .from('suggestions')
         .select('image_url')
         .eq('id', suggestionId)
@@ -150,13 +150,13 @@ async function deleteSuggestion(suggestionId) {
     if (data?.image_url) {
         const fileName = data.image_url.split('/').pop();
 
-        await supabase.storage
+        await supabaseClient.storage
             .from('suggestion-images')
             .remove([fileName]);
     }
 
     // 3. supprimer DB (équivalent filter)
-    const { error } = await supabase
+    const { error } = await supabaseClient
         .from('suggestions')
         .delete()
         .eq('id', suggestionId);
@@ -183,7 +183,7 @@ async function loadSuggestions() {
     }
 
     // récupérer depuis Supabase (remplace localStorage)
-    const { data: suggestions, error } = await supabase
+    const { data: suggestions, error } = await supabaseClient
         .from('suggestions')
         .select('*')
         .eq('list_id', currentListId);
