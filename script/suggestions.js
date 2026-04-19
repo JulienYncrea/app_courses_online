@@ -31,6 +31,28 @@ const emojiSizeInput = document.getElementById('emojiSize');
 let currentEmojiSize = 40;
 const eraserBtn = document.getElementById('eraserBtn');
 const eraserSizeInput = document.getElementById('eraserSize');
+const textLayer = document.getElementById('textLayer');
+
+document.getElementById('textBtn').addEventListener('click', () => {
+    const box = document.createElement('div');
+    box.style.top = (bigCanvas.height - 60) + "px";
+    box.contentEditable = true;
+    box.innerText = "😊 Text";
+
+    box.style.position = "absolute";
+    box.style.left = "50px";
+    box.style.top = "50px";
+    box.style.fontSize = "24px";
+    box.style.padding = "5px";
+    box.style.background = "rgba(255,255,255,0.5)";
+    box.style.border = "1px dashed #aaa";
+    box.style.cursor = "move";
+
+    textLayer.appendChild(box);
+
+    enableDrag(box);
+    enableResize(box);
+});
 
 bigCanvas.addEventListener('mousedown', (e) => {
     drawingBig = true;
@@ -84,6 +106,34 @@ eraserSizeInput.addEventListener('input', (e) => {
 document.getElementById('colorPicker').addEventListener('change', (e) => {
     bigCtx.strokeStyle = e.target.value;
 });
+document.addEventListener('keydown', (e) => {
+    if (e.key === "Delete") {
+        document.querySelectorAll('#textLayer div').forEach(el => {
+            if (el.style.outline === "2px solid red") {
+                el.remove();
+            }
+        });
+    }
+});
+document.getElementById('closeDrawing').addEventListener('click', () => {
+    modal.classList.add('hidden');
+
+    // 1. canvas
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(bigCanvas,0,0,canvas.width,canvas.height);
+
+    // 2. texte → canvas
+    document.querySelectorAll('#textLayer div').forEach(el => {
+        const rect = el.getBoundingClientRect();
+
+        ctx.font = `${parseFloat(el.style.fontSize)}px Arial`;
+        ctx.fillText(
+            el.innerText,
+            rect.left,
+            rect.top
+        );
+    });
+});
 document.getElementById('emojiBtn').addEventListener('click', () => {
     const emoji = prompt("Enter emoji (😊🔥❤️)");
 
@@ -130,12 +180,43 @@ canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
 });
 
-canvas.addEventListener('click', () => {
+canvas.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
     openDrawingModal();
 });
 // Support Tactile
 
+function enableDrag(el) {
+    let offsetX, offsetY;
 
+    el.addEventListener('mousedown', (e) => {
+        offsetX = e.clientX - el.offsetLeft;
+        offsetY = e.clientY - el.offsetTop;
+
+        function move(e) {
+            el.style.left = (e.clientX - offsetX) + "px";
+            el.style.top = (e.clientY - offsetY) + "px";
+        }
+
+        document.addEventListener('mousemove', move);
+
+        document.addEventListener('mouseup', () => {
+            document.removeEventListener('mousemove', move);
+        }, { once: true });
+    });
+}
+function enableResize(el) {
+    let scale = 1;
+
+    el.addEventListener('wheel', (e) => {
+        e.preventDefault();
+
+        scale += e.deltaY * -0.001;
+        scale = Math.min(Math.max(0.5, scale), 5);
+
+        el.style.transform = `scale(${scale})`;
+    });
+}
 function draw(e) {
     if (!drawing) return;
     const rect = canvas.getBoundingClientRect();
