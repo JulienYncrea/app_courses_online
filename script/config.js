@@ -35,7 +35,7 @@ async function setupRealtimeListener() {
             table: 'list_items',
             filter: `list_id=eq.${currentListId}`
         }, (payload) => {
-            if (isUpdatingLocally) return;
+            if (isUpdatingLocally && payload.eventType === 'UPDATE') return;
             console.log('Realtime UPDATE detected:', payload);
             const updatedItem = payload.new;
             const listItemElement = document.querySelector(`#shoppingListToBuy li[data-id="${updatedItem.id}"]`);
