@@ -68,9 +68,6 @@ bigCanvas.addEventListener('mouseup', () => {
     drawingBig = false;
     bigCtx.beginPath();
 });
-emojiSizeInput.addEventListener('input', (e) => {
-    currentEmojiSize = e.target.value;
-});
 bigCanvas.addEventListener('mousemove', (e) => {
     if (!drawingBig) return;
 
