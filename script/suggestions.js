@@ -29,32 +29,21 @@ bigCtx.lineJoin = 'round'; // 🔥 évite les effets pointillés
 const sizeSlider = document.getElementById('sizeSlider');
 
 let isErasing = false;
-const emojiSizeInput = document.getElementById('emojiSize');
-let currentEmojiSize = 40;
 const eraserBtn = document.getElementById('eraserBtn');
 const eraserSizeInput = document.getElementById('eraserSize');
 const textLayer = document.getElementById('textLayer');
 let mode = "draw"; // "draw" | "text"
 let selectedBox = null;
 document.getElementById('textModeBtn').addEventListener('click', () => {
-    const box = document.createElement('div');
-    box.style.top = (bigCanvas.height - 60) + "px";
-    box.contentEditable = true;
-    box.innerText = "😊 Text";
-
-    box.style.position = "absolute";
-    box.style.left = "50px";
-    box.style.top = "50px";
-    box.style.fontSize = "24px";
-    box.style.padding = "5px";
-    box.style.background = "rgba(255,255,255,0.5)";
-    box.style.border = "1px dashed #aaa";
-    box.style.cursor = "move";
-
-    textLayer.appendChild(box);
-
-    enableDrag(box);
-    enableResize(box);
+    mode = (mode === "text") ? "draw" : "text";
+    
+    // Feedback visuel pour savoir qu'on a changé de mode
+    const btn = document.getElementById('textModeBtn');
+    btn.style.background = (mode === "text") ? "#ff4d4d" : "";
+    
+    if(mode === "text") {
+        alert("Cliquez n'importe où sur le dessin pour ajouter du texte");
+    }
 });
 sizeSlider.addEventListener('input', (e) => {
     brushSize = e.target.value;
@@ -184,9 +173,7 @@ eraserBtn.addEventListener('click', () => {
 
     bigCtx.lineWidth = brushSize; // 👈 même valeur
 });
-document.getElementById('textModeBtn').addEventListener('click', () => {
-    mode = mode === "text" ? "draw" : "text";
-});
+
 eraserSizeInput.addEventListener('input', (e) => {
     eraserSize = e.target.value;
     if (isErasing) bigCtx.lineWidth = eraserSize;
@@ -204,42 +191,36 @@ document.addEventListener('keydown', (e) => {
     }
 });
 document.getElementById('closeDrawing').addEventListener('click', () => {
-    modal.classList.add('hidden');
+    // 1. Avant de fermer, on dessine le texte du textLayer SUR le bigCanvas
+    const boxes = document.querySelectorAll('#textLayer div');
+    const canvasRect = bigCanvas.getBoundingClientRect();
 
-    // 1. canvas
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.drawImage(bigCanvas,0,0,canvas.width,canvas.height);
+    boxes.forEach(el => {
+        const elRect = el.getBoundingClientRect();
+        
+        // Calcul de la position relative au canvas
+        const x = elRect.left - canvasRect.left;
+        const y = elRect.top - canvasRect.top;
 
-    // 2. texte → canvas
-    document.querySelectorAll('#textLayer div').forEach(el => {
-        const rect = el.getBoundingClientRect();
-
-        ctx.font = `${parseFloat(el.style.fontSize)}px Arial`;
-        ctx.fillText(
-            el.innerText,
-            rect.left,
-            rect.top
-        );
+        // On applique le style au contexte du grand canvas
+        bigCtx.fillStyle = colorPicker.value;
+        bigCtx.font = window.getComputedStyle(el).font; // Récupère la taille et police exacte
+        bigCtx.textBaseline = 'top';
+        bigCtx.fillText(el.innerText, x, y);
+        
+        el.remove(); // On nettoie pour la prochaine fois
     });
+
+    // 2. Transférer le grand dessin sur le petit canvas de l'aperçu
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(bigCanvas, 0, 0, canvas.width, canvas.height);
+
+    // 3. Fermer la modale
+    modal.classList.add('hidden');
+    isErasing = false;
+    bigCtx.globalCompositeOperation = 'source-over';
 });
-document.getElementById('emojiBtn').addEventListener('click', () => {
-    const emoji = prompt("Enter emoji (😊🔥❤️)");
 
-    if (!emoji) return;
-
-    function placeEmoji(e) {
-        const rect = bigCanvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        bigCtx.font = `${currentEmojiSize}px Arial`;
-        bigCtx.fillText(emoji, x, y);
-
-        bigCanvas.removeEventListener('click', placeEmoji);
-    }
-
-    bigCanvas.addEventListener('click', placeEmoji);
-});
 document.getElementById('closeDrawing').addEventListener('click', () => {
     modal.classList.add('hidden');
 
