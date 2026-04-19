@@ -66,12 +66,12 @@ function toggleDeleteMode() {
 }
 
 
-function getSuggestions() {
-    return JSON.parse(localStorage.getItem('shopping_suggestions') || '[]');
+function getSuggestions(listId) {
+    return JSON.parse(localStorage.getItem(`shopping_suggestions_${listId}`) || '[]');
 }
 
-function saveSuggestions(suggestions) {
-    localStorage.setItem('shopping_suggestions', JSON.stringify(suggestions));
+function saveSuggestions(listId, suggestions) {
+    localStorage.setItem(`shopping_suggestions_${listId}`, JSON.stringify(suggestions));
 }
 
 async function addSuggestion(name, category) {
@@ -80,7 +80,8 @@ async function addSuggestion(name, category) {
         return;
     }
 
-    const suggestions = getSuggestions();
+    const suggestions = getSuggestions(currentListId);
+
 
     if (suggestions.some(sug => 
         sug.name.toLowerCase() === name.trim().toLowerCase() &&
@@ -102,7 +103,7 @@ async function addSuggestion(name, category) {
     };
     console.log(imageData);
     suggestions.push(newSuggestion);
-    saveSuggestions(suggestions);
+    saveSuggestions(currentListId, suggestions);
 
     newSuggestionInput.value = '';
 
@@ -112,7 +113,7 @@ async function addSuggestion(name, category) {
 }
 
 async function deleteSuggestion(suggestionId) {
-    const suggestions = getSuggestions();
+    const suggestions = getSuggestions(currentListId);
     const suggestionToDelete = suggestions.find(sug => sug.id === suggestionId);
     const suggestionName = suggestionToDelete ? suggestionToDelete.name : "this suggestion";
     // 3. On affiche le confirm avec le vrai nom
@@ -123,7 +124,7 @@ async function deleteSuggestion(suggestionId) {
 
     // Mise à jour du Local Storage
     const updatedSuggestions = suggestions.filter(sug => sug.id !== suggestionId);
-    saveSuggestions(updatedSuggestions);
+    saveSuggestions(currentListId, updatedSuggestions);
 
     // Message si vide
     if (updatedSuggestions.length === 0) {
@@ -132,7 +133,7 @@ async function deleteSuggestion(suggestionId) {
 }
 
 async function loadSuggestions() {
-    let suggestions = getSuggestions();
+    let suggestions = getSuggestions(currentListId);
     const list = document.getElementById('suggestionList');
     list.innerHTML = '';
 
