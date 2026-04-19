@@ -66,108 +66,122 @@ function toggleDeleteMode() {
 }
 
 
-function getSuggestions(listId) {
-    return JSON.parse(localStorage.getItem(`shopping_suggestions_${listId}`) || '[]');
-}
-
-function saveSuggestions(listId, suggestions) {
-    localStorage.setItem(`shopping_suggestions_${listId}`, JSON.stringify(suggestions));
-}
-
 async function addSuggestion(name, category) {
-    if (!name.trim() || !category) {
-        alert("Please enter a name and choose a category for the suggestion.");
+    if (!name.trim() || !category) return;
+
+    // 1. canvas → blob
+    const dataURL = canvas.toDataURL("image/webp", 0.7);
+
+    if (dataURL === "data:,") {
+        alert("Draw something");
         return;
     }
 
-    const suggestions = getSuggestions(currentListId);
+    const blob = await (await fetch(dataURL)).blob();
 
+    // 2. upload image
+    const fileName = `suggestion_${Date.now()}.webp`;
 
-    if (suggestions.some(sug => 
-        sug.name.toLowerCase() === name.trim().toLowerCase() &&
-        sug.category.toLowerCase() === category.toLowerCase()
-    )) {
-        alert(`"${name.trim()}" is already a suggestion in category "${category}"!`);
+    const { error: uploadError } = await supabase.storage
+        .from('suggestion-images')
+        .upload(fileName, blob);
+
+    if (uploadError) {
+        console.error(uploadError);
         return;
     }
 
-    // 👉 Export direct en WebP (léger + transparence)
-    const imageData = canvas.toDataURL("image/webp", 0.7); 
-    // 0.7 = bon compromis qualité / poids (tu peux descendre à 0.5 si besoin)
+    // 3. get public URL
+    const { data } = supabase.storage
+        .from('suggestion-images')
+        .getPublicUrl(fileName);
 
-    const newSuggestion = {
-        id: Date.now(),
-        name: name.trim(),
-        category: category,
-        image: imageData
-    };
-    console.log(imageData);
-    suggestions.push(newSuggestion);
-    saveSuggestions(currentListId, suggestions);
+    const imageUrl = data.publicUrl;
 
+    // 4. insert DB
+    const { error: insertError } = await supabase
+        .from('suggestions')
+        .insert([{
+            name: name.trim(),
+            category: category,
+            image_url: imageUrl,
+            list_id: currentListId
+        }]);
+
+    if (insertError) {
+        console.error(insertError);
+        return;
+    }
+
+    // reset
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     newSuggestionInput.value = '';
-
-    // ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     loadSuggestions();
 }
 
-async function deleteSuggestion(suggestionId) {
-    const suggestions = getSuggestions(currentListId);
-    const suggestionToDelete = suggestions.find(sug => sug.id === suggestionId);
-    const suggestionName = suggestionToDelete ? suggestionToDelete.name : "this suggestion";
-    // 3. On affiche le confirm avec le vrai nom
-    const listItemElement = document.querySelector(`#suggestionList li[data-id="${suggestionId}"]`);
-    if (listItemElement) {
-        listItemElement.remove();
+async function deleteSuggestion(id) {
+
+    // récupérer image
+    const { data } = await supabase
+        .from('suggestions')
+        .select('image_url')
+        .eq('id', id)
+        .single();
+
+    if (data?.image_url) {
+        const fileName = data.image_url.split('/').pop();
+
+        await supabase.storage
+            .from('suggestion-images')
+            .remove([fileName]);
     }
 
-    // Mise à jour du Local Storage
-    const updatedSuggestions = suggestions.filter(sug => sug.id !== suggestionId);
-    saveSuggestions(currentListId, updatedSuggestions);
+    // delete DB
+    await supabase
+        .from('suggestions')
+        .delete()
+        .eq('id', id);
 
-    // Message si vide
-    if (updatedSuggestions.length === 0) {
-        document.getElementById('suggestionList').innerHTML = '<p class="empty-list-message">No suggestions available at the moment.</p>';
-    }
+    loadSuggestions();
 }
 
 async function loadSuggestions() {
-    let suggestions = getSuggestions(currentListId);
     const list = document.getElementById('suggestionList');
     list.innerHTML = '';
 
-    const selectedCategory = suggestionCategoryFilter.value;
-    let filteredSuggestions = selectedCategory === 'all'
-        ? suggestions
-        : suggestions.filter(sug => sug.category === selectedCategory);
+    const { data, error } = await supabase
+        .from('suggestions')
+        .select('*')
+        .eq('list_id', currentListId);
 
-    filteredSuggestions.forEach(sug => {
-    const li = document.createElement('li');
-
-    if (sug.image && sug.image.startsWith("data:image")) {
-        li.style.backgroundImage = `url("${sug.image}")`; // 👈 important les guillemets
-        li.style.backgroundSize = 'cover';
-        li.style.backgroundPosition = 'center';
-        li.style.backgroundRepeat = 'no-repeat';
-    } else {
-        li.style.backgroundColor = '#f0f0f0';
+    if (error) {
+        console.error(error);
+        return;
     }
 
-    li.innerHTML = `<span class="name">${sug.name}</span>`;
+    data.forEach(sug => {
+        const li = document.createElement('li');
 
-    li.onclick = () => {
-        if (isDeleteMode) {
-            deleteSuggestion(sug.id);
-            loadSuggestions(); 
+        if (sug.image_url) {
+            li.style.backgroundImage = `url("${sug.image_url}")`;
+            li.style.backgroundSize = 'cover';
+            li.style.backgroundPosition = 'center';
         } else {
-            addItem(sug.name, 1, sug.category, currentListId);
-            li.style.transform = "scale(0.95)";
-            setTimeout(() => li.style.transform = "scale(1)", 100);
+            li.style.backgroundColor = '#f0f0f0';
         }
-    };
 
-    list.appendChild(li);
+        li.innerHTML = `<span class="name">${sug.name}</span>`;
+
+        li.onclick = () => {
+            if (isDeleteMode) {
+                deleteSuggestion(sug.id);
+            } else {
+                addItem(sug.name, 1, sug.category, currentListId);
+            }
+        };
+
+        list.appendChild(li);
     });
 }
 document.getElementById('toggleDeleteModeBtn').addEventListener('click', toggleDeleteMode);
